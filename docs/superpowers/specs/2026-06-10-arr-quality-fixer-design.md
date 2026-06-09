@@ -16,11 +16,15 @@ profile is too strict (e.g. only Ultra-HD releases accepted, none exist). This j
 
 - **Language:** Python 3 (stdlib only — `urllib`, `xml.etree`, `json`, `datetime`,
   `argparse`, `logging`). Host has Python 3.11.2.
-- **Location:** `/home/dgmneto/homelab/scripts/arr-quality-fixer.py` (on the server;
-  mirrored into the second-brain repo under `services/` docs as a runbook reference).
+- **Location:** new service dir on the **server**:
+  `/home/dgmneto/homelab/services/arr-quality-fixer/` (version-controlled with the
+  deployment repo on the server, NOT this second-brain repo). Holds
+  `arr-quality-fixer.py` + a `README.md`. This second-brain repo only gets the
+  `services/arr-quality-fixer/README.md` runbook + logbook, no code.
 - **Schedule:** `0 2 * * *` in the **dgmneto** user crontab.
-- **Logging:** append to `/footage/services/arr-quality-fixer.log` (under `/footage`,
-  the 492G config mount). One run = one block, timestamped, with a summary line.
+- **Logging:** append to `/footage/services/arr-quality-fixer/arr-quality-fixer.log`
+  (under `/footage`, the 492G config mount). One run = one block, timestamped, with a
+  summary line.
 - **Secrets:** API keys read at runtime from each app's `config.xml`
   (`/footage/services/{sonarr,radarr}/config/config.xml`, `<ApiKey>` element).
   No keys baked into the script, cron line, or repo.
