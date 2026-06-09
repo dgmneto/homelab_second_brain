@@ -40,10 +40,10 @@ python3 ~/homelab/services/plex-qbittorrent-watchdog/watchdog.py --once   # sing
 
 ## Quirks / runbook
 - **Status (2026-06-10):** enabled + active, running since 2026-04-29 (~1mo, ~20h CPU). Healthy.
-- **`Linger=no` for dgmneto** — user services normally stop when the user's last session ends. It has
-  survived a month only because a session stays open (ssh / vscode-server). If downloads suddenly
-  ignore Plex playback, check the service is still up; consider
-  `sudo loginctl enable-linger dgmneto` to make it survive logout.
+- **Linger enabled (2026-06-10):** `loginctl enable-linger dgmneto` was run (marker
+  `/var/lib/systemd/linger/dgmneto`), so the user manager — and this service — now survives dgmneto
+  logging out. Previously `Linger=no` and it only stayed up because a session was always open.
+  Verify with `loginctl show-user dgmneto -p Linger` (expect `Linger=yes`).
 - **⚠️ Hardcoded credential:** `watchdog.py` ships a default `QBITTORRENT_PASSWORD` value in source,
   committed to the `dgmneto/homelab` repo. That is a leaked qBittorrent password — rotate it and read
   it from env/secret instead of a literal default. Not reproduced in this repo on purpose.

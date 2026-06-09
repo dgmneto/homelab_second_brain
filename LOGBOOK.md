@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Enabled linger for dgmneto
+Ran `loginctl enable-linger dgmneto` so the `plex-qbittorrent-watchdog` user service survives logout
+(was `Linger=no`, only alive via open sessions). Now `Linger=yes`, service still active. Server change.
+
 ## 2026-06-10 — Tested `op` CLI, documented secret access
 Verified the 1Password `op` CLI (v2.30.3) works via desktop-app integration (no manual signin).
 Confirmed `op vault list` / `op item list` / search against the `Homelab` vault. Added a "Secrets"
