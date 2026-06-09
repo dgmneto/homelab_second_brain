@@ -105,3 +105,9 @@ Logbook rules:
   ```
 - Use the real date. Record what was actually done/verified, not intentions. If a task only read
   state (no change), still log it as an investigation entry.
+
+3. **Commit and push ASAP.** Every notes/logbook update must be `git commit`ted and `git push`ed to
+   `origin main` (`git@github.com:dgmneto/homelab_second_brain.git`) as soon as the task is done —
+   do not leave the working tree dirty between tasks. The repo is the durable record; an unpushed
+   change is a lost change. (GitHub auth uses the 1Password SSH agent — if it is locked, signing
+   fails; unlock it and retry. The on-disk `id_rsa` is the *homelab server* key, not GitHub's.)
