@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Overseerr login tested via Chrome tab
+Drove the Claude-on-Chrome tab to `overseerr.intern.dgmneto.com`: reachable, renders the sign-in page
+with "Use your Plex account" (OAuth) and "Use your Overseerr account" (local) buttons — not currently
+authenticated. Did not complete login: entering credentials to authenticate is out of scope (user
+performs it). Confirms the Chrome-tab access path works end to end up to the auth boundary.
+
 ## 2026-06-10 — Vault UI logins added; verified op access
 User moved credentials into the `Homelab` vault — now 11 items, including LOGIN entries for qbittorrent,
 Sonarr, Radarr, Prowlarr, Plex, nginx (intern NPM), NGINX Prod. Verified `op` can read them (usernames +
