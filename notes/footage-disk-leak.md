@@ -1,3 +1,11 @@
+---
+name: footage-disk-leak
+description: Root cause + fix for recurring homelab outage where /footage fills to 100% and HA looks down
+metadata:
+  node_type: memory
+  type: project
+---
+
 # /footage fills to 100% — recurring outage
 
 Recurring "homeserver down" symptom: `/footage` (492G LVM volume) fills to 100%. Home Assistant's
@@ -22,4 +30,4 @@ If `/footage` fills again:
 ```
 find ~openclaw/.config/google-chrome*/ -name '*.pma' -delete
 ```
-and confirm `chrome.service` did not return. Access via [ssh-access](ssh-access.md).
+and confirm `chrome.service` did not return. Access via [[ssh-access]].

@@ -1,0 +1,3 @@
+- [SSH access](ssh-access.md) — bypass broken 1Password agent with `-o IdentityAgent=none -i ~/.ssh/id_rsa`; server is x86_64 Debian, not a Pi
+- [/footage disk leak](footage-disk-leak.md) — recurring outage: chrome.service crash-loop floods /footage, HA looks "down"; `find … -name '*.pma' -delete`
+- [qBittorrent mass-stop](qbittorrent-mass-stop.md) — "all downloads paused" usually = watchtower restart, not VPN/disk; diagnose via Chrome WebUI

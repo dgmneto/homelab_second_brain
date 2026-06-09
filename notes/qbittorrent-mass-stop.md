@@ -1,3 +1,11 @@
+---
+name: qbittorrent-mass-stop
+description: qBittorrent "all downloads paused" is usually a watchtower restart, not VPN/disk; how to diagnose via Chrome
+metadata:
+  node_type: memory
+  type: project
+---
+
 # "All downloads paused" — usually a watchtower restart
 
 When the user reports "all my downloads are paused," the cause is usually **not** VPN or disk. Most
@@ -15,4 +23,4 @@ playback — won't touch never-started 0 B torrents), and config auto-pause (Too
 Downloads, currently OFF). Full decision-table runbook lives in
 [../services/qbittorrent/README.md](../services/qbittorrent/README.md).
 
-Related: [footage-disk-leak](footage-disk-leak.md), [ssh-access](ssh-access.md).
+Related: [[footage-disk-leak]], [[ssh-access]].

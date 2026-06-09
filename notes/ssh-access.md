@@ -1,3 +1,11 @@
+---
+name: ssh-access
+description: How to SSH into the homelab server when the 1Password agent breaks key signing
+metadata:
+  node_type: memory
+  type: reference
+---
+
 # SSH access (1Password agent bypass)
 
 Homelab = x86_64 Debian 12 (bookworm) box at `192.168.11.13` (hostname `homelab`, internal name
@@ -19,4 +27,4 @@ the user; pipe via `sudo -S` for non-interactive use. Note: this `id_rsa` is the
 key — it is NOT authorized on GitHub (GitHub uses the 1Password-held `ED25519` key, so pushes still
 need the agent unlocked).
 
-Related: [footage-disk-leak](footage-disk-leak.md).
+Related: [[footage-disk-leak]].

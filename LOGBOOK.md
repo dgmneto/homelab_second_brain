@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Symlinked harness memory dir to repo `notes/`
+Made `notes/` the actual auto-memory store: gave each note harness frontmatter + a `notes/MEMORY.md`
+index, then symlinked the harness path
+(`~/.claude/projects/-Users-dgmneto-homelab/memory` → `/Users/dgmneto/homelab/notes`). Auto-recall now
+reads the real repo files and new memories land in-repo. Old memory dir backed up to `memory.bak.<ts>`.
+Symlink is Mac-local/per-machine (not in git) — recreate steps in `notes/README.md`.
+
 ## 2026-06-10 — Migrated agent memory into repo `notes/`
 Moved the three `~/.claude` project memories (ssh-access, footage-disk-leak, qbittorrent-mass-stop)
 into version-controlled `notes/` with a `notes/README.md` index; CLAUDE.md now points there and names
