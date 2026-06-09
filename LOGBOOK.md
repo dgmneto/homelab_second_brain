@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Investigated "all qBittorrent downloads paused"
+Drove WebUI via Claude-in-Chrome: all 28 torrents `Stopped`/0 B/0%, but VPN+disk+config
+all healthy (green connectivity, 889 GiB free, auto-start OFF). Root cause: `watchtower`
+auto-updated the unpinned qbit `:latest` (build-date 2026-06-08), recreated the
+container, torrents came back stopped. No state change made. Added a stopped-downloads
+decision-table runbook to `services/qbittorrent/README.md`. See its LOGBOOK for detail.
+
 ## 2026-06-10 — Split access docs to per-service ACCESS.md
 Moved per-service access detail (URL, `op://` credential, auth method, quirks) out of the root
 `ACCESS.md` into `services/<svc>/ACCESS.md` for 11 UI services (overseerr, plex, sonarr, radarr,
