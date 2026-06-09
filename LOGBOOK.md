@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Split access docs to per-service ACCESS.md
+Moved per-service access detail (URL, `op://` credential, auth method, quirks) out of the root
+`ACCESS.md` into `services/<svc>/ACCESS.md` for 11 UI services (overseerr, plex, sonarr, radarr,
+prowlarr, bazarr, qbittorrent, homeassistant, z2mqtt, nginxIntern, nginxProd). Root `ACCESS.md` is now
+an index + shared vault/Chrome notes.
+
 ## 2026-06-10 — Overseerr login tested via Chrome tab
 Drove the Claude-on-Chrome tab to `overseerr.intern.dgmneto.com`: reachable, renders the sign-in page
 with "Use your Plex account" (OAuth) and "Use your Overseerr account" (local) buttons — not currently
