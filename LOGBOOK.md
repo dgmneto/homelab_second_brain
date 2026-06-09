@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Documented Chrome-extension UI access
+Verified service web UIs are reachable through the Claude-in-Chrome extension driving the user's local
+Chrome (loaded `overseerr.intern.dgmneto.com/login` successfully). Documented the access flow and the
+NPM hostname scheme (`<svc>.intern.dgmneto.com` internal, public via nginxProd) in `CLAUDE.md`.
+
 ## 2026-06-10 — Enabled linger for dgmneto
 Ran `loginctl enable-linger dgmneto` so the `plex-qbittorrent-watchdog` user service survives logout
 (was `Linger=no`, only alive via open sessions). Now `Linger=yes`, service still active. Server change.

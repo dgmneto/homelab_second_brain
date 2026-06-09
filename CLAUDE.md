@@ -32,6 +32,23 @@ ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab
 For the deployment user add `-o User=openclaw`. The user holds the `sudo` password; pipe via `sudo -S`
 for non-interactive use.
 
+## Accessing service web UIs (Claude-in-Chrome)
+
+Every service with a web UI is reachable through the **Claude in Chrome** browser extension by driving
+the user's local Chrome — the same Chrome that sits on/behind the home network, so it resolves the
+nginx-proxy-manager hostnames that are not exposed to the public internet.
+
+- **Internal hostnames (via `nginxIntern`):** `https://<service>.intern.dgmneto.com`
+  (verified: `overseerr.intern.dgmneto.com`, also `qbittorrent.intern.dgmneto.com`,
+  `prowlarr.intern.dgmneto.com`). qBittorrent/prowlarr proxy into the gluetun namespace.
+- **Public hostnames (via `nginxProd`):** e.g. Plex at `https://filmin.3e.dgmneto.com`.
+
+How: `list_connected_browsers` → `switch_browser` (user clicks Connect in the right Chrome) →
+`tabs_context_mcp` (create a tab) → `navigate` to the hostname → `read_page`/screenshot/`computer` to
+drive it. Reaching `*.intern.dgmneto.com` requires the user's Chrome to be on the LAN (or via their
+remote-access path); an off-network browser won't resolve them. Do not type secrets into login forms —
+pull from 1Password and have the user authenticate.
+
 ## Secrets — 1Password (`op` CLI)
 
 Homelab secrets live in 1Password. The `op` CLI (v2.30+) is installed on the Mac and authenticated via
