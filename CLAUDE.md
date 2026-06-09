@@ -32,6 +32,30 @@ ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab
 For the deployment user add `-o User=openclaw`. The user holds the `sudo` password; pipe via `sudo -S`
 for non-interactive use.
 
+## Secrets — 1Password (`op` CLI)
+
+Homelab secrets live in 1Password. The `op` CLI (v2.30+) is installed on the Mac and authenticated via
+**desktop-app integration** — no manual `op signin` needed as long as the 1Password app is unlocked
+(same app whose SSH agent signs GitHub pushes). Account: `dgmneto@gmail.com` / `my.1password.com`.
+
+Vaults: **`Homelab`** (server/service secrets) and `Personal`. Find and read:
+```
+op vault list
+op item list --vault Homelab                      # titles + categories
+op item list --vault Homelab --format json | jq    # scriptable
+op item get "<title>" --vault Homelab              # full item
+op read "op://Homelab/<title>/password"            # one field, by secret reference
+```
+Known `Homelab` items: `Plex - Claim`, `Cloudflare - DDNS`, `ProtonVPN - Gluetun`,
+`Service Account Auth Token: Homelab`. (No qBittorrent item yet — relevant to the leaked watchdog
+password noted in `services/plex-qbittorrent-watchdog/README.md`.)
+
+Rules:
+- **Never** paste a retrieved secret value into a file, commit, logbook, or this repo. Reference
+  secrets by their `op://` path instead.
+- To wire a secret into a service, prefer reading it at run time (`op read`) or templating with
+  `op inject`/`op run` on the server — do not bake literals into compose `.env` or scripts.
+
 ## Deployment architecture (on the server)
 
 - **Orchestration:** plain `docker compose`, one directory per service under

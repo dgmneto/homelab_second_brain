@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Tested `op` CLI, documented secret access
+Verified the 1Password `op` CLI (v2.30.3) works via desktop-app integration (no manual signin).
+Confirmed `op vault list` / `op item list` / search against the `Homelab` vault. Added a "Secrets"
+section to `CLAUDE.md` with access/search commands and a no-secrets-in-repo rule. Did not extract any
+secret values (classifier blocked a test read; not needed). Noted there is no qBittorrent item in the
+vault yet.
+
 ## 2026-06-10 — Found the Plex→qBittorrent pause job
 The "pause downloads while Plex streams" job the user remembered is **not cron** — it is the
 `plex-qbittorrent-watchdog` `systemd --user` service (active since 2026-04-29). Documented it under
