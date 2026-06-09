@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Found the Plex→qBittorrent pause job
+The "pause downloads while Plex streams" job the user remembered is **not cron** — it is the
+`plex-qbittorrent-watchdog` `systemd --user` service (active since 2026-04-29). Documented it under
+`services/plex-qbittorrent-watchdog/`, cross-linked from plex/qbittorrent READMEs and the cron note.
+Flagged a leaked hardcoded `QBITTORRENT_PASSWORD` in the deployment repo's `watchdog.py` and the
+`Linger=no` fragility. No server change.
+
 ## 2026-06-09 — Documented cron jobs + commit/push rule
 Added the "commit and push ASAP" rule to `CLAUDE.md`. Probed all scheduled jobs on the server and
 documented them under `cron/` (README + LOGBOOK). Homelab-specific: root weekly `backup.sh`

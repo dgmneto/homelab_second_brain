@@ -60,3 +60,6 @@ transcoding. Runs on its own dedicated LAN IP via a macvlan network.
 - If HW transcoding stops working, check `/dev/dri` still passes through and the
   container user is in the `render`/`video` groups.
 - NEVER write the Plex claim token or auth tokens into version control.
+- A host-side `systemd --user` service, **plex-qbittorrent-watchdog**, polls Plex
+  `/status/sessions` every 5s and pauses qBittorrent while anything is streaming. See
+  `../plex-qbittorrent-watchdog/README.md`.

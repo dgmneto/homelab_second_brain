@@ -60,3 +60,7 @@ ProtonVPN tunnel** provided by the `gluetunProtonVPN` container.
   qbittorrent crashed.
 - Paths `/library/torrent` are identical host/container — keep that mapping for the
   *arr stack hardlink/move logic to work.
+- Torrents auto-pause while Plex is streaming: the host-side `systemd --user` service
+  **plex-qbittorrent-watchdog** stops/starts torrents via `docker exec` based on Plex
+  sessions. If downloads stall during playback (or never resume), check that service.
+  See `../plex-qbittorrent-watchdog/README.md`.

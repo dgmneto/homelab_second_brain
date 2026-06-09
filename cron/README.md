@@ -34,6 +34,12 @@ directory — the actual leak was `*.pma` files under `~openclaw/.config/google-
 from a crash-looping `chrome.service` (now removed). Harmless but useless; safe to delete.
 See `../services/homeassistant/LOGBOOK.md` and the `homelab-footage-chrome-leak` memory.
 
+## Not cron, but commonly mistaken for it
+- **plex-qbittorrent-watchdog** — pauses qBittorrent while Plex streams. It is a long-running
+  `systemd --user` service for `dgmneto`, **not** a cron job, so it appears in neither crontabs nor
+  system `systemctl`. Check with `systemctl --user status plex-qbittorrent-watchdog`. See
+  `../services/plex-qbittorrent-watchdog/README.md`.
+
 ## Stock Debian / vendor jobs (not homelab-specific, listed for completeness)
 
 - `/etc/crontab`: standard `run-parts` for `cron.hourly|daily|weekly|monthly` (Debian default).
