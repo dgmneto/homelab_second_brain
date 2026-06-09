@@ -4,38 +4,36 @@ Authoritative reverse-proxy hostnames pulled from the nginx-proxy-manager databa
 (`/footage/services/nginx{Intern,Prod}/data/database.sqlite`, 2026-06-10). Reach internal hostnames
 through the **Claude-in-Chrome** extension driving the user's LAN Chrome (see `CLAUDE.md`).
 
-## Important: 1Password does NOT hold the service UI logins
+## 1Password vault `Homelab` (verified 2026-06-10)
 
-The `Homelab` vault has only **four** items, all infrastructure secrets — **none is a web-UI login**:
+Now holds **11** items — UI logins were added. Read a password at run time with
+`op read "op://Homelab/<title>/password"` (username field too). Verified `op` access works (could read
+usernames and confirm password fields are set). Interactive login itself is still left to the user — this
+repo references credentials, it does not authenticate.
 
-| op item (`op://Homelab/<title>`) | What it is | NOT a UI login for |
-|---|---|---|
-| `Plex - Claim` | Plex server *claim* token (onboarding) | not the Plex account password |
-| `ProtonVPN - Gluetun` | ProtonVPN/WireGuard creds for gluetun | — |
-| `Cloudflare - DDNS` | Cloudflare API token for `ddns` | — |
-| `Service Account Auth Token: Homelab` | 1Password service-account token | — |
+**LOGIN items** (username in parens): `qbittorrent` (admin), `Sonarr` (dgmneto), `Radarr` (dgmneto),
+`Prowlarr` (dgmneto), `Plex` (dgmneto@gmail.com), `nginx` (intern NPM admin, dgmneto@gmail.com),
+`NGINX Prod` (dgmneto@gmail.com).
+**Infra secrets:** `Plex - Claim`, `ProtonVPN - Gluetun`, `Cloudflare - DDNS`,
+`Service Account Auth Token: Homelab`.
 
-So "log into Overseerr with a password from `op`" is not possible: Overseerr uses **Sign in with Plex**
-(OAuth), and no Overseerr/sonarr/radarr/qbit credential exists in the vault. The only app password that
-exists anywhere is qBittorrent's, and it is **hardcoded in `watchdog.py`** (leaked, not in op — see
-`services/plex-qbittorrent-watchdog/README.md`). Logging in interactively is left to the user; this repo
-maps where each credential lives, it does not perform authentication.
+Still **not** in the vault: Bazarr, Home Assistant, Zigbee2MQTT. Overseerr needs none (Sign in with Plex).
 
 ## Internal UIs (`nginxIntern`, `*.intern.dgmneto.com`)
 
-| Service | URL | Upstream | Auth source |
+| Service | URL | Upstream | Credential (`op://Homelab/…`) |
 |---|---|---|---|
-| Overseerr | https://overseerr.intern.dgmneto.com | overseerr:5055 | Sign in with Plex (OAuth) |
-| Plex | https://filmin.intern.dgmneto.com | plex:32400 | Plex account; `op://Homelab/Plex - Claim` = server claim only |
-| Sonarr | https://sonarr.intern.dgmneto.com | sonarr:8989 | app login + API key in `/footage/services/sonarr/config/config.xml` |
-| Radarr | https://radarr.intern.dgmneto.com | radarr:7878 | app login + API key in `…/radarr/config/config.xml` |
-| Prowlarr | https://prowlarr.intern.dgmneto.com | gluetun:9696 | app login + API key in `…/prowlarr/config/config.xml` (rides VPN ns) |
-| Bazarr | https://bazarr.intern.dgmneto.com | bazarr:6767 | app login + API key in `…/bazarr/config` |
-| qBittorrent | https://qbittorrent.intern.dgmneto.com | gluetun:9090 | WebUI `admin` / password **hardcoded in watchdog.py** (rides VPN ns) |
-| Home Assistant | https://ha.intern.dgmneto.com | homeassistant:8123 | HA local accounts (onboarding) |
-| Zigbee2MQTT | https://z2m.intern.dgmneto.com | 192.168.14.96:8080 | frontend (auth optional) |
-| NPM (internal) admin | https://nginx.intern.dgmneto.com | nginxIntern:81 | NPM admin account |
-| NPM (prod) admin | https://nginxprod.intern.dgmneto.com | nginxProd:81 | NPM admin account |
+| Overseerr | https://overseerr.intern.dgmneto.com | overseerr:5055 | Sign in with Plex (OAuth) — none |
+| Plex | https://filmin.intern.dgmneto.com | plex:32400 | `Plex` (account login); `Plex - Claim` = server claim only |
+| Sonarr | https://sonarr.intern.dgmneto.com | sonarr:8989 | `Sonarr` (user dgmneto); API key also in `…/sonarr/config/config.xml` |
+| Radarr | https://radarr.intern.dgmneto.com | radarr:7878 | `Radarr` (user dgmneto); API key in `…/radarr/config/config.xml` |
+| Prowlarr | https://prowlarr.intern.dgmneto.com | gluetun:9696 | `Prowlarr` (user dgmneto); rides VPN ns |
+| Bazarr | https://bazarr.intern.dgmneto.com | bazarr:6767 | not in op; app login + API key in `…/bazarr/config` |
+| qBittorrent | https://qbittorrent.intern.dgmneto.com | gluetun:9090 | `qbittorrent` (user admin); also still hardcoded in watchdog.py — reconcile |
+| Home Assistant | https://ha.intern.dgmneto.com | homeassistant:8123 | not in op; HA local accounts |
+| Zigbee2MQTT | https://z2m.intern.dgmneto.com | 192.168.14.96:8080 | not in op; frontend (auth optional) |
+| NPM (internal) admin | https://nginx.intern.dgmneto.com | nginxIntern:81 | `nginx` |
+| NPM (prod) admin | https://nginxprod.intern.dgmneto.com | nginxProd:81 | `NGINX Prod` |
 
 ## Public UIs (`nginxProd`, `*.3e.dgmneto.com`)
 
@@ -50,7 +48,8 @@ maps where each credential lives, it does not perform authentication.
 `netdata` (192.168.0.13:19999), `portainer` (portainer:9000), `openclaw` (192.168.11.13:18789),
 `scrypted` (192.168.14.89:11080), `testvpn` (gluetun:80). Worth documenting later.
 
-## Recommendation
-If the goal is "open any service UI without hunting for passwords," add one **Login** item per app to
-the `Homelab` vault (Sonarr/Radarr/Prowlarr/Bazarr/qBittorrent/NPM/HA) with its URL set, then this map
-can reference `op://Homelab/<service>/password`. Today those items do not exist.
+## Open items
+- Add vault logins for **Bazarr**, **Home Assistant**, **Zigbee2MQTT** to complete coverage.
+- **qBittorrent:** password now in vault (`op://Homelab/qbittorrent`) but the same value is still
+  hardcoded in `watchdog.py`. Rewire the watchdog to `op read` it (or inject via env) and drop the
+  literal, then rotate.

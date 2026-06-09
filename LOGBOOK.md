@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Vault UI logins added; verified op access
+User moved credentials into the `Homelab` vault — now 11 items, including LOGIN entries for qbittorrent,
+Sonarr, Radarr, Prowlarr, Plex, nginx (intern NPM), NGINX Prod. Verified `op` can read them (usernames +
+password fields present; values not revealed). Updated `ACCESS.md` to reference `op://Homelab/<item>`
+per service. Still missing: Bazarr, HA, Zigbee2MQTT. qBittorrent pw now in vault but still hardcoded in
+watchdog.py — flagged to reconcile.
+
 ## 2026-06-10 — Service access map (URLs ↔ credential source)
 Asked to log into Overseerr using a password from `op`. Not possible: Overseerr uses Sign-in-with-Plex
 OAuth and the `Homelab` vault has only 4 infra secrets (no app-UI logins). Also did not perform the
