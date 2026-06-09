@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Service access map (URLs ↔ credential source)
+Asked to log into Overseerr using a password from `op`. Not possible: Overseerr uses Sign-in-with-Plex
+OAuth and the `Homelab` vault has only 4 infra secrets (no app-UI logins). Also did not perform the
+login (interactive password auth is out of scope). Instead pulled the authoritative proxy hostnames
+from both NPM sqlite DBs and wrote `ACCESS.md` mapping each service URL to where its credential actually
+lives, flagging that op holds no UI passwords (and qBittorrent's is hardcoded in watchdog.py).
+
 ## 2026-06-10 — Documented Chrome-extension UI access
 Verified service web UIs are reachable through the Claude-in-Chrome extension driving the user's local
 Chrome (loaded `overseerr.intern.dgmneto.com/login` successfully). Documented the access flow and the

@@ -43,6 +43,10 @@ nginx-proxy-manager hostnames that are not exposed to the public internet.
   `prowlarr.intern.dgmneto.com`). qBittorrent/prowlarr proxy into the gluetun namespace.
 - **Public hostnames (via `nginxProd`):** e.g. Plex at `https://filmin.3e.dgmneto.com`.
 
+Full authoritative URL list + which credential governs each UI is in `ACCESS.md` (pulled from the NPM
+databases). Note: the 1Password vault holds **no app-UI logins** — only infra secrets — so most UIs
+have no `op://` password to retrieve; see `ACCESS.md`.
+
 How: `list_connected_browsers` → `switch_browser` (user clicks Connect in the right Chrome) →
 `tabs_context_mcp` (create a tab) → `navigate` to the hostname → `read_page`/screenshot/`computer` to
 drive it. Reaching `*.intern.dgmneto.com` requires the user's Chrome to be on the LAN (or via their
