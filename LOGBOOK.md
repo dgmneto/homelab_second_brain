@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Added self-improvement mandate to CLAUDE.md
+Added a top-of-file "this repo is built for agents to improve" section: every agent must correct stale
+docs in the same task, capture mistaken assumptions where the next agent will hit them, restructure
+freely, and prefer durable root-cause fixes over perpetual warnings.
+
 ## 2026-06-10 — Investigated "all qBittorrent downloads paused"
 Drove WebUI via Claude-in-Chrome: all 28 torrents `Stopped`/0 B/0%, but VPN+disk+config
 all healthy (green connectivity, 889 GiB free, auto-start OFF). Root cause: `watchtower`

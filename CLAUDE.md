@@ -2,10 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Read this first — this repo is built for agents to improve
+
+This is a **second brain** for the homelab, optimized for the agents that read it. **You are not just a
+consumer of these notes — you are their maintainer.** Every agent that runs here must actively leave the
+repo better for the next iteration than it found it.
+
+Operating rules for every task:
+- **Fix the repo the moment reality contradicts it.** If you acted on a note/README/ACCESS/runbook and
+  it was wrong, stale, or misleading, **correct it in the same task** — don't just work around it. The
+  bug is the documentation, not just the situation.
+- **Capture every mistaken assumption you had to recover from.** If you wasted a step on a wrong guess
+  (wrong path, wrong hostname, wrong auth, a tool that overflowed, a command that doesn't exist here),
+  write the correction down where the *next* agent will hit it first, so they never make that guess.
+  The qBittorrent runbook (`read_page` overflows → use a screenshot; all-stopped-at-0B = watchtower
+  restart, not the watchdog) is the model: record the gotcha AND the shortcut.
+- **Move/rename/restructure freely** when the current layout caused the confusion. Put facts where an
+  agent would look for them, add cross-links, split or merge files. Don't preserve a bad structure out
+  of caution — improving navigability is part of the job.
+- **Prefer durable fixes over notes.** If something keeps biting (e.g. a literal that should be an
+  `op://` reference, a missing permission, an unpinned image), fix the root cause and document that you
+  did, rather than leaving a "watch out for this" forever.
+- **Leave breadcrumbs as you go**, not just at the end: a new quirk, a verified command, a corrected
+  IP/port — append it to the right README/ACCESS/LOGBOOK immediately, then commit + push (see below).
+
+Treat anything in here as provisional: if a recalled fact, file, flag, or hostname doesn't match what
+the server actually shows, trust the server and update the repo.
+
 ## What this repo is
 
-This is a **second brain** for the homelab server — a knowledge base of notes, runbooks, and
-service docs. It is **not** the deployment. There is no application code to build, lint, or test here.
+It is **not** the deployment. There is no application code to build, lint, or test here.
 
 The actual deployment (docker-compose stacks) lives **on the server itself** at
 `/home/dgmneto/homelab` and is version-controlled separately at `git@github.com:dgmneto/homelab.git`.
