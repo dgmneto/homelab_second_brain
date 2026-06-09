@@ -106,8 +106,28 @@ searches per series; small sleep between command POSTs.
   future monitor could catch it.
 - HTTP non-2xx → logged with status + body snippet.
 
+## Companion job: arr-stale-cleaner (added later, same service dir)
+
+Queue/download management — distinct from the missing-item logic above. Lives alongside
+quality-fixer under `services/arr-maintenance/`, sharing `arr_common.py`.
+
+- **Schedule:** every 6h (`0 */6 * * *`).
+- **Logic:** for each Sonarr/Radarr queue item still downloading (`amount_left > 0`), look
+  up its torrent in qBittorrent by hash (`downloadId` ↔ `hash`). If `now - last_activity
+  > 36h` → stale: `DELETE /api/v3/queue/{id}?removeFromClient=true&blocklist=true&
+  skipRedownload=true` then re-search (Radarr `MoviesSearch` / Sonarr `EpisodeSearch`).
+  Skip `amount_left == 0` (downloaded, import-pending).
+- **qBit access:** `docker exec qbittorrent curl http://localhost:9090/api/v2/torrents/info`
+  — qBit bypasses auth for localhost, so no creds. qBit has no host-published port (rides
+  gluetun ns). `last_activity` (unix ts) freezes when a torrent stalls.
+
+**Overlap handled:** quality-fixer skips any item already in the download queue, so it
+never downgrades a profile or re-searches while a grab is active. The two jobs are
+otherwise independent.
+
 ## Out of scope (YAGNI)
 
 - Cutoff-unmet items (have a file below cutoff) — not touched.
 - Per-release inspection to confirm the profile is the actual block — too heavy nightly.
 - Notifications/alerting — log file only for now.
+- Import-pending torrents (`amount_left == 0` stuck in queue) — a separate problem.

@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **qbittorrent** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-06-10 — New consumer: arr-stale-cleaner reads qBit last_activity
+New host job [arr-stale-cleaner](../arr-maintenance/README.md) (every 6h) reads qBit
+`GET /api/v2/torrents/info` via `docker exec qbittorrent curl http://localhost:9090/...`.
+Confirmed qBit **bypasses auth for localhost** (HTTP 200, no login) — so this needs no
+creds, unlike the watchdog which still logs in. Uses each torrent's `last_activity` to
+detect stalls (>36h) and tells Sonarr/Radarr to remove+blocklist+re-search. First run
+removed 2 stalled torrents (Hacks S01E02/E03, 214.7h idle) via the arr queue API.
+
 ## 2026-06-10 — Diagnosed "all downloads paused"; added stopped-downloads runbook
 User reported all downloads paused. Opened WebUI via Claude-in-Chrome
 (`qbittorrent.intern.dgmneto.com`, no login). Found all **28 torrents `Stopped`, 0 B,

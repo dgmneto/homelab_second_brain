@@ -3,8 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **sonarr** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-06-10 — arr-stale-cleaner removes stalled Sonarr downloads
+New 6-hourly job [arr-stale-cleaner](../arr-maintenance/README.md) removes Sonarr queue
+items whose qBittorrent torrent has had no `last_activity` in >36h: DELETE from queue
+(removeFromClient+blocklist) + per-episode re-search. First run removed Hacks S01E02 &
+S01E03 (stalledDL, 214.7h idle). Lives with the quality-fixer under `services/arr-maintenance`.
+
 ## 2026-06-10 — Quality profiles auto-downgraded by arr-quality-fixer
-New nightly job [arr-quality-fixer](../arr-quality-fixer/README.md) may change a series'
+New nightly job [arr-quality-fixer](../arr-maintenance/README.md) may change a series'
 `qualityProfileId` to HD-1080p(4) when it has stuck missing episodes on a restrictive
 profile (SD/720p/UHD). First run downgraded Hacks, Rick and Morty, Your Friends &
 Neighbors from Ultra-HD(5)→1080p and triggered per-episode searches (42 eps). Profile

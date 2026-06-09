@@ -4,18 +4,29 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
-## 2026-06-10 — New service: arr-quality-fixer (nightly missing-item quality fixer)
-Built a daily 2am job to unstick Sonarr/Radarr items that never download because their
-quality profile is too strict. Python3 stdlib script on the server at
-`/home/dgmneto/homelab/services/arr-quality-fixer/arr-quality-fixer.py`; cron `0 2 * * *`
-in dgmneto's crontab. Logic: monitored + file-less + already released/aired only; <48h
-since added (or aired/released) → search; >=48h → set restrictive profile (SD/720p/UHD)
-to HD-1080p(4) then search. Sonarr searches per-episode (batched per series), profile
-change per-series; Radarr per-movie. API keys read from each `config.xml` at runtime.
-First live run verified (exit 0): downgraded 3 Sonarr series + 1 Radarr movie off
-Ultra-HD, queued 42 episode + 1 movie searches, skipped 1 unreleased movie. Full runbook:
-[services/arr-quality-fixer/README.md](services/arr-quality-fixer/README.md). Touched
-sonarr + radarr (profile changes).
+## 2026-06-10 — New service arr-maintenance: quality-fixer + stale-cleaner
+Built two host cron jobs (deployment repo `services/arr-maintenance/`, Python3 stdlib,
+shared `arr_common.py`) to keep the arr pipeline unstuck. API keys read from each
+`config.xml` at runtime; logs beside the scripts.
+
+**arr-quality-fixer** (daily `0 2 * * *`): for monitored, file-less, released/aired items
+NOT in the download queue — <48h since added (or aired/released) → search; >=48h → set
+restrictive profile (SD/720p/UHD) to HD-1080p(4) then search. Sonarr per-episode search
+(batched per series) + per-series profile change; Radarr per-movie. First live run: 3
+Sonarr series + 1 Radarr movie downgraded off Ultra-HD, 42 ep + 1 movie searches, 1
+unreleased skipped (exit 0).
+
+**arr-stale-cleaner** (every 6h `0 */6 * * *`): for each Sonarr/Radarr queue item still
+downloading, match its torrent in qBittorrent by hash; `now - last_activity > 36h` →
+remove from queue (`removeFromClient&blocklist&skipRedownload`) + re-search. qBit reached
+via `docker exec qbittorrent curl localhost:9090` (localhost auth-bypass, no creds; rides
+gluetun ns, no host port). First live run removed 2 stalls (Hacks S01E02/E03, 214.7h idle),
+blocklisted + re-searched (exit 0).
+
+Overlap: quality-fixer skips anything already in the download queue (won't downgrade/search
+an active grab). Full runbook:
+[services/arr-maintenance/README.md](services/arr-maintenance/README.md). Touched sonarr,
+radarr (profiles + searches), qbittorrent (stale torrents removed).
 
 ## 2026-06-10 — Symlinked harness memory dir to repo `notes/`
 Made `notes/` the actual auto-memory store: gave each note harness frontmatter + a `notes/MEMORY.md`
