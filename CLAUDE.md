@@ -32,6 +32,8 @@ the server actually shows, trust the server and update the repo.
 ## What this repo is
 
 It is **not** the deployment. There is no application code to build, lint, or test here.
+Durable cross-cutting facts (the "project memory") live in [notes/](notes/); per-service knowledge in
+`services/<svc>/`. This repo is the single source of truth — keep memory here, not in scratch stores.
 
 The actual deployment (docker-compose stacks) lives **on the server itself** at
 `/home/dgmneto/homelab` and is version-controlled separately at `git@github.com:dgmneto/homelab.git`.
@@ -147,7 +149,7 @@ Home Assistant's config is bind-mounted on `/footage`; when `/footage` hits 100%
 `OSError: [Errno 28] No space left on device` and looks "down" while `/` is fine. Past root cause was
 the `openclaw` user's runaway `chrome.service` leaking `*.pma` files. If it recurs:
 `find ~openclaw/.config/google-chrome*/ -name '*.pma' -delete` and confirm `chrome.service` has not
-returned. See `services/` notes and the `homelab-footage-chrome-leak` memory.
+returned. Full write-up: [notes/footage-disk-leak.md](notes/footage-disk-leak.md).
 
 ## Working conventions
 

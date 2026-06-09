@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-10 — Migrated agent memory into repo `notes/`
+Moved the three `~/.claude` project memories (ssh-access, footage-disk-leak, qbittorrent-mass-stop)
+into version-controlled `notes/` with a `notes/README.md` index; CLAUDE.md now points there and names
+`notes/` the home for durable cross-cutting facts. Reduced the external memory files to recall pointers
+(the harness memory dir is a fixed path, can't be relocated — but the repo is now the single source of
+truth and the pointers route agents here).
+
 ## 2026-06-10 — Added self-improvement mandate to CLAUDE.md
 Added a top-of-file "this repo is built for agents to improve" section: every agent must correct stale
 docs in the same task, capture mistaken assumptions where the next agent will hit them, restructure
