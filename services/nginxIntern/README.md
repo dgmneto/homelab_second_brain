@@ -45,6 +45,32 @@ Same two external networks as `nginxProd`, different static IPs:
 
 Both declared `external: true`.
 
+## Adding a proxy host without the UI
+
+The NPM REST API works from the Mac too (HTTPS via `https://nginx.intern.dgmneto.com/api`, login
+`op://Homelab/nginx`; the admin IP `192.168.14.34:81` itself is Mac-unreachable but the proxied
+hostname is fine):
+
+```
+TOKEN=$(curl -sk -X POST https://nginx.intern.dgmneto.com/api/tokens \
+  -H "Content-Type: application/json" \
+  -d '{"identity":"<username>","secret":"<password>"}' | jq -r '.token')
+
+curl -sk -X POST https://nginx.intern.dgmneto.com/api/nginx/proxy-hosts \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{
+    "domain_names": ["<svc>.intern.dgmneto.com"],
+    "forward_host": "<container_name>", "forward_port": <port>,
+    "access_list_id": 0, "certificate_id": 1, "ssl_forced": true,
+    "http2_support": true, "allow_websocket_upgrade": true,
+    "forward_scheme": "http", "enabled": true, "locations": [],
+    "advanced_config": "", "meta": {"letsencrypt_agree": false, "dns_challenge": false}
+  }'
+```
+
+`certificate_id: 1` is the shared `*.intern.dgmneto.com` wildcard cert used by every existing host
+— reuse it. `forward_host` resolves via docker DNS on `internalNetwork`, so the target container
+just needs to be on that network (no static IP needed).
+
 ## Quirks / runbook
 
 - This is the **internal** twin of `nginxProd` (`192.168.14.33`). The two are

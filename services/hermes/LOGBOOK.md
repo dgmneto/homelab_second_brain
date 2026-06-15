@@ -3,6 +3,16 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-06-15 — Expose Hermes dashboard via nginxIntern
+Added basic-auth creds (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME/PASSWORD/SECRET`, generated, stored in
+1Password Personal as "Hermes - Dashboard") to `.env`, `docker compose up -d --force-recreate`.
+Confirmed `docker exec hermes env` does NOT show these (or the API keys) — Hermes loads
+`/opt/data/.env` itself at startup, compose `environment:`/`env_file` not needed for app secrets.
+
+Created NPM proxy host via API (`https://nginx.intern.dgmneto.com/api`, creds `op://Homelab/nginx`):
+id 23, `hermes.intern.dgmneto.com` -> `hermes:9119`, cert_id 1 (shared `*.intern.dgmneto.com` cert),
+`allow_websocket_upgrade: true`. Verified `https://hermes.intern.dgmneto.com/login` returns 200.
+
 ## 2026-06-15 — New service: Hermes AI agent (Telegram + OpenRouter)
 Deployed NousResearch Hermes Agent as a new docker compose service, per
 https://hermes-agent.nousresearch.com/docs/user-guide/docker.

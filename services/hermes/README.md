@@ -7,9 +7,11 @@ model provider.
 `nousresearch/hermes-agent:latest` (tag not pinned, ~3.3GB)
 
 ## Access
-- Telegram bot (token in `/footage/services/hermes/config/.env`, see "Secrets" below). No web UI
-  exposed yet (dashboard runs on :9119 inside container, not proxied).
-- No host ports published — `internalNetwork` only.
+- Telegram bot (token in `/footage/services/hermes/config/.env`, see "Secrets" below).
+- Dashboard: https://hermes.intern.dgmneto.com (NPM proxy host id 23 -> `hermes:9119`, cert_id 1,
+  websocket upgrade on). Login form (not HTTP basic auth) — creds = `HERMES_DASHBOARD_BASIC_AUTH_*`
+  from `.env`, also stored in 1Password Personal as "Hermes - Dashboard".
+- No host ports published — `internalNetwork` only; dashboard reachable only via the NPM proxy.
 
 ## Compose
 `/home/dgmneto/homelab/services/hermes/compose.yaml`
@@ -26,6 +28,9 @@ write; don't `chown` unless you also adjust the container user.
 - `TELEGRAM_ALLOWED_USERS` — comma-separated user/group IDs. Currently copied from openclaw's
   `telegram-default-allowFrom.json` (`2070569244,386325858`) plus two group IDs
   (`-1003616165246,-1003925667659`) found in `/footage/home/openclaw/.openclaw/openclaw.json`.
+- `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` / `_SECRET` — dashboard login. App reads
+  these from `/opt/data/.env` itself (not exposed via `docker exec env`) — same mechanism as the
+  API keys above, no compose `environment:` entry needed.
 
 ## Config (`config.yaml`, non-secret)
 ```yaml
