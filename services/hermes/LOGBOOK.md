@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-06-15 — Broaden telegram allowlist to all openclaw accounts
+First pass only used `telegram-default-allowFrom.json` + 2 group IDs. User pointed out openclaw
+runs multiple agent accounts (default/lobi/nutri/orion) each with their own `allowFrom` /
+`groupAllowFrom` / groups in `openclaw.json`. Took the union: users `2070569244, 386325858,
+6400549245` (6400549245 only appeared in orion's `groupAllowFrom`); groups `-1003925667659,
+-1003616165246, -5294644290` (-5294644290 only in orion's `groups`). Updated `.env` +
+`config.yaml`, `--force-recreate`, verified `✓ telegram connected` again.
+
 ## 2026-06-15 — Expose Hermes dashboard via nginxIntern
 Added basic-auth creds (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME/PASSWORD/SECRET`, generated, stored in
 1Password Personal as "Hermes - Dashboard") to `.env`, `docker compose up -d --force-recreate`.

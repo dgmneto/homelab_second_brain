@@ -25,9 +25,11 @@ write; don't `chown` unless you also adjust the container user.
 - `OPENROUTER_API_KEY` — dedicated key, also stored in 1Password Personal as "Hermes - OpenRouter
   API key".
 - `TELEGRAM_BOT_TOKEN` — also stored in 1Password Personal as "Hermes - Telegram Bot Token".
-- `TELEGRAM_ALLOWED_USERS` — comma-separated user/group IDs. Currently copied from openclaw's
-  `telegram-default-allowFrom.json` (`2070569244,386325858`) plus two group IDs
-  (`-1003616165246,-1003925667659`) found in `/footage/home/openclaw/.openclaw/openclaw.json`.
+- `TELEGRAM_ALLOWED_USERS` — comma-separated user/group IDs. Union of every `allowFrom` /
+  `groupAllowFrom` / group entry across **all** of openclaw's agent accounts (default, lobi, nutri,
+  orion) in `/footage/home/openclaw/.openclaw/openclaw.json` plus
+  `credentials/telegram-default-allowFrom.json`:
+  users `2070569244, 386325858, 6400549245`; groups `-1003925667659, -1003616165246, -5294644290`.
 - `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` / `_SECRET` — dashboard login. App reads
   these from `/opt/data/.env` itself (not exposed via `docker exec env`) — same mechanism as the
   API keys above, no compose `environment:` entry needed.
@@ -39,7 +41,7 @@ model:
   default: "anthropic/claude-sonnet-4"
 
 telegram:
-  allowed_users: [2070569244, 386325858, -1003616165246, -1003925667659]
+  allowed_users: [2070569244, 386325858, 6400549245, -1003925667659, -1003616165246, -5294644290]
 ```
 
 ## Networks
