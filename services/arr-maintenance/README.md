@@ -53,16 +53,20 @@ search (`EpisodeSearch`, batched per series), profile change per-**series** (`PU
 
 ## arr-stale-cleaner (stalled downloads)
 
-Distinct from "missing" — these items *are* downloading but stuck. For each item in a
-Sonarr/Radarr **queue** still downloading (`amount_left > 0`):
+Distinct from "missing" — these items *are* in the download queue but stuck. For each
+queue item that is **not yet complete** (`progress < 1` and `completion_on <= 0` — see the
+gotcha below):
 
 1. Look up its torrent in qBittorrent by hash (`downloadId` ↔ torrent `hash`).
-2. If `now - last_activity > 36h` → **stale**:
+2. Compute **idle = seconds since last progress** (`idle_seconds()`): qBit's
+   `last_activity` if it's a sane past timestamp, else fall back to `added_on`. If
+   `idle > 36h` → **stale**:
    `DELETE /api/v3/queue/{id}?removeFromClient=true&blocklist=true&skipRedownload=true`
    (deletes torrent + partial data, bans that release), then trigger a fresh search
    (Radarr `MoviesSearch` / Sonarr `EpisodeSearch`). Blocklist guarantees the re-search
    grabs a *different* release.
-3. Skip `amount_left == 0` items (downloaded, import-pending — a different problem).
+3. Skip genuinely **complete** items (`progress >= 1` or `completion_on > 0`) — downloaded,
+   import-pending, a different problem.
 
 ### Reaching qBittorrent (important)
 
@@ -97,3 +101,12 @@ still runs. stale-cleaner exits 1 immediately if qBit can't be read. Re-running 
   match case-insensitively.
 - An item actively downloading still shows in `wanted/missing` (no file yet); the
   quality-fixer's queue-skip is what prevents double-searching / downgrading it.
+- **`amount_left == 0` does NOT mean complete.** A torrent stuck in `metaDL`/`queuedDL`
+  with no metadata reports `size=0, progress=0, amount_left=0`. The original v1
+  stale-cleaner skipped these as "import pending" and left ~19 dead grabs sitting in the
+  queue for a week. Fixed 2026-06-15: completion is judged by `progress >= 1` /
+  `completion_on > 0`, not `amount_left`.
+- **`last_activity` can be a sentinel** (0 or a far-future value → negative idle) for
+  torrents that never started. `idle_seconds()` falls back to `added_on` so a torrent that
+  has downloaded nothing since it was added is correctly aged. Without this the no-metadata
+  stalls were never flagged (idle came out negative).

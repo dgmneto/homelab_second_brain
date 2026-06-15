@@ -12,6 +12,18 @@ allowlist (2 users + 2 groups) copied from the existing `openclaw` agent's confi
 container hardening only (no new Linux user) — see `services/hermes/README.md` and
 `services/hermes/LOGBOOK.md` for full detail. Verified: telegram connected, ~180MB/2GB RAM idle.
 
+## 2026-06-15 — arr-stale-cleaner fix: dead no-metadata torrents weren't cleaned
+One-week review of the arr-maintenance crons. Both ran clean every 6h for 5 days (no
+failures). But the stale-cleaner left ~18 Sonarr queue items stuck the whole week, logged
+as "complete, import pending". Turned out they were `metaDL`/`queuedDL` torrents that never
+fetched metadata (`size=0, progress=0, amount_left=0`) — dead releases the profile
+downgrades grabbed, not completed downloads. Two v1 bugs fixed: (1) completion judged by
+`progress>=1`/`completion_on>0` instead of `amount_left==0`; (2) `idle_seconds()` falls
+back to `added_on` when qBit's `last_activity` is a never-started sentinel (was producing
+negative idle, so stalls never flagged). Live run cleaned 18 (remove+blocklist+re-search),
+queue 19→1; re-searches grabbed different releases. Touched sonarr, qbittorrent. Detail:
+[services/arr-maintenance/LOGBOOK.md](services/arr-maintenance/LOGBOOK.md).
+
 ## 2026-06-10 — New service arr-maintenance: quality-fixer + stale-cleaner
 Built two host cron jobs (deployment repo `services/arr-maintenance/`, Python3 stdlib,
 shared `arr_common.py`) to keep the arr pipeline unstuck. API keys read from each

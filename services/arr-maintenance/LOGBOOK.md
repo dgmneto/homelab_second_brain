@@ -1,5 +1,25 @@
 # LOGBOOK — arr-maintenance
 
+## 2026-06-15 — Fixed stale-cleaner: dead no-metadata torrents slipped through
+~Week-in review. Cron ran clean every 6h for 5 days (zero failures; removed 1 more stall,
+Rick&Morty S09E04 queuedDL, on 06-13). But ~18-19 Sonarr queue items sat stuck the whole
+time, logged each run as "complete, import pending" and never cleaned. Investigated:
+qBit showed them as `metaDL`/`queuedDL` with `size=0, progress=0, amount_left=0,
+completion_on=-1` — dead releases that **never fetched metadata** (grabbed by the profile
+downgrades), NOT completed downloads.
+
+Two bugs in v1 stale-cleaner, both fixed:
+1. **`amount_left==0` treated as "complete"** — false for 0-byte/no-metadata torrents.
+   Now use `is_complete()` = `progress>=1 or completion_on>0`.
+2. **`last_activity` sentinel** — for never-started torrents qBit returns a sentinel
+   (saw negative idle, -494786h), so `now-last_activity>36h` was never true. New
+   `idle_seconds()` falls back to `added_on` when last_activity isn't a sane past ts.
+
+Deployed + dry-ran (18 flagged stale, idle 93–357h; 1 spared at 19.3h) then LIVE:
+removed+blocklisted+re-searched 18, queue 19→1, exit 0. Re-searches grabbed *different*
+releases (e.g. Hacks S01E10 `eztv re` vs blocklisted `rartv`); Rick&Morty S09E04 actively
+downloading. Pipeline now self-correcting.
+
 ## 2026-06-10 — Added arr-stale-cleaner; consolidated into arr-maintenance
 Added second job `arr-stale-cleaner.py` (queue/download management, distinct from the
 quality fixer). Every 6h (`0 */6 * * *`): for each Sonarr/Radarr queue item still
