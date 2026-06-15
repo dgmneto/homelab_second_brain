@@ -4,6 +4,14 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-15 — New service: Hermes AI agent (Telegram + OpenRouter)
+Deployed `nousresearch/hermes-agent` as a new compose service on the server
+(`/home/dgmneto/homelab/services/hermes/`), config at `/footage/services/hermes/config`. Wired
+Telegram bot (new token) + dedicated OpenRouter key (both stored in 1Password Personal). Telegram
+allowlist (2 users + 2 groups) copied from the existing `openclaw` agent's config. Isolation via
+container hardening only (no new Linux user) — see `services/hermes/README.md` and
+`services/hermes/LOGBOOK.md` for full detail. Verified: telegram connected, ~180MB/2GB RAM idle.
+
 ## 2026-06-10 — New service arr-maintenance: quality-fixer + stale-cleaner
 Built two host cron jobs (deployment repo `services/arr-maintenance/`, Python3 stdlib,
 shared `arr_common.py`) to keep the arr pipeline unstuck. API keys read from each
