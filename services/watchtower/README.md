@@ -22,7 +22,7 @@ Server path: `/home/dgmneto/homelab/services/watchtower/compose.yaml`
 No `.env` file — fully configured via the `command` flags below.
 
 ```
-command: --interval 30 --cleanup
+command: --schedule "0 0 10 * * 0" --cleanup
 ```
 
 Mounts `/var/run/docker.sock:/var/run/docker.sock` so it can inspect and
@@ -30,9 +30,10 @@ recreate containers.
 
 ## Schedule & scope
 
-- **Interval: `--interval 30` = every 30 seconds.** This is very aggressive
-  (the more common config is a daily cron). Every 30s Watchtower checks all
-  watched containers for newer images.
+- **Schedule: `--schedule "0 0 10 * * 0"` = Sundays at 10:00 UTC.** Changed from
+  the original `--interval 30` (every 30 seconds) which caused constant restarts
+  when upstream publishers push images rapidly (e.g. hermes-agent was pushed 30+
+  times/day during active dev).
 - **Scope: ALL containers.** There is no scope/label filter on the command and
   no `WATCHTOWER_LABEL_ENABLE`. Watchtower defaults to watching **every**
   container on the host (currently all ~18: plex, sonarr, radarr, the two NPMs,
@@ -58,11 +59,9 @@ the Docker daemon via the mounted socket, and registries via outbound internet.
 
 ## Quirks / runbook
 
-- **30-second interval is a surprise.** It means images are pulled almost
-  immediately on publish across the entire stack, including pinned `:latest`
-  infra (both NPMs, gluetun VPN, etc.). Unattended `:latest` updates can break
-  services on a bad upstream release. Consider widening the interval or switching
-  to label-enable scope if updates ever cause churn.
+- **Weekly schedule (Sundays 10:00 UTC).** Changed from 30-second interval after
+  `nousresearch/hermes-agent:latest` was being pushed 30+ times/day, restarting
+  hermes constantly. Weekly cadence balances staying current vs. churn.
 - Mounting `docker.sock` grants Watchtower full control of the Docker daemon —
   treat it as root-equivalent.
 - Restart policy `always`; container reports `(healthy)`.

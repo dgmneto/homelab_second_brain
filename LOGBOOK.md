@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-22 — watchtower: switch from 30s interval to weekly cron
+Hermes gateway was restarting constantly (26+ times on 2026-06-21). Root cause: upstream
+`nousresearch/hermes-agent:latest` publishes new images every ~10 minutes during active dev;
+watchtower at `--interval 30` picked up every one. Changed watchtower schedule to
+`--schedule "0 0 10 * * 0"` (Sundays 10:00 UTC) across all containers. Next update:
+2026-06-28. Detail: [services/watchtower/LOGBOOK.md](services/watchtower/LOGBOOK.md).
+
 ## 2026-06-15 — New service: Hermes AI agent (Telegram + OpenRouter)
 Deployed `nousresearch/hermes-agent` as a new compose service on the server
 (`/home/dgmneto/homelab/services/hermes/`), config at `/footage/services/hermes/config`. Wired
