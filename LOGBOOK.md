@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-22 — prowlarr: move off VPN to internalNetwork
+Prowlarr was routing indexer traffic through ProtonVPN (gluetun netns). VPN exit IPs were blocking tracker domains. Zen Internet (UK ISP) does minimal voluntary blocking so VPN is unnecessary for HTTP indexer queries. Moved prowlarr to `internalNetwork` directly; updated NPM proxy host to forward to `prowlarr:9696` instead of `gluetun:9696`. Verified reachable at `prowlarr.intern.dgmneto.com`.
+Detail: [services/prowlarr/LOGBOOK.md](services/prowlarr/LOGBOOK.md).
+
 ## 2026-06-22 — hermes: add read-only Docker access via socket proxy
 Added `tecnativa/docker-socket-proxy` sidecar to hermes compose. Hermes reads Docker API
 (containers, images, networks, volumes, info) via `tcp://hermes-docker-proxy:2375` — no write

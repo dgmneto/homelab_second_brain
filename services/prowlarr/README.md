@@ -6,7 +6,7 @@ Indexer manager/proxy — feeds indexer definitions and search to sonarr/radarr.
 `lscr.io/linuxserver/prowlarr:latest` (LinuxServer; tag not pinned)
 
 ## Access
-WebUI on port **9696**. Container runs in gluetun's network namespace (`network_mode: container:gluetunProtonVPN`), so it has **no own ports** and is reachable only via gluetun's `intern` IP. Fronted by NPM (nginxIntern/nginxProd, both on `intern` network) — proxy host config lives in the NPM database, not in repo files.
+WebUI on port **9696**. Container on `internalNetwork` (`intern`), own IP (e.g. `172.21.0.8`). Fronted by NPM (nginxIntern) — proxy host `prowlarr.intern.dgmneto.com` → `prowlarr:9696`.
 
 ## Compose
 `/home/dgmneto/homelab/services/prowlarr/compose.yaml`
@@ -18,15 +18,14 @@ WebUI on port **9696**. Container runs in gluetun's network namespace (`network_
 None (indexer manager, no media mounts).
 
 ## Networks
-Inherits gluetun's networking via `network_mode: container:gluetunProtonVPN`. gluetun itself sits on `internalNetwork` (`intern`). All indexer traffic egresses through the ProtonVPN tunnel.
+Directly on `internalNetwork` (`172.21.0.0/24`). Indexer traffic egresses via host internet (no VPN). VPN is not needed for prowlarr — it queries indexers over HTTPS and VPN exit IPs were blocking some trackers.
 
 ## Integrations
 - Pushes indexer configs to **sonarr** and **radarr** (Prowlarr -> *arr "Apps" sync).
-- Search/grab requests route out through **gluetunProtonVPN** (VPN).
 
 ## Quirks / runbook
 - PUID=1004, PGID=1313, UMASK=002, TZ=Europe/London.
 - restart: always.
-- Healthcheck: `curl -f https://www.google.com` every 15s — verifies VPN egress is up, not the app itself. If gluetun drops, prowlarr loses all networking.
-- Because it shares gluetun's netns, restarting/recreating gluetun takes prowlarr down with it; recreate prowlarr after gluetun.
+- Healthcheck: `curl -f https://www.google.com` every 15s.
+- Previously ran in gluetun's network namespace (`network_mode: container:gluetunProtonVPN`) — removed 2026-06-22 because VPN was blocking tracker IPs.
 - No `.env` file.
