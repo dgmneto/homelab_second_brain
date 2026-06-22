@@ -44,6 +44,14 @@ telegram:
   allowed_users: [2070569244, 386325858, 6400549245, -1003925667659, -1003616165246, -5294644290]
 ```
 
+## Docker access (read-only)
+Hermes gets read-only Docker API access via a `tecnativa/docker-socket-proxy` sidecar
+(`hermes-docker-proxy`, same compose file). The proxy exposes only GET endpoints on
+`tcp://hermes-docker-proxy:2375`; hermes reaches it via `DOCKER_HOST=tcp://hermes-docker-proxy:2375`.
+Enabled scopes: `CONTAINERS`, `IMAGES`, `NETWORKS`, `VOLUMES`, `INFO`, `SERVICES`, `TASKS`.
+No write/exec/build endpoints exposed. The proxy mounts the host socket `:ro` to prevent
+socket replacement (the API restriction is enforced by HAProxy, not the mount flag).
+
 ## Networks
 `internalNetwork` (`intern`) only, no static IP, no published ports.
 

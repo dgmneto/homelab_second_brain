@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-06-22 — hermes: add read-only Docker access via socket proxy
+Added `tecnativa/docker-socket-proxy` sidecar to hermes compose. Hermes reads Docker API
+(containers, images, networks, volumes, info) via `tcp://hermes-docker-proxy:2375` — no write
+or exec endpoints exposed. Both containers up and healthy.
+Detail: [services/hermes/LOGBOOK.md](services/hermes/LOGBOOK.md).
+
 ## 2026-06-22 — watchtower: switch from 30s interval to weekly cron
 Hermes gateway was restarting constantly (26+ times on 2026-06-21). Root cause: upstream
 `nousresearch/hermes-agent:latest` publishes new images every ~10 minutes during active dev;

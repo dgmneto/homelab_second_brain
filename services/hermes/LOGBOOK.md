@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-06-22 — Add read-only Docker access via socket proxy
+Added `tecnativa/docker-socket-proxy` sidecar (`hermes-docker-proxy`) to compose.
+Hermes now has `DOCKER_HOST=tcp://hermes-docker-proxy:2375`; proxy allows only GET
+endpoints (CONTAINERS, IMAGES, NETWORKS, VOLUMES, INFO, SERVICES, TASKS). No write/exec
+access. Both containers up, proxy shows "Loading success" in logs. HAProxy timeout warning
+on `docker-events` backend is cosmetic/expected for this image.
+
 ## 2026-06-15 — Broaden telegram allowlist to all openclaw accounts
 First pass only used `telegram-default-allowFrom.json` + 2 group IDs. User pointed out openclaw
 runs multiple agent accounts (default/lobi/nutri/orion) each with their own `allowFrom` /
