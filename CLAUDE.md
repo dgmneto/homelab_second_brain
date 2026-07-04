@@ -57,8 +57,11 @@ Bypass the agent and use the key file directly:
 ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab
 ```
 
-For the deployment user add `-o User=openclaw`. The user holds the `sudo` password; pipe via `sudo -S`
-for non-interactive use.
+For the deployment user add `-o User=openclaw`. **Verified 2026-07-04: this is stale** — `openclaw` has
+no passwordless sudo (`sudo -n true` fails, "a password is required") and cannot even read
+`/home/dgmneto/homelab` or `/footage/services` (permission denied). For anything under
+`/home/dgmneto/homelab` or root-owned paths like `/footage/services/<svc>`, SSH as `dgmneto` instead —
+it has `sudo` (interactive password required, ask the user) and owns the repo checkout directly.
 
 ## Accessing service web UIs (Claude-in-Chrome)
 

@@ -4,6 +4,21 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-07-04 — add Jellyfin alongside Plex
+New media server, second player on the same `/library/media` library. Deployed
+`ghcr.io/hotio/jellyfin:latest` under `/home/dgmneto/homelab/services/jellyfin/compose.yaml` on
+`internalNetwork` only (no macvlan/static IP — simpler pattern than Plex, matches overseerr/bazarr),
+`PUID=1005`/`PGID=1313` reused from `plex/.env` so file ownership matches, `/dev/dri` passed through
+for HW transcode. Config dir `/footage/services/jellyfin/config` had to be `sudo mkdir`'d as `dgmneto`
+— `/footage/services` is root-owned and `openclaw` (the compose file's documented "deployment user")
+turned out to have neither passwordless sudo nor read access there; corrected that stale claim in
+`CLAUDE.md`. Added reverse-proxy hosts in both NPM instances: `jellyfin.intern.dgmneto.com` (nginxIntern,
+reused `*.intern.dgmneto.com` cert) and `jellyfin.3e.dgmneto.com` (nginxProd, reused `*.3e.dgmneto.com`
+cert), both Force SSL + Websockets Support on. User completed the first-run setup wizard and confirmed
+both URLs load and libraries are scanning. Verified: `docker compose ps` shows `Up`, GPU device log line
+confirms `renderD128` picked up, both hostnames render Jellyfin UI in browser (internal already logged
+in and scanning; public shows login page). See [services/jellyfin/README.md](services/jellyfin/README.md).
+
 ## 2026-07-04 — server health deep-check (investigation only)
 Full pass: `uptime`, `df -h` (/, /footage, /library), `free -h`, `docker ps`, `docker stats`,
 restart counts, inode usage, `dmesg`/`journalctl -k` OOM grep, `journalctl -u docker -p err`,
