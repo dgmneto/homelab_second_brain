@@ -4,6 +4,18 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-07-04 — server health deep-check (investigation only)
+Full pass: `uptime`, `df -h` (/, /footage, /library), `free -h`, `docker ps`, `docker stats`,
+restart counts, inode usage, `dmesg`/`journalctl -k` OOM grep, `journalctl -u docker -p err`,
+gluetun + watchtower logs, z2mqtt log, host `ps aux --sort=-%mem`. All 20 containers up, no
+crash-loops, 0 OOM kills in 7d, 0 docker daemon errors in 7d. Disk healthy: `/` 53%,
+`/footage` 9%, `/library` 65%, inodes all <10%. Mem: 4.3Gi/7.6Gi used, 656Mi swap in use but
+3.3Gi available (buff/cache reclaimable) — not concerning. z2mqtt RestartCount=1 traced to the
+2026-06-28 watchtower weekly run recreating it (not a crash — log has no errors). Watchtower's
+last run (2026-06-28 10:08 UTC, per the new Sunday-10:00 cron from commit 9d35b56) updated 10 of
+20 containers with 0 failures. Gluetun port-forwarding had one transient retry then succeeded —
+normal. No action taken; server is healthy.
+
 ## 2026-06-22 — prowlarr: move off VPN to internalNetwork
 Prowlarr was routing indexer traffic through ProtonVPN (gluetun netns). VPN exit IPs were blocking tracker domains. Zen Internet (UK ISP) does minimal voluntary blocking so VPN is unnecessary for HTTP indexer queries. Moved prowlarr to `internalNetwork` directly; updated NPM proxy host to forward to `prowlarr:9696` instead of `gluetun:9696`. Verified reachable at `prowlarr.intern.dgmneto.com`.
 Detail: [services/prowlarr/LOGBOOK.md](services/prowlarr/LOGBOOK.md).
