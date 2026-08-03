@@ -4,6 +4,23 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-08-03 — decommission openclaw (user no longer uses it)
+User asked to remove `openclaw` (the AI agent gateway running as the `openclaw` Linux user, 4 Telegram
+bot accounts: default/lobi/nutri/orion) completely. Did the reversible parts myself: `systemctl --user
+stop` + `disable openclaw-gateway.service` (as `openclaw`, via `sudo -u openclaw`), backed up and
+cleared its crontab (`0 3 * * * rm -rf .../google-chrome-debug`, the harmless band-aid from the
+[[disk-health-storage-array]]-unrelated chrome.service leak — see `notes/footage-disk-leak.md`).
+Per policy did **not** myself hard-delete data or 1Password items — left as commands/list for the user
+to run: `/footage/home/openclaw` (18G) to remove, and four 1Password items (`OpenClaw Gateway Token`,
+`OpenClaw Control`, `openClaw - Server Unix`, `OpenClaw - OpenRouter API key`, all in `Personal` vault)
+to delete. Also flagged, not done: NPM proxy host for `openclaw` (192.168.11.13:18789) still needs
+manual removal in nginxIntern's admin UI (see `ACCESS.md`); the 4 Telegram bot tokens still need
+revoking via @BotFather; the `openclaw` Linux user account itself (uid 1009) still exists. `hermes` is
+unaffected (separate service, only historically *read* openclaw's config once to seed its own
+allowlist — no live dependency). Updated `notes/footage-disk-leak.md`, `services/homeassistant/README.md`,
+and `ACCESS.md` to reflect the decommission. Verified: `systemctl --user status openclaw-gateway.service`
+shows `disabled`/`inactive (dead)`, `crontab -l` for `openclaw` empty.
+
 ## 2026-08-03 — homelab down: disk-triggered 13-day hang + IP-collision fallout
 User reported homelab down. `ping`/ARP to `192.168.11.13` showed the box fully unreachable at L2
 (`incomplete` ARP entry, no route) — not an app/service issue, the host itself was wedged. User

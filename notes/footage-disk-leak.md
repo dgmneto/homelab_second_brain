@@ -31,3 +31,9 @@ If `/footage` fills again:
 find ~openclaw/.config/google-chrome*/ -name '*.pma' -delete
 ```
 and confirm `chrome.service` did not return. Access via [[ssh-access]].
+
+**2026-08-03: `openclaw` decommissioned** (user no longer uses it) — `openclaw-gateway.service` stopped
++ disabled, its crontab cleared, `/footage/home/openclaw` (18G) queued for deletion (see root
+[LOGBOOK.md](../LOGBOOK.md)). This whole recurrence path is now moot — nothing runs as `openclaw`
+anymore to leak into `/footage`. Left here for history in case the pattern (a systemd user unit
+respawning a doomed GUI process into a bind-mounted volume) recurs under a different service.

@@ -31,7 +31,9 @@ desktop app; no manual signin). LOGIN items: `qbittorrent`, `Sonarr`, `Radarr`, 
 
 ## Other internal hosts in NPM (not yet documented under `services/`)
 `dashdot`, `fast`/`speedtest`, `homarr` (192.168.14.9:7575), `home` (192.168.14.33:3000),
-`netdata` (192.168.0.13:19999), `portainer` (portainer:9000), `openclaw` (192.168.11.13:18789),
+`netdata` (192.168.0.13:19999), `portainer` (portainer:9000),
+~~`openclaw` (192.168.11.13:18789)~~ — service decommissioned 2026-08-03, NPM proxy host still needs
+manual removal in the nginxIntern admin UI (not done via this repo),
 `scrypted` (192.168.14.89:11080), `testvpn` (gluetun:80).
 
 ## Open items
