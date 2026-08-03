@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-08-03 — Pin static IP (was colliding with nginxProd after reboot)
+During recovery from a forced host reboot (see root LOGBOOK + `notes/disk-health-storage-array.md`),
+found `hermes` had grabbed `172.21.0.9` on `internalNetwork` dynamically, which is `nginxProd`'s
+hardcoded static IP — broke that container on boot. Added `ipv4_address: 172.21.0.250` to `hermes`'s
+`intern` network block in `compose.yaml`, `docker compose up -d` to recreate. Verified:
+`docker network inspect internalNetwork` shows `hermes 172.21.0.250/24`, `nginxProd` came up clean on
+`.9` afterward.
+
 ## 2026-06-22 — Add read-only Docker access via socket proxy
 Added `tecnativa/docker-socket-proxy` sidecar (`hermes-docker-proxy`) to compose.
 Hermes now has `DOCKER_HOST=tcp://hermes-docker-proxy:2375`; proxy allows only GET

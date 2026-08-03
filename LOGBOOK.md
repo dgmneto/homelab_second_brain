@@ -4,6 +4,31 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-08-03 — homelab down: disk-triggered 13-day hang + IP-collision fallout
+User reported homelab down. `ping`/ARP to `192.168.11.13` showed the box fully unreachable at L2
+(`incomplete` ARP entry, no route) — not an app/service issue, the host itself was wedged. User
+physically checked and power-cycled it; `uptime` afterward confirmed a fresh boot. Root cause found
+via `journalctl --list-boots` + `journalctl -b -1`: the previous boot's journal went silent at
+`Jul 21 16:39:13` right after `smartd` logged pending sectors on **both** disks in the `library` LVM
+array (`sda`: 1 pending, `sdb`: 2 pending + both show 1 offline-uncorrectable each) — 13 days of total
+silence until the forced reboot. `smartctl` confirmed both disks: `sda` (WD Green, ~57,790 power-on
+hrs) and `sdb` (WD RE4, ~127,584 hrs / ~14.6y old) are old and degrading, and the array has **no
+RAID/mirror** (`libraryVirtualGroup` is linear/concatenated) — a bad-sector read almost certainly hung
+the kernel/LVM I/O and froze the whole box. Documented in
+[notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) — open risk, no fix applied
+yet (needs backup + eventual disk replacement/mirroring, flagged to user).
+
+Post-reboot, two containers hadn't come back: `qbittorrent` (boot-order race with `gluetunProtonVPN`'s
+network namespace, self-resolved on `docker compose up -d`) and `nginxProxyManagerProd` (stuck in
+`Removal In Progress`, `failed to set up container networking: Address already in use` on its static
+IP `172.21.0.9`). Second one was a real bug, unrelated to the disks: `hermes` has no static IP and had
+been dynamically assigned `.9` on this boot. Fixed by pinning `hermes` to `172.21.0.250`
+(`services/hermes/compose.yaml`), which freed `.9` for `nginxProd`. All 20 containers verified `Up`
+(`docker ps -a`), `qbittorrent` and `plex`/`prowlarr`/`gluetunProtonVPN`/`watchtower` report `healthy`,
+and `curl --resolve filmin.3e.dgmneto.com:443:192.168.14.33` returned `HTTP 401` (proxy alive). Detail
+in [services/nginxProd/LOGBOOK.md](services/nginxProd/LOGBOOK.md) and
+[services/hermes/LOGBOOK.md](services/hermes/LOGBOOK.md).
+
 ## 2026-07-04 — add Jellyfin alongside Plex
 New media server, second player on the same `/library/media` library. Deployed
 `ghcr.io/hotio/jellyfin:latest` under `/home/dgmneto/homelab/services/jellyfin/compose.yaml` on

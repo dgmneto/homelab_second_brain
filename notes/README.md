@@ -22,3 +22,5 @@ new `*.md` + a `MEMORY.md` line — commit and push them like any other change.
   leak) that surfaces as Home Assistant "down".
 - [qbittorrent-mass-stop](qbittorrent-mass-stop.md) — "all downloads paused" is usually a watchtower
   restart, not VPN/disk; diagnose via the Chrome WebUI.
+- [disk-health-storage-array](disk-health-storage-array.md) — `library`/`footage` LVM array has no
+  RAID, both disks show pending sectors; caused a 13-day silent full-box hang on 2026-08-03.

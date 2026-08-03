@@ -53,7 +53,10 @@ No write/exec/build endpoints exposed. The proxy mounts the host socket `:ro` to
 socket replacement (the API restriction is enforced by HAProxy, not the mount flag).
 
 ## Networks
-`internalNetwork` (`intern`) only, no static IP, no published ports.
+`internalNetwork` (`intern`) only, static IP **172.21.0.250**, no published ports. Pinned 2026-08-03
+(previously dynamic) — on a cold host reboot the dynamic allocator could hand hermes a low address
+that collided with `nginxProd`'s static `172.21.0.9`, breaking that container. See
+[[disk-health-storage-array]] / `../nginxProd/README.md` quirks section.
 
 ## Isolation / hardening
 No dedicated Linux user — container-level hardening only (matches every other service here):

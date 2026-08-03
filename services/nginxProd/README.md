@@ -50,6 +50,18 @@ Both networks are declared `external: true` and must exist before `up`.
 
 ## Quirks / runbook
 
+- **Static-IP collision on cold boot (fixed 2026-08-03).** After a full host reboot, any container
+  without a pinned IP on `internalNetwork` can get dynamically assigned an address that collides with
+  this container's static `172.21.0.9` if it starts first — Docker fails the recreate with
+  `failed to set up container networking: Address already in use`, and the old container gets stuck in
+  `Removal In Progress` (harmless zombie, clears once the real container starts under a temp
+  `<hash>_nginxProxyManagerProd` name; re-running `docker compose up -d` eventually reclaims the proper
+  name once the zombie drains). Root cause was `hermes` having no static IP and grabbing `.9` on boot —
+  fixed by pinning `hermes` to `172.21.0.250` (see `../hermes/compose.yaml`). If this recurs with a
+  different container, same fix: give the offending container a static IP outside the low end of
+  `172.21.0.0/24` that Docker's dynamic allocator hands out first. See
+  [[disk-health-storage-array]] for the reboot that surfaced this (this bug is unrelated to the disk
+  issue, just uncovered by the same forced reboot).
 - **Two NPM instances exist.** This one (`nginxProd`) is the public edge;
   `nginxIntern` (`192.168.14.34`) serves LAN-only hosts. Don't add internal-only
   proxy hosts here — they'd be exposed to the configured public path.

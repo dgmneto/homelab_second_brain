@@ -1,3 +1,4 @@
 - [SSH access](ssh-access.md) — bypass broken 1Password agent with `-o IdentityAgent=none -i ~/.ssh/id_rsa`; server is x86_64 Debian, not a Pi
 - [/footage disk leak](footage-disk-leak.md) — recurring outage: chrome.service crash-loop floods /footage, HA looks "down"; `find … -name '*.pma' -delete`
 - [qBittorrent mass-stop](qbittorrent-mass-stop.md) — "all downloads paused" usually = watchtower restart, not VPN/disk; diagnose via Chrome WebUI
+- [Disk health: library array](disk-health-storage-array.md) — sda/sdb both have pending sectors, no RAID; caused 13-day silent hang 2026-08-03, box unreachable at L2 until power-cycled
