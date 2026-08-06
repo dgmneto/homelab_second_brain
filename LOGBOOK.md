@@ -39,9 +39,24 @@ Progress helper installed at `/home/dgmneto/migration-progress.sh` (run via
 `ssh -t dgmneto@homelab 'sudo /home/dgmneto/migration-progress.sh'`) — reports shrink / `pvmove` /
 RAID1-sync progress, or dumps full volume state when nothing is running.
 
-Next: physical swap of `sdb` (`WD2003FYYS-05T8B0`, `WD-WMAUR0541868`) → new disk N1, then Phase 2
-drains `sda` onto N1, then `sda` (`WD20EZRX-00DC0B0`, `WD-WMC301625707`) → N2 and
-`lvconvert --type raid1 -m1` on both LVs.
+**PAUSED after Phase 1** — the replacement drives turned out to be **SAS, not SATA**. This box has an
+Intel N3350 AHCI SATA controller; SAS is not backward-compatible (SATA drives run on SAS controllers,
+never the reverse, and the SAS connector's bridged gap won't even seat in a SATA cable). A SAS HBA
+would need a PCIe slot this mini-PC doesn't have, so the fix is exchanging the drives for SATA. User
+expects them within days and chose to leave the box **powered off** meanwhile rather than restore
+service (`systemctl poweroff` issued; ping + SSH confirmed down).
+
+The paused state is stable and bootable — full description, plus how to bring services back up and how
+to resume, is in [notes/disk-health-storage-array.md](notes/disk-health-storage-array.md).
+
+Remaining when SATA disks arrive: fit N1 in the free port → `sgdisk -n1:0:-100M -t1:8e00` →
+`pvcreate`/`vgextend` → `pvmove /dev/sda` → `vgreduce`/`pvremove` `sda` → swap `sda`
+(`WD20EZRX-00DC0B0`, `WD-WMC301625707`) → N2 → `vgextend` → `lvconvert --type raid1 -m1` on both LVs →
+`lvextend -l +100%FREE -r` on `library`. Then Phase 4: re-enable docker, restart stacks and the
+`--user` watchdog, enable `lvm2-monitor`, make `smartd` actually alert (its 2026-07-21 warnings were
+journaled and unseen — that silence is what turned a bad sector into 13 days down), add a
+`ATTR{device/eh_deadline}="10"` udev rule, SMART long-test both new disks. Also still pending: user to
+`sudo rm -rf /footage/home/openclaw` (18G, queued since 2026-08-03).
 
 ## 2026-08-03 — decommission openclaw (user no longer uses it)
 User asked to remove `openclaw` (the AI agent gateway running as the `openclaw` Linux user, 4 Telegram
