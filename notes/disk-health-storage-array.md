@@ -8,14 +8,19 @@ metadata:
 
 # `library` LVM array — failing disks, zero redundancy
 
-> ## ⚠ CURRENT STATE (2026-08-06): disk replacement PAUSED mid-flight, box POWERED OFF
+> ## ⚠ CURRENT STATE (2026-08-06): disk replacement PAUSED, running on ONE disk
 >
 > A rolling replacement of both disks with 2× 4TB, ending on an LVM RAID1 mirror, is **half done**.
-> It stopped because the replacement drives turned out to be **SAS, not SATA** — this box has an Intel
-> N3350 AHCI **SATA** controller, and SAS drives are not backward-compatible (the connector has a
-> bridged gap and won't seat). Waiting on SATA replacements; user expects them within days.
+> It stopped because the replacement drives turned out to be **SAS, not SATA** — this box (a ZimaBlade,
+> Intel Apollo Lake) has an AHCI **SATA** controller, and SAS is not backward-compatible: SATA drives
+> run on SAS controllers, never the reverse, and the SAS connector's bridged gap won't even seat in a
+> SATA cable. Passive "SAS→SATA adapters" sold online do **not** bridge the protocol — they adapt
+> connectors for the *opposite* direction. A SAS HBA (LSI 9207-8i etc.) would work electrically but the
+> ZimaBlade's ~36–60W USB-C PD budget cannot feed an HBA plus two 3.5" enterprise drives, which also
+> need external power. Correct fix: SATA drives. Replacements ordered 2026-08-06.
 >
-> **The box is powered off and in a stable, bootable configuration.** Nothing is broken or half-written:
+> **The box is powered on and fully in service on the single remaining disk** — all 21 containers up.
+> Nothing is broken or half-written:
 >
 > | | |
 > |---|---|
@@ -23,13 +28,26 @@ metadata:
 > | `footageLogicalVolume` | 500 GiB, on `sda`, 41G used |
 > | `/dev/sda` (`WD-WMC301625707`) | sole PV, `PFree <363.02g` — **holds all data, no redundancy** |
 > | `/dev/sdb` (`WD-WMAUR0541868`) | `vgreduce`d + `pvremove`d, LVM labels wiped, empty. May or may not still be physically installed |
-> | Docker | `docker.service`, `docker.socket`, `containerd.service` all **disabled** — they do NOT come back on boot |
-> | `plex-qbittorrent-watchdog` | `systemd --user` unit, stopped but still `enabled` (returns on boot) |
+> | Docker | re-enabled 2026-08-06; all 21 containers running |
+> | `plex-qbittorrent-watchdog` | `systemd --user` unit, running again |
 >
-> **To bring services back up meanwhile:** power on, then
-> `sudo systemctl enable --now docker`, `docker compose up -d` per stack (`gluetunProtonVPN` before
-> `qbittorrent`/`prowlarr`), and `systemctl --user start plex-qbittorrent-watchdog.service`.
-> `/library` has 178G free, so downloads keep working; the shrink is invisible to the services.
+> **Interim hardening added while single-disk (keep after the mirror exists):**
+> - **Hardware watchdog enabled** — `wdat_wdt` via `/etc/systemd/system.conf.d/10-watchdog.conf`
+>   (`RuntimeWatchdogSec=60`). A total freeze like 2026-07-21 now self-reboots in ~1 min instead of
+>   sitting dead for 13 days.
+> - **`eh_deadline` does NOT work on this box** — writes to
+>   `/sys/class/scsi_host/host*/eh_deadline` return `Invalid argument` because libata/AHCI uses its own
+>   error handler, not SCSI EH. It is also *not* a block-device attribute (`/sys/block/sd*/device/…`
+>   doesn't exist here). Don't re-add that udev rule; the watchdog is the working substitute.
+> - **smartd now actually alerts.** It was `DEVICESCAN … -m root -M exec …/smartd-runner` with **no MTA
+>   installed**, so the 2026-07-21 pending-sector warnings went nowhere — that silence is the real
+>   reason a bad sector became a 13-day outage. Now runs `/usr/local/sbin/smart-alert.sh`, which logs to
+>   `/var/log/smart-alerts.log` + journal (`daemon.crit`) and sends Telegram via the hermes bot, reading
+>   `TELEGRAM_BOT_TOKEN`/`TELEGRAM_ALLOWED_USERS` from `/footage/services/hermes/config/.env` **at run
+>   time** (no secret literals on disk or in this repo).
+>
+> **Watch `/library` free space:** it is 984G instead of 3.1T until Phase 3 re-extends it, so the arr
+> stack will fill it far sooner than usual (178G free at the pause).
 >
 > **To resume the migration:** the remaining work is Phase 2 onward — fit SATA disk N1 in the free port,
 > `sgdisk -n1:0:-100M -t1:8e00`, `pvcreate`/`vgextend`, `pvmove /dev/sda` onto it, `vgreduce`/`pvremove`

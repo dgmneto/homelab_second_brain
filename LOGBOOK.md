@@ -39,6 +39,37 @@ Progress helper installed at `/home/dgmneto/migration-progress.sh` (run via
 `ssh -t dgmneto@homelab 'sudo /home/dgmneto/migration-progress.sh'`) — reports shrink / `pvmove` /
 RAID1-sync progress, or dumps full volume state when nothing is running.
 
+### 2026-08-06 (later) — back in service on the single disk + interim hardening
+User restored power with only `sda` installed (correct disk pulled — verified `WD20EZRX-00DC0B0` /
+`WD-WMC301625707` still present, both LVs mounted, `/library` 761G used). Box was unreachable at first:
+the ethernet had moved to the **second NIC** — `enp3s0` is now the live one (`enp2s0` DOWN), DHCP still
+hands out `192.168.11.13`, so nothing else needed changing. Diagnosis note: `arp -a` showing
+`casaos.localdomain … (incomplete)` means dead at L2 — but that alone does *not* imply the 2026-08-03
+kernel-wedge; here the OS was up fine and only the NIC was wrong. Check the console before assuming.
+
+Re-enabled `docker.socket`/`docker.service`/`containerd.service`, started `gluetunProtonVPN` first,
+then `qbittorrent`/`prowlarr`, then everything else, then `systemctl --user start
+plex-qbittorrent-watchdog.service`. **sonarr failed**: `failed to set up container networking: Address
+already in use` — `jellyfin` (deployed 2026-07-04 with *no* `ipv4_address`) had been dynamically
+assigned `172.21.0.5`, which is sonarr's static IP. Same collision class as hermes/nginxProd on
+2026-08-03. Fixed durably by pinning jellyfin to `172.21.0.251` in
+`/home/dgmneto/homelab/services/jellyfin/compose.yaml`; NPM proxies to the hostname `"jellyfin"` so no
+proxy config change was needed. All 21 containers now up; verified Plex via nginxProd `401` from the
+Mac, plus `jellyfin` 302 / `overseerr` 307 / `qbittorrent` 200 / `prowlarr` 302 through
+`*.intern.dgmneto.com`, and HA 200. Note during cold start the box hit **60% iowait / load 6.2** on the
+one old disk — HA and jellyfin returned 502/refused for ~20 min purely from I/O starvation, not faults.
+
+Interim hardening (worth keeping after the mirror lands):
+- **Hardware watchdog enabled** (`wdat_wdt`, `RuntimeWatchdogSec=60` via
+  `/etc/systemd/system.conf.d/10-watchdog.conf`) — a total freeze now self-reboots in ~1 min.
+- **`eh_deadline` from the original plan is unimplementable here** — it is a SCSI *host* attribute, not
+  a block-device one, and libata/AHCI rejects writes with `Invalid argument`. Rule removed; watchdog is
+  the substitute. Don't re-add it.
+- **smartd made to actually alert** — it was `-m root` with no MTA, which is why the 2026-07-21
+  warnings were never seen. Now execs `/usr/local/sbin/smart-alert.sh` (logs +
+  `/var/log/smart-alerts.log` + Telegram via the hermes bot, token read from hermes `.env` at run time,
+  never copied). **Delivery still untested** — needs a test message.
+
 **PAUSED after Phase 1** — the replacement drives turned out to be **SAS, not SATA**. This box has an
 Intel N3350 AHCI SATA controller; SAS is not backward-compatible (SATA drives run on SAS controllers,
 never the reverse, and the SAS connector's bridged gap won't even seat in a SATA cable). A SAS HBA
