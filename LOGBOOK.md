@@ -4,6 +4,45 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-08-06 — HDD replacement (in progress): Phase 0–1, `/library` shrunk, `sdb` evacuated
+Replacing both failing disks (`notes/disk-health-storage-array.md`) with 2× 4TB, ending on an LVM
+RAID1 mirror. Only 2 SATA ports exist and both were occupied, so the swap is a rolling one — no third
+disk can ever be attached, and there is no USB dock.
+
+**The trap this job exposed:** the volumes were only 22% full of data (805 GiB real) but **100%
+allocated** (`VFree 0`), so `pvmove /dev/sdb` was impossible — it needed 1.82 TiB of free extents on
+`sda` and there were none. `pvmove` moves *allocated extents*, not used blocks. The fix is to shrink
+first. Second trap: `lvreduce` frees the LV's **highest** LEs, and `seg_pe_ranges` showed
+`libraryLogicalVolume` was laid out **`sdb` first** (`sdb:0-476931`, then `sda:0-348931`) — so shrinking
+freed the `sda` half, which is exactly what made room to then drain `sdb` onto `sda`. Always read
+`lvs -o+seg_pe_ranges` before assuming which physical disk a shrink will empty.
+
+Phase 0: verified extent map, `dm-raid` module present, `lvm2-monitor` enabled. Tarred
+`/footage/services` (3.7G, 22,760 entries) to the Mac as a config safety net — note `/footage` is 44G
+because Docker's **data-root is `/footage/docker`** (35G) plus the 18G `/footage/home/openclaw`
+leftover, but the actual service configs are only 3.7G. Took everything down: all 20 containers +
+`arani`, then `systemctl disable --now docker.socket docker.service containerd.service` — *disabling*
+matters because restart policies plus watchtower's 30s poll would resurrect the stacks across the two
+power-cycles this job needs. Also had to `systemctl --user stop plex-qbittorrent-watchdog.service`:
+it is a `systemd --user` unit for `dgmneto` (as its README correctly says), so it survives
+`compose down` and is invisible to system-scope `systemctl list-units`.
+
+Phase 1: `umount /library` → `e2fsck -f -y` (clean; only extent-tree optimizations; 281 inodes,
+213,028,448/845,684,736 blocks) → `resize2fs … 1000G` (~4 h, relocated ~560 GiB, no errors) →
+`lvreduce -f -L 1000G` → `pvmove -i 60 /dev/sdb` (1000 GiB at ~133 MB/s, ~2.2 h) → `vgreduce` +
+`pvremove /dev/sdb`. Long-running steps were launched `setsid nohup …` so they are PPID 1 and survive
+SSH drops. Verified after: `pvs` shows only `/dev/sda` (`PFree <363.02g`), both LVs on `sda`,
+`/library` mounts with 761G used / 178G free and `media/{movies,tv,transcoding}` + `torrent` intact,
+`/footage` 41G. `lsblk` confirms `sdb` has no FSTYPE — safe to pull.
+
+Progress helper installed at `/home/dgmneto/migration-progress.sh` (run via
+`ssh -t dgmneto@homelab 'sudo /home/dgmneto/migration-progress.sh'`) — reports shrink / `pvmove` /
+RAID1-sync progress, or dumps full volume state when nothing is running.
+
+Next: physical swap of `sdb` (`WD2003FYYS-05T8B0`, `WD-WMAUR0541868`) → new disk N1, then Phase 2
+drains `sda` onto N1, then `sda` (`WD20EZRX-00DC0B0`, `WD-WMC301625707`) → N2 and
+`lvconvert --type raid1 -m1` on both LVs.
+
 ## 2026-08-03 — decommission openclaw (user no longer uses it)
 User asked to remove `openclaw` (the AI agent gateway running as the `openclaw` Linux user, 4 Telegram
 bot accounts: default/lobi/nutri/orion) completely. Did the reversible parts myself: `systemctl --user
