@@ -23,6 +23,18 @@ Notes / quirks:
 - This backs up the **server's compose repo**, NOT this second-brain repo.
 - No error handling: if `git commit` finds nothing staged it exits non-zero, but the script ignores
   it. Push uses `~/.ssh/github_ed25519` (separate from the on-disk `id_rsa`).
+- ⚠ **BROKEN — this job cannot push (verified 2026-08-08).** `~/.ssh/github_ed25519` is
+  **passphrase-protected**, so the `ssh-add` line prompts `Enter passphrase for …` and gets nothing
+  from cron; the push then fails with `git@github.com: Permission denied (publickey)`. The repo was
+  found **6 commits ahead of `origin`** as a result. Because cron discards the output, this has been
+  failing invisibly — the "auto-backup" has been backing nothing up.
+  Fixes, pick one: strip the passphrase (`ssh-keygen -p -f ~/.ssh/github_ed25519`), switch the remote
+  to a deploy token, or use a dedicated passphrase-less deploy key. Until then the compose repo must
+  be pushed by hand:
+  ```
+  ssh -t dgmneto@homelab 'cd ~/homelab && eval "$(ssh-agent -s)" && ssh-add ~/.ssh/github_ed25519 && git push origin main'
+  ```
+- Despite its name, `backup.sh` backs up **no data** — it is purely a `git push` of the compose files.
 - Commit message is always `auto-backup` — no diff detail.
 
 ### openclaw user crontab — chrome-debug cleanup (band-aid, harmless)
