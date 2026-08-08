@@ -39,6 +39,53 @@ Progress helper installed at `/home/dgmneto/migration-progress.sh` (run via
 `ssh -t dgmneto@homelab 'sudo /home/dgmneto/migration-progress.sh'`) — reports shrink / `pvmove` /
 RAID1-sync progress, or dumps full volume state when nothing is running.
 
+## 2026-08-08 — HDD replacement COMPLETE: both disks new, both volumes on LVM RAID1
+Finished the migration paused on 2026-08-06. New disks (both 4 TB, both SATA, exactly
+4,000,787,030,016 bytes): **HGST HUS724040ALA640** `PN1334PEJ2ZESS` (Ultrastar 7K4000, 35,221 h) and
+**TOSHIBA MG08ADA400E** `12J0A036FXBG` (23,819 h). Both recertified but with clean counters —
+0 reallocated / 0 pending / 0 offline-uncorrectable / 0 CRC on both, checked *before* trusting data to
+them. Old disks removed: `WD-WMAUR0541868` (RE4, 14.6 y) and `WD-WMC301625707` (WD Green, 3 pending
+sectors and rising).
+
+Sequence that worked (2 power-offs, no third attachment point ever needed):
+1. **N1 added to the port the RE4 vacated — nothing removed.** `sgdisk -Z`, `sgdisk -n1:0:-100M
+   -t1:8e00` (100 M end-slack so a future replacement that is marginally smaller still fits),
+   `pvcreate`/`vgextend`, then `pvmove -i 60 /dev/sda /dev/sdb1` — 1.46 TiB, ~2 h, **online with
+   services running**. `vgreduce`/`pvremove` the old WD Green.
+2. Power off → pull WD Green → fit N2 → same partitioning → `vgextend` →
+   `lvconvert -y --type raid1 -m1` on both LVs.
+3. `lvextend -l +100%FREE -r` on `libraryLogicalVolume`: **984 G → 3.15 TiB** (it had reached 92 % full
+   during the single-disk period).
+
+**Sync throughput is dominated by what else is running** — measured on this box, same 1.5 TiB job:
+8.5 MB/s (20 containers + an `rm -rf` walking many small files) → 37 MB/s (rm cancelled) → 53 MB/s
+(footage sync throttled) → 79 MB/s (footage leg detached entirely) → **154 MB/s with only the HA stack
+up** (homeassistant, z2mqtt, mosquitto, matter-server, nginxIntern). Raising
+`/proc/sys/dev/raid/speed_limit_min` and `lvchange --raidminrecoveryrate` changed nothing — the limit
+is real contention, not the governor. Useful trick when two LVs sync at once and thrash the heads:
+`lvconvert -y -m0 <vg>/<lv> /dev/<new-pv>` **detaches the unsynced leg** (name the new PV explicitly so
+it can never drop the good one), let the important LV finish, then re-add with
+`lvconvert -y --type raid1 -m1`. Losing a few % of sync progress costs nothing.
+
+**Non-obvious**: `lvextend` on a RAID1 LV puts the *newly added* extents out of sync, so `Cpy%Sync`
+drops back (100 % → 31 %) and a long re-sync follows. This is **not** a redundancy gap — dm-raid writes
+go to *both* legs immediately, so live data is mirrored as it lands; the resync only reconciles regions
+never written. Don't stop services over it (we briefly stopped Plex before working this out — Plex was
+burning 172 % CPU on `Plex Transcoder`/`EasyAudioEncoder` post-scan analysis and starving the sync, with
+iowait at 0 %).
+
+Unattended completion was driven by `/root/finish-migration.sh` (`setsid nohup`, PPID 1, log
+`/var/log/migration-finish.log`) — waits for sync, re-mirrors `/footage`, extends `/library`, restarts
+every stack in order (`gluetunProtonVPN` before `qbittorrent`/`prowlarr`) plus the
+`plex-qbittorrent-watchdog` **`systemd --user`** unit via
+`sudo -u dgmneto XDG_RUNTIME_DIR=/run/user/1002 systemctl --user start …`. It is idempotent; re-running
+is safe. Verified after: `/library` 3.1T (870G used, 2.2T free), `/footage` 492G (26G used — user's
+`rm -rf /footage/home/openclaw` finished, freeing ~17G), **21/21 containers up**, six healthchecks
+green, watchdog active.
+
+**Not verified:** the actual degraded-mirror survival path — user declined a deliberate disk-pull test.
+Redundancy rests on `lvs` reporting two in-sync legs, not on observed failover.
+
 ### 2026-08-06 (later) — back in service on the single disk + interim hardening
 User restored power with only `sda` installed (correct disk pulled — verified `WD20EZRX-00DC0B0` /
 `WD-WMC301625707` still present, both LVs mounted, `/library` 761G used). Box was unreachable at first:

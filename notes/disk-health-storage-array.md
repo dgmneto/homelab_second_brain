@@ -1,122 +1,114 @@
 ---
 name: disk-health-storage-array
-description: Failing library/footage LVM array; disk replacement to RAID1 is PAUSED mid-flight (2026-08-06) with the box powered off — read the "current state" section before touching anything
+description: The library/footage LVM array is now an LVM RAID1 mirror on two new 4TB disks (2026-08-08); how it is laid out, how to check it, and the LVM traps the migration exposed
 metadata:
   node_type: memory
   type: project
 ---
 
-# `library` LVM array — failing disks, zero redundancy
+# `library` LVM array — RAID1 mirror on 2× 4 TB (since 2026-08-08)
 
-> ## ⚠ CURRENT STATE (2026-08-06): disk replacement PAUSED, running on ONE disk
->
-> A rolling replacement of both disks with 2× 4TB, ending on an LVM RAID1 mirror, is **half done**.
-> It stopped because the replacement drives turned out to be **SAS, not SATA** — this box (a ZimaBlade,
-> Intel Apollo Lake) has an AHCI **SATA** controller, and SAS is not backward-compatible: SATA drives
-> run on SAS controllers, never the reverse, and the SAS connector's bridged gap won't even seat in a
-> SATA cable. Passive "SAS→SATA adapters" sold online do **not** bridge the protocol — they adapt
-> connectors for the *opposite* direction. A SAS HBA (LSI 9207-8i etc.) would work electrically but the
-> ZimaBlade's ~36–60W USB-C PD budget cannot feed an HBA plus two 3.5" enterprise drives, which also
-> need external power. Correct fix: SATA drives. Replacements ordered 2026-08-06.
->
-> **The box is powered on and fully in service on the single remaining disk** — all 21 containers up.
-> Nothing is broken or half-written:
->
-> | | |
-> |---|---|
-> | `libraryLogicalVolume` | **1000 GiB** (shrunk from 3.15 TiB), entirely on `sda`, 761G used / 178G free |
-> | `footageLogicalVolume` | 500 GiB, on `sda`, 41G used |
-> | `/dev/sda` (`WD-WMC301625707`) | sole PV, `PFree <363.02g` — **holds all data, no redundancy** |
-> | `/dev/sdb` (`WD-WMAUR0541868`) | `vgreduce`d + `pvremove`d, LVM labels wiped, empty. May or may not still be physically installed |
-> | Docker | re-enabled 2026-08-06; all 21 containers running |
-> | `plex-qbittorrent-watchdog` | `systemd --user` unit, running again |
->
-> **Interim hardening added while single-disk (keep after the mirror exists):**
-> - **Hardware watchdog enabled** — `wdat_wdt` via `/etc/systemd/system.conf.d/10-watchdog.conf`
->   (`RuntimeWatchdogSec=60`). A total freeze like 2026-07-21 now self-reboots in ~1 min instead of
->   sitting dead for 13 days.
-> - **`eh_deadline` does NOT work on this box** — writes to
->   `/sys/class/scsi_host/host*/eh_deadline` return `Invalid argument` because libata/AHCI uses its own
->   error handler, not SCSI EH. It is also *not* a block-device attribute (`/sys/block/sd*/device/…`
->   doesn't exist here). Don't re-add that udev rule; the watchdog is the working substitute.
-> - **smartd now actually alerts.** It was `DEVICESCAN … -m root -M exec …/smartd-runner` with **no MTA
->   installed**, so the 2026-07-21 pending-sector warnings went nowhere — that silence is the real
->   reason a bad sector became a 13-day outage. Now runs `/usr/local/sbin/smart-alert.sh`, which logs to
->   `/var/log/smart-alerts.log` + journal (`daemon.crit`) and sends Telegram via the hermes bot, reading
->   `TELEGRAM_BOT_TOKEN`/`TELEGRAM_ALLOWED_USERS` from `/footage/services/hermes/config/.env` **at run
->   time** (no secret literals on disk or in this repo).
->
-> **Watch `/library` free space:** it is 984G instead of 3.1T until Phase 3 re-extends it, so the arr
-> stack will fill it far sooner than usual (178G free at the pause).
->
-> **To resume the migration:** the remaining work is Phase 2 onward — fit SATA disk N1 in the free port,
-> `sgdisk -n1:0:-100M -t1:8e00`, `pvcreate`/`vgextend`, `pvmove /dev/sda` onto it, `vgreduce`/`pvremove`
-> `sda`, swap `sda` → N2, `vgextend`, `lvconvert --type raid1 -m1` on **both** LVs, then
-> `lvextend -l +100%FREE -r` on `library` to reclaim capacity. Full plan and rationale in the
-> 2026-08-06 entry of [../LOGBOOK.md](../LOGBOOK.md). Progress helper:
-> `ssh -t dgmneto@homelab 'sudo /home/dgmneto/migration-progress.sh'`.
->
-> Config safety net: `/footage/services` (3.7G, 22,760 entries) tarred to the Mac at
-> `~/homelab-footage-services-2026-08-05.tar`.
+`libraryVirtualGroup` is now **mirrored**. Both logical volumes are `--type raid1 -m1` across two
+physical volumes on two different disks, so a single disk failure no longer takes anything down.
 
-## Two LVM traps this migration exposed
+| | |
+|---|---|
+| `/dev/sda1` | **TOSHIBA MG08ADA400E**, serial `12J0A036FXBG`, 4 TB, 7200 rpm, 23,819 h |
+| `/dev/sdb1` | **HGST HUS724040ALA640** (Ultrastar 7K4000), serial `PN1334PEJ2ZESS`, 4 TB, 7200 rpm, 35,221 h |
+| `libraryLogicalVolume` | **3.15 TiB**, `/library`, mirrored |
+| `footageLogicalVolume` | 500 GiB, `/footage`, mirrored |
 
-1. **Allocated ≠ used.** The volumes held 805 GiB of data but were **100% allocated** (`VFree 0`), so
-   `pvmove` was impossible — it moves *allocated extents*, not used blocks, and needed 1.82 TiB of free
-   extents that didn't exist. A filesystem+LV shrink has to come first.
-2. **`lvreduce` frees the LV's *highest* LEs**, which is not necessarily the disk you want emptied.
-   Here `lvs -o+seg_pe_ranges` showed `libraryLogicalVolume` was laid out **`sdb` first**
-   (`sdb:0-476931`, then `sda:0-348931`), so the shrink freed the *`sda`* half — which happened to be
-   exactly what created room to then drain `sdb` onto `sda`. **Always read `seg_pe_ranges` before
-   assuming which physical disk a shrink will empty.**
+Both disks are recertified (ServerPartDeals) but were verified clean before any data was trusted to
+them: 0 reallocated, 0 pending, 0 offline-uncorrectable, 0 UDMA CRC errors on both. Both are exactly
+4,000,787,030,016 bytes, and each is partitioned with `sgdisk -n1:0:-100M -t1:8e00` — the 100 MiB of
+end-slack exists so a future replacement drive that is marginally smaller still fits the mirror.
 
-Also worth knowing: `/footage` is 44G used, but only **3.7G of that is service configs** — Docker's
-data-root is `/footage/docker` (35G), plus the 18G `/footage/home/openclaw` leftover still pending
-deletion. And deleting files does **not** shrink `pvmove` work, since extents move regardless.
+Retired 2026-08-08 and shelved: `WD-WMAUR0541868` (WD RE4, 14.6 y) and `WD-WMC301625707` (WD Green,
+3 pending sectors and climbing). The 2026-07-21 → 08-03 13-day silent hang came from the latter class
+of failure; see the history section below.
 
-## Historical layout (pre-migration)
+## Checking it
 
-The `libraryVirtualGroup` volume group (`vgs`/`pvs`) was built from **two bare spinning disks with no
-RAID/mirror**:
-
-- `/dev/sda` — WD Green `WD20EZRX-00DC0B0`, ~57,790 power-on hours (~6.6y). Holds `footageLogicalVolume`
-  (`/footage`, 500G) alone, plus half of `libraryLogicalVolume`.
-- `/dev/sdb` — WD RE4 `WD2003FYYS-05T8B0`, ~127,584 power-on hours (~14.6y — very old). Holds the other
-  half of `libraryLogicalVolume` (`/library`, 3.15T, concatenated across both disks).
-
-Both are `linear`/concatenated, not mirrored — **either disk failing takes down its LV entirely**, and
-since `footageLogicalVolume` (service configs) lives solely on `sda`, an `sda` failure = every service
-config gone, not just media.
-
-## 2026-08-03 incident: 13-day silent hang
-
-`smartd` logged pending sectors on both disks (`sda`: 1, `sdb`: 2) at `Jul 21 16:39:13`, then the
-journal went **completely silent for 13 days** — no clean shutdown, no crash dump, just nothing until
-the box was found unresponsive (ping/ARP dead) on 2026-08-03 and physically power-cycled. Root cause:
-a read hit a bad/pending sector, the kernel/LVM I/O hung waiting on it, and the whole box froze solid
-(not a panic, not an OOM — just wedged). No amount of SSH/network troubleshooting helps this case:
-the host is fully unresponsive at L2 (ARP shows `incomplete`), so the only recovery is a physical power
-cycle. See [[ssh-access]] for the access path used to investigate once it came back.
-
-Check current SMART state:
 ```
 ssh dgmneto@homelab
+sudo lvs -a -o name,attr,size,sync_percent,raid_sync_action,devices libraryVirtualGroup
+sudo pvs
 sudo smartctl -a /dev/sda | grep -E 'Pending|Reallocated|Uncorrectable|Power_On_Hours'
 sudo smartctl -a /dev/sdb | grep -E 'Pending|Reallocated|Uncorrectable|Power_On_Hours'
 ```
 
-SMART as of 2026-08-05: `sda` 57,842 h, **Current_Pending_Sector 3** (was 1 on 2026-08-03 — actively
-growing); `sdb` 127,636 h, pending 2, unchanged. Both `PASSED`, 0 reallocated, 1 offline-uncorrectable
-each.
+Healthy looks like: each LV `rwi-aor---` with `Cpy%Sync 100.00` and `SyncAction idle`, and each LV's
+`_rimage_0` / `_rimage_1` on **different** PVs. A leg letter of `I` (capital, as in `Iwi-aor---`) means
+that image is *out of sync*; lowercase `i` means in sync. A `p` (partial) attribute means a PV is
+missing — that is the real "a disk died" signal.
 
-## Open risk until the migration finishes
+**Untested:** nobody has actually pulled a disk to confirm failover behaves. Redundancy currently rests
+on `lvs` reporting two in-sync legs, not on an observed degraded-mode survival.
 
-All data now lives on `sda` alone — the disk whose pending-sector count is climbing — with no
-redundancy at all. That is the intended intermediate state of the migration, but it was meant to last
-hours, not days. While it persists:
-- Don't stall. Finish Phase 2+ as soon as SATA disks arrive.
-- If the wait stretches past ~a week, consider a stopgap: `vgextend` the old `sdb` back in and
-  `lvconvert --type raid1 -m1` both LVs (1.5 TiB fits on `sdb`'s 1.82 TiB). Two dying disks mirrored
-  beats one dying disk alone — at the cost of a ~4h sync that stresses both.
-- Re-run the `smartctl` check above periodically — a rising pending-sector count means the drive is
-  actively degrading, not just old.
+## Monitoring (added 2026-08-06, keep it)
+
+- **Hardware watchdog** — `wdat_wdt` via `/etc/systemd/system.conf.d/10-watchdog.conf`
+  (`RuntimeWatchdogSec=60`). A total kernel freeze now self-reboots in ~1 min instead of sitting dead
+  for 13 days.
+- **`eh_deadline` does NOT work on this box.** It is a SCSI *host* attribute
+  (`/sys/class/scsi_host/host*/eh_deadline`), not a block-device one, and libata/AHCI rejects writes
+  with `Invalid argument` because it uses its own error handler rather than SCSI EH. Don't re-add that
+  udev rule — the watchdog is the working substitute.
+- **smartd actually alerts now.** It used to be `DEVICESCAN … -m root -M exec …/smartd-runner` with
+  **no MTA installed**, so the 2026-07-21 pending-sector warnings went nowhere — that silence is the
+  real reason a bad sector became a two-week outage. It now runs `/usr/local/sbin/smart-alert.sh`,
+  which logs to `/var/log/smart-alerts.log` + journal (`daemon.crit`) and sends Telegram through the
+  hermes bot, reading `TELEGRAM_BOT_TOKEN` / `TELEGRAM_ALLOWED_USERS` from
+  `/footage/services/hermes/config/.env` **at run time** — no secret literals on disk or in this repo.
+- `lvm2-monitor` is enabled, which is what reports a failed mirror leg.
+
+## LVM traps this migration exposed
+
+1. **Allocated ≠ used.** The old volumes held 805 GiB of data but were **100 % allocated**
+   (`VFree 0`), so `pvmove` was impossible — it moves *allocated extents*, not used blocks. A
+   filesystem + LV shrink had to come first. Deleting files does **not** reduce `pvmove` work.
+2. **`lvreduce` frees the LV's *highest* LEs**, which is not necessarily the disk you want emptied.
+   `lvs -o+seg_pe_ranges` showed `libraryLogicalVolume` was laid out `sdb` first, so the shrink freed
+   the *`sda`* half. **Always read `seg_pe_ranges` before assuming which disk a shrink will empty.**
+3. **`resize2fs` before `lvreduce`, always.** Reversed, it truncates live data. If the box dies
+   mid-`resize2fs`: power-cycle, `e2fsck -f`, re-run `resize2fs`, and do not `lvreduce` until it
+   reports success.
+4. **`lvextend` on a RAID1 LV desyncs the new extents** — `Cpy%Sync` drops back (100 % → 31 % here) and
+   a long resync follows. This is **not** a redundancy gap: dm-raid writes go to *both* legs
+   immediately, so live data is mirrored as it lands and the resync only reconciles never-written
+   regions. Don't stop services over it.
+5. **Two LVs syncing at once thrash the heads.** `lvconvert -y -m0 <vg>/<lv> /dev/<new-pv>` detaches
+   the unsynced leg — **name the new PV explicitly** so it can never drop the leg holding your data —
+   then re-add later with `lvconvert -y --type raid1 -m1`. Losing a few % of sync progress costs
+   nothing.
+6. **Sync speed is all about contention, not tuning.** Same 1.5 TiB job measured on this box:
+   8.5 MB/s (20 containers + an `rm -rf` over many small files) → 37 → 53 → 79 → **154 MB/s with only
+   the HA stack up**. Raising `/proc/sys/dev/raid/speed_limit_min` and `lvchange
+   --raidminrecoveryrate` changed nothing. Watch for CPU starvation too: Plex post-scan analysis
+   (`Plex Transcoder` / `EasyAudioEncoder`) hit 172 % CPU with iowait at 0 % and throttled the sync.
+
+Also: `/footage` is only ~26 G used, and most of it is **Docker's data-root** (`/footage/docker`) —
+actual service configs are just ~3.7 G. `services/backup.sh` (root cron, Sundays 05:00) despite its
+name backs up **no data**; it is a `git push` of the compose repo.
+
+## History — 2026-08-03 incident (why this rebuild happened)
+
+`smartd` logged pending sectors on both old disks (`sda`: 1, `sdb`: 2) at `Jul 21 16:39:13`, then the
+journal went **completely silent for 13 days** — no clean shutdown, no crash dump — until the box was
+found unresponsive (ping/ARP dead) on 2026-08-03 and physically power-cycled. A read hit a bad/pending
+sector, kernel/LVM I/O hung on it, and the whole box wedged. The host was unreachable at L2 (ARP
+`incomplete`), so the only recovery was a physical power cycle. Note that ARP `incomplete` alone does
+*not* prove a wedge — on 2026-08-06 the same symptom was just the ethernet being in the other NIC
+(`enp3s0` is the live one now). Check the console before assuming the worst. See [[ssh-access]].
+
+The old array was `linear`/concatenated with no redundancy, and `footageLogicalVolume` lived solely on
+`sda`, so an `sda` failure would have taken every service config with it. That is what the mirror
+fixes.
+
+A first attempt at replacement stalled on 2026-08-06 because the drives bought were **SAS, not SATA**.
+This box (ZimaBlade, Apollo Lake) has an AHCI **SATA** controller: SATA drives run on SAS controllers,
+never the reverse, and the SAS connector's bridged gap won't seat in a SATA cable. Passive
+"SAS→SATA adapters" do **not** bridge the protocol — they adapt connectors for the opposite direction.
+A SAS HBA (LSI 9207-8i etc.) would work electrically, but the ZimaBlade's ~36–60 W USB-C PD budget
+cannot feed an HBA plus two 3.5" enterprise drives, which also need external power. Only 2 SATA ports
+exist (`ata1`/`ata2`), which is why the whole migration had to roll one disk at a time.

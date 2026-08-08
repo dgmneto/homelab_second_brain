@@ -142,12 +142,15 @@ NPM and Plex also sit on a `macvlan` (VLAN 14, `192.168.14.0/24`) with static IP
 |-------|------|-------|
 | `/` (`/dev/mmcblk0p2`) | 27G | OS root |
 | `/footage` | 492G | **service configs** — e.g. `/footage/services/<svc>/config`, HA config bind-mount |
-| `/library` | **984G** (was 3.1T) | media + torrents (`/library/media`, `/library/torrent`) |
+| `/library` | 3.1T | media + torrents (`/library/media`, `/library/torrent`) |
 
-⚠ **Mid-migration as of 2026-08-06.** Both disks are being replaced with 2× 4TB ending on an LVM RAID1
-mirror. `/library` was shrunk 3.15 TiB → 1000G and the old `sdb` removed, so the box now runs on the
-**single** `sda` with **no redundancy**. Read
-[notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) before touching storage.
+Both volumes sit on an **LVM RAID1 mirror** across two 4TB disks (rebuilt 2026-08-08 — the old pair
+were failing and had no redundancy). A single disk failure is now survivable. Check with
+`sudo lvs -a -o name,attr,sync_percent,devices` — healthy is `rwi-aor---` at `100.00` with each LV's
+two `_rimage_` legs on **different** PVs. Read
+[notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) before touching storage; it
+carries the LVM traps (allocated ≠ used, `lvreduce` frees the LV *tail*, `lvextend` desyncs new
+extents) that cost real time to rediscover.
 
 Container configs are bind-mounted from `/footage`, **media** from `/library`. A service "down" is
 usually a **full disk**, not a crashed app — `df -h /footage /library` first.
