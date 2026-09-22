@@ -24,6 +24,12 @@ Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume the
 - **HA:** `homeassistant.enabled: true` → publishes HA MQTT-discovery messages. Flow: HA ← MQTT (mosquitto) ← z2mqtt.
 
 ## Quirks / runbook
+- **HA shows every Zigbee device unavailable but z2m is fine** → HA discovery configs missing from the
+  broker (see `../mosquitto/README.md`). Fix: `docker restart z2mqtt` (republishes 253 configs on start).
+- `docker logs z2mqtt` is empty for long stretches; the real log is
+  `/app/data/log/<start-timestamp>/log.log` inside the container (rotates at 10MB, keeps 3). It can stop
+  being written while z2m keeps working (seen 2026-09-22) — check MQTT traffic, not the file, for liveness:
+  publish `{}` to `zigbee2mqtt/bridge/request/health_check`, expect `bridge/response/health_check`.
 - Coordinator is over the LAN/TCP — if `192.168.11.228:6638` is unreachable, z2mqtt logs serial/connection errors and Zigbee goes dark even though the container is "Up". Check that host first, not a USB stick.
 - Data lives on `/footage`; a full `/footage` can break z2mqtt persistence/logging too.
 - Unpinned `latest` image; z2mqtt config schema occasionally changes between majors — a Watchtower bump can break the config.

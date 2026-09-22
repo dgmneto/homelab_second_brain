@@ -26,4 +26,13 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 ## Quirks / runbook
 - **`/footage` full → HA crash-loop.** HA's config is bind-mounted on the `/footage` LVM volume (`/footage/services/homeassistant/config`). When `/footage` fills to 100%, HA fails to write its SQLite recorder DB / config and crash-loops with `OSError: [Errno 28] No space left on device`, appearing "down" even though `/` has plenty of free space. **Check `df -h /footage` first.** Past recurring filler was the `openclaw` `chrome.service` crash-loop (see memory note) — `openclaw` was decommissioned 2026-08-03, so that specific cause no longer applies, but the "check `/footage` first" advice still holds for whatever fills it next.
 - `autoheal` + `watchtower` containers run alongside; the `restart: always` policy plus autoheal will keep restarting HA, which masks the real disk-full cause.
+- **"All devices missing" = MQTT entities `unavailable`, not a deleted registry.** 2026-09-22: a
+  mosquitto restart (no persistence) wiped the retained z2m discovery configs; fixed by
+  `docker restart z2mqtt` and enabling mosquitto persistence. Diagnose offline via
+  `.storage/core.restore_state` (dumped every 15 min) joined to `.storage/core.entity_registry` by
+  platform — no API token needed (script pattern in root LOGBOOK 2026-09-22).
+- **`tapo_control` (HACS, JurajNyiri/HomeAssistant-Tapo-Control 7.1.13) folder is MISSING** from
+  `/config/custom_components` (dir last changed 2026-08-10 23:13, just after the disk migration) while HACS
+  still lists it installed and a config entry + 109 entities remain. No HA backup has it (only 3 kept, all
+  ≥ Sep 20). Fix: HACS → Tapo Control → Redownload, then restart HA.
 - Image is unpinned (`latest`); a Watchtower pull can introduce breaking HA core upgrades.

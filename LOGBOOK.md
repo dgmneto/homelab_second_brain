@@ -4,6 +4,19 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-09-22 — HA "all devices missing": Zigbee discovery lost on broker restart; fixed + persistence
+HA registries were intact (61 devices / 953 entities), but `core.restore_state` showed all 188 `mqtt`
+entities `unavailable`. Cause: watchtower restarted `mosquitto` (2.1.2) on 09-20 10:09 UTC. mosquitto had
+no `persistence`, so all retained `homeassistant/#` discovery configs were lost (broker had **0**). z2m
+itself was healthy (coordinator `tcp://192.168.11.228:6638` up, publishing, answering health_check).
+Publishing `homeassistant/status online` did not trigger a republish. Fixes: `docker restart z2mqtt` →
+253 configs back, HA 21:13 dump shows 0 mqtt unavailable. Durable fix: appended `persistence true`,
+`persistence_location /mosquitto/data/`, `autosave_interval 300` to mosquitto.conf (backup
+`.bak-20260922`) via `docker exec -u root`, restarted mosquitto then z2mqtt; 253 configs present, HA
+reconnected. Also found (NOT fixed, needs user): HACS `tapo_control` folder missing since ~08-10 →
+Tapo devices gone; redownload via HACS. Diagnostic: `docker exec -i homeassistant python3 -` with a
+script joining `core.restore_state` to `core.entity_registry` platforms.
+
 ## 2026-09-22 — Investigation: "Home Assistant and Plex are down" (no fault found)
 Read-only. Host up 7d, disks OK (`/footage` 7%, `/library` 80%), `homeassistant` up 2d, `plex` up 7d
 (healthy), both NPMs up 7d. Checked from the Mac on the LAN: `http://192.168.14.73:8123` 200,
