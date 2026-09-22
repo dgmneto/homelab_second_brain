@@ -10,7 +10,7 @@ authoritative as of 2026-06-10, pulled from the NPM databases.
 | Service | URL | Credential | Detail |
 |---|---|---|---|
 | Overseerr | https://overseerr.intern.dgmneto.com | Plex OAuth (none) | [services/overseerr/ACCESS.md](services/overseerr/ACCESS.md) |
-| Plex | https://filmin.intern.dgmneto.com · https://filmin.3e.dgmneto.com | `op://Homelab/Plex` | [services/plex/ACCESS.md](services/plex/ACCESS.md) |
+| Plex | https://filmin.3e.dgmneto.com (`filmin.intern` broken, see plex ACCESS) | `op://Homelab/Plex` | [services/plex/ACCESS.md](services/plex/ACCESS.md) |
 | Jellyfin | https://jellyfin.intern.dgmneto.com · https://jellyfin.3e.dgmneto.com | local account, not in op | [services/jellyfin/README.md](services/jellyfin/README.md) |
 | Sonarr | https://sonarr.intern.dgmneto.com | `op://Homelab/Sonarr` | [services/sonarr/ACCESS.md](services/sonarr/ACCESS.md) |
 | Radarr | https://radarr.intern.dgmneto.com | `op://Homelab/Radarr` | [services/radarr/ACCESS.md](services/radarr/ACCESS.md) |

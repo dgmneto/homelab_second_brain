@@ -4,6 +4,16 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-09-22 — Investigation: "Home Assistant and Plex are down" (no fault found)
+Read-only. Host up 7d, disks OK (`/footage` 7%, `/library` 80%), `homeassistant` up 2d, `plex` up 7d
+(healthy), both NPMs up 7d. Checked from the Mac on the LAN: `http://192.168.14.73:8123` 200,
+`https://ha.intern.dgmneto.com` 200, `http://192.168.14.7:32400/identity` 200,
+`https://filmin.3e.dgmneto.com/identity` 200, and it is reachable from the public internet (WebFetch).
+Plex served a transcode at 20:24. Found: `filmin.intern.dgmneto.com` has no nginxIntern proxy host
+(TLS `unrecognized name`), and HA logged DNS timeouts to router `192.168.11.1` at ~01:00 on 09-22
+(unifiprotect lost connection). No change made; waiting on the user's exact symptom/location.
+Note: `ha.intern` resolves publicly to 192.168.14.34 (private), so HA is unreachable off-LAN by design.
+
 ## 2026-08-06 — HDD replacement (in progress): Phase 0–1, `/library` shrunk, `sdb` evacuated
 Replacing both failing disks (`notes/disk-health-storage-array.md`) with 2× 4TB, ending on an LVM
 RAID1 mirror. Only 2 SATA ports exist and both were occupied, so the swap is a rolling one — no third
