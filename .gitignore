@@ -1,0 +1,4 @@
+*.HEIC
+.DS_Store
+result
+result-*
