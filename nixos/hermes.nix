@@ -55,6 +55,13 @@ in
       python3
       openssh # ssh casaos (see "casaos access" below)
       git # second brain clone at /var/lib/hermes/home/homelab
+      # coding
+      gh # needs GH_TOKEN in env file for API work; git itself uses SSH
+      ripgrep
+      fd
+      gnumake
+      gcc
+      nodejs
     ];
   };
 
@@ -64,6 +71,8 @@ in
   # (github dgmneto/homelab_second_brain) with a repo-scoped deploy key.
   # Keys are generated on the box and never leave it; casaos side is set up
   # by hand (see homelab_second_brain services/hermes/README.md).
+  # id_github is for coding: added to dgmneto's own GitHub account, so it can
+  # push to every repo dgmneto can. Revoke at github.com/settings/keys.
   systemd.services.hermes-ssh-keys = {
     description = "Generate Hermes SSH keys if missing";
     wantedBy = [ "hermes-agent.service" ];
@@ -76,7 +85,7 @@ in
     };
     script = ''
       install -d -m 700 /var/lib/hermes/.ssh
-      for k in casaos github_brain; do
+      for k in casaos github_brain github; do
         f=/var/lib/hermes/.ssh/id_$k
         [ -e "$f" ] || ssh-keygen -q -t ed25519 -N "" -C "hermes@homelab-notebook ($k)" -f "$f"
       done
@@ -91,7 +100,10 @@ in
       User hermes
       IdentityFile /var/lib/hermes/.ssh/id_casaos
       IdentitiesOnly yes
+    # GitHub takes the first registered key offered, so the account key wins
+    # once added; the brain deploy key stays as fallback until it is.
     Match localuser hermes host github.com
+      IdentityFile /var/lib/hermes/.ssh/id_github
       IdentityFile /var/lib/hermes/.ssh/id_github_brain
       IdentitiesOnly yes
   '';
@@ -119,6 +131,10 @@ in
     GIT_AUTHOR_EMAIL = "hermes@homelab-notebook";
     GIT_COMMITTER_NAME = "Hermes";
     GIT_COMMITTER_EMAIL = "hermes@homelab-notebook";
+    # Rewrite https GitHub URLs to SSH so cloned repos can be pushed.
+    GIT_CONFIG_COUNT = "1";
+    GIT_CONFIG_KEY_0 = "url.git@github.com:.insteadOf";
+    GIT_CONFIG_VALUE_0 = "https://github.com/";
   };
   systemd.services.hermes-backend.environment = hermesEnv;
 
