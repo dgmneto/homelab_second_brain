@@ -18,6 +18,11 @@ let
     };
   });
   hermesEnv = { LD_LIBRARY_PATH = "${lib.getLib sqliteFixed}/lib"; };
+  # The module sets HERMES_MANAGED, which makes Hermes refuse every config
+  # write (config set/edit, .env, plugin settings), not just the keys pinned
+  # in `settings`. Opt out so the agent can update its own config.yaml.
+  # The .managed marker still applies to interactive shells (admin CLI).
+  hermesUnmanaged = { HERMES_MANAGED = lib.mkForce "false"; };
 in
 {
   services.hermes-agent = {
@@ -29,13 +34,11 @@ in
     # API_SERVER_KEY). Plain 0600 file, not in git. TODO: move to sops-nix.
     environmentFiles = [ "/var/lib/hermes/env" ];
 
-    # Only the keys we want pinned; everything else in config.yaml is
-    # agent-managed on disk and survives rebuilds.
+    # Only the keys we want pinned (re-applied on every rebuild); everything
+    # else in config.yaml is agent-managed on disk. The model is deliberately
+    # unpinned so Hermes can switch it; the last pinned value (openrouter,
+    # qwen/qwen3.8-max) stays in config.yaml.
     settings = {
-      model = {
-        provider = "openrouter";
-        default = "qwen/qwen3.8-max";
-      };
       # NPM (nginxIntern on casaos) proxies hermes.intern.dgmneto.com here;
       # public_url makes the dashboard accept that Host header.
       dashboard.public_url = "https://hermes.intern.dgmneto.com";
@@ -126,7 +129,7 @@ in
     # Gateway drains for up to restart_drain_timeout (180s) + cron (30s).
     TimeoutStopSec = 240;
   };
-  systemd.services.hermes-agent.environment = hermesEnv // {
+  systemd.services.hermes-agent.environment = hermesEnv // hermesUnmanaged // {
     GIT_AUTHOR_NAME = "Hermes";
     GIT_AUTHOR_EMAIL = "hermes@homelab-notebook";
     GIT_COMMITTER_NAME = "Hermes";
@@ -136,7 +139,7 @@ in
     GIT_CONFIG_KEY_0 = "url.git@github.com:.insteadOf";
     GIT_CONFIG_VALUE_0 = "https://github.com/";
   };
-  systemd.services.hermes-backend.environment = hermesEnv;
+  systemd.services.hermes-backend.environment = hermesEnv // hermesUnmanaged;
 
   # Dashboard: only reachable from NPM (nginxIntern) on casaos. It can come
   # from its macvlan IP or the host IP depending on route.
