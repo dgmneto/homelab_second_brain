@@ -2,3 +2,5 @@
 .DS_Store
 result
 result-*
+__pycache__/
+*.blend1
