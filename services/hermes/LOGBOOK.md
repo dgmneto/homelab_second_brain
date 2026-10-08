@@ -3,6 +3,20 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-08 — Migrated to native NixOS on homelab-notebook
+Moved from Docker on casaos to the upstream `services.hermes-agent` NixOS module on `homelab-notebook`
+(192.168.11.21), pinned to the same upstream rev (749220ef, v0.21.5). Config in repo
+`notebook_home_lab/nixos/hermes.nix`. Cutover: 09:27:54 `docker compose stop` on casaos → tar of
+`/footage/services/hermes/config` (minus 203 MB `core` dump, `.bak-*`, gateway pid/lock/sock) piped to
+`/var/lib/hermes/.hermes`; 16 `*.db` md5s matched. `home/` → `/var/lib/hermes/home`, `.env` →
+`/var/lib/hermes/env`, `/opt/data` paths rewritten in config/skills, stale `.local/state/hermes/gateway-locks`
+removed. 10:02 all three bots `✓ telegram connected` (default, gmail-agent, orion). NPM host 23 →
+`192.168.11.21:9119`, dashboard 200. Downtime ~35 min (09:28–10:03; 10 min planned — default bot waited
+on a missing `.env`, see README gotcha). casaos containers stopped, not removed (rollback).
+Issues hit: SQLite 3.51.2 WAL bug (fixed via 3.53.3 + LD_LIBRARY_PATH); build OOM/swap on 4 GB RAM
+(nixpkgs follows); notebook stuck in emergency mode after a hardware-configuration.nix edit from
+another session switched disks to `HL-*` labels before they existed (partitions relabeled).
+
 ## 2026-08-03 — Pin static IP (was colliding with nginxProd after reboot)
 During recovery from a forced host reboot (see root LOGBOOK + `notes/disk-health-storage-array.md`),
 found `hermes` had grabbed `172.21.0.9` on `internalNetwork` dynamically, which is `nginxProd`'s

@@ -63,6 +63,30 @@ no passwordless sudo (`sudo -n true` fails, "a password is required") and cannot
 `/home/dgmneto/homelab` or root-owned paths like `/footage/services/<svc>`, SSH as `dgmneto` instead —
 it has `sudo` (interactive password required, ask the user) and owns the repo checkout directly.
 
+### Second host: `homelab-notebook` (NixOS) — added 2026-10-08
+
+`192.168.11.21` (DHCP — reserve it on the router), Acer Aspire A315-34, Celeron N4020 (2 cores),
+4 GB soldered RAM + one **empty** SO-DIMM slot (max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
+`HL-BOOT`/`HL-SWAP`/`HL-ROOT`). NixOS 26.05, **no Docker** — services are native NixOS modules.
+Runs: **hermes** (see `services/hermes/`).
+
+```
+ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password ("homelab-notebook SSH")
+```
+- Key-only SSH, no passwords, no root login; `dgmneto` has **passwordless sudo**.
+- **If 1Password is locked, you are locked out** — there is no `id_rsa` fallback on this host. Agents
+  running while the user is away cannot reach it. (The Bash sandbox also can't reach the 1Password
+  agent socket; run ssh/op commands with the sandbox disabled.)
+- Config is a flake in the separate repo `~/notebook_home_lab` (`nixos/`). Deploy: rsync `nixos/` to
+  `homelab-notebook:nixos/`, then `sudo nixos-rebuild switch --flake path:.#homelab-notebook` in `~/nixos`.
+  **Always `git diff` before deploying** — other sessions edit that repo too (a 2026-10-07 label change
+  deployed unreviewed left the box in emergency mode; root is locked, so recovery needs the console +
+  picking the previous generation in the systemd-boot menu).
+- Builds are RAM-bound (4 GB + swap on HDD): big builds can take ~1 h and may push the box into heavy
+  swap; if `nix-daemon` balloons, kill the build + `sudo systemctl restart nix-daemon` (progress kept).
+  Run long switches via `sudo systemd-run --wait ...switch-to-configuration switch` so an SSH drop can't
+  kill them mid-activation.
+
 ## Accessing service web UIs (Claude-in-Chrome)
 
 Every service with a web UI is reachable through the **Claude in Chrome** browser extension by driving
