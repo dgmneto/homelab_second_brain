@@ -53,7 +53,57 @@ in
       curl
       jq
       python3
+      openssh # ssh casaos (see "casaos access" below)
+      git # second brain clone at /var/lib/hermes/home/homelab
     ];
+  };
+
+  # --- casaos access + second brain -------------------------------------
+  # Hermes SSHes to casaos as user `hermes` (docker group, rwX ACL on
+  # /home/dgmneto/homelab, no sudo) and pushes the second-brain repo
+  # (github dgmneto/homelab_second_brain) with a repo-scoped deploy key.
+  # Keys are generated on the box and never leave it; casaos side is set up
+  # by hand (see homelab_second_brain services/hermes/README.md).
+  systemd.services.hermes-ssh-keys = {
+    description = "Generate Hermes SSH keys if missing";
+    wantedBy = [ "hermes-agent.service" ];
+    before = [ "hermes-agent.service" ];
+    path = [ pkgs.openssh ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      User = "hermes";
+    };
+    script = ''
+      install -d -m 700 /var/lib/hermes/.ssh
+      for k in casaos github_brain; do
+        f=/var/lib/hermes/.ssh/id_$k
+        [ -e "$f" ] || ssh-keygen -q -t ed25519 -N "" -C "hermes@homelab-notebook ($k)" -f "$f"
+      done
+    '';
+  };
+
+  # ssh reads ~/.ssh from the passwd home (/var/lib/hermes), not $HOME, so
+  # pin everything here instead.
+  programs.ssh.extraConfig = ''
+    Match localuser hermes host casaos,homelab,192.168.11.13
+      HostName 192.168.11.13
+      User hermes
+      IdentityFile /var/lib/hermes/.ssh/id_casaos
+      IdentitiesOnly yes
+    Match localuser hermes host github.com
+      IdentityFile /var/lib/hermes/.ssh/id_github_brain
+      IdentitiesOnly yes
+  '';
+  programs.ssh.knownHosts = {
+    casaos = {
+      hostNames = [ "casaos" "homelab" "192.168.11.13" ];
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBxYWEfoHxVn+vZRSFCbn14/EbX31lhVh6obxpumvldr";
+    };
+    github = {
+      hostNames = [ "github.com" ];
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+    };
   };
 
   # Same limits the container had.
@@ -64,7 +114,12 @@ in
     # Gateway drains for up to restart_drain_timeout (180s) + cron (30s).
     TimeoutStopSec = 240;
   };
-  systemd.services.hermes-agent.environment = hermesEnv;
+  systemd.services.hermes-agent.environment = hermesEnv // {
+    GIT_AUTHOR_NAME = "Hermes";
+    GIT_AUTHOR_EMAIL = "hermes@homelab-notebook";
+    GIT_COMMITTER_NAME = "Hermes";
+    GIT_COMMITTER_EMAIL = "hermes@homelab-notebook";
+  };
   systemd.services.hermes-backend.environment = hermesEnv;
 
   # Dashboard: only reachable from NPM (nginxIntern) on casaos. It can come
