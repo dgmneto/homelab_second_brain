@@ -1,0 +1,12 @@
+bounding box (mm): X 120.5  Y 216.6  Z 5.0 (PCB 1.0 + tallest part)
+check vs hand measurements (mm):
+  A 48.78 (49.24)  B 114.53 (114.76)  C 129.18 (129.28)
+  H1-H2 41.88 (42.02)  H3-H4 106.35 (106.24)  H1-H3 77.56 (77.40)
+holes (center X, Y mm, origin X = west edge, Y = south edge):
+  H1    59.34  194.69  round
+  H2   101.22  194.42  round
+  H3     5.20  139.16  round
+  H4    76.59   60.33  round
+  H5   114.00  128.94  slot_e
+  H6   117.14   33.93  slot_e
+  H7     1.53   68.35  slot_w
