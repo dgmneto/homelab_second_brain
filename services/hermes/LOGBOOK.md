@@ -3,6 +3,23 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-08 — SSH access to casaos + second-brain clone
+The user wanted Hermes to be able to change casaos and keep this repo current. They chose "docker + repo,
+no sudo".
+- Notebook (`hermes.nix`): `hermes-ssh-keys` oneshot generates `/var/lib/hermes/.ssh/id_{casaos,github_brain}`
+  (ed25519, never leave the box); `programs.ssh.extraConfig` `Match localuser hermes` blocks map
+  `casaos`/`github.com` to those keys; casaos + github.com host keys pinned in `programs.ssh.knownHosts`;
+  `openssh`/`git` in `extraPackages`; `GIT_{AUTHOR,COMMITTER}_*` = Hermes on `hermes-agent`.
+  Switch restarted hermes-agent; all 3 bots reconnected at 10:14.
+- casaos (one-time root script): user `hermes` (uid 1305) in `docker`, `passwd -l`,
+  `authorized_keys` with `from="192.168.11.21",no-agent-forwarding,no-port-forwarding,no-X11-forwarding`;
+  `setfacl -m u:hermes:--x /home/dgmneto`; `setfacl -R -m u:hermes:rwX,u:dgmneto:rwX` +
+  default ACLs on dirs of `/home/dgmneto/homelab`; hermes git `safe.directory` + identity.
+- GitHub: write deploy key "hermes@homelab-notebook" on `dgmneto/homelab_second_brain`.
+- Hermes skill `skills/devops/homelab-ops/SKILL.md` (default profile only) explains how to use it.
+Verified: `sudo -u hermes ssh casaos` → `id` shows docker group, write+delete a file in the repo,
+`docker compose ls` works.
+
 ## 2026-10-08 — Migrated to native NixOS on homelab-notebook
 Moved from Docker on casaos to the upstream `services.hermes-agent` NixOS module on `homelab-notebook`
 (192.168.11.21), pinned to the same upstream rev (749220ef, v0.21.5). Config in repo

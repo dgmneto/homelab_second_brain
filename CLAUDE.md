@@ -68,7 +68,8 @@ it has `sudo` (interactive password required, ask the user) and owns the repo ch
 `192.168.11.21` (DHCP — reserve it on the router), Acer Aspire A315-34, Celeron N4020 (2 cores),
 4 GB soldered RAM + one **empty** SO-DIMM slot (max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
 `HL-BOOT`/`HL-SWAP`/`HL-ROOT`). NixOS 26.05, **no Docker** — services are native NixOS modules.
-Runs: **hermes** (see `services/hermes/`).
+Runs: **hermes** (see `services/hermes/`). Hermes can SSH to casaos as user `hermes` (docker, no
+sudo) and **pushes to this repo**, so `git pull --rebase` before editing.
 
 ```
 ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password ("homelab-notebook SSH")

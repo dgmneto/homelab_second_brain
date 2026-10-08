@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-08 — Hermes gets SSH access to casaos + its own clone of this repo
+New casaos user `hermes` (uid 1305, `docker` group, password locked, **no sudo**), key-only from
+`192.168.11.21` with no forwarding. ACLs: `u:hermes:--x` on `/home/dgmneto`, rwX (+ default ACL for
+hermes and dgmneto) on `/home/dgmneto/homelab`. Hermes clones this repo at
+`/var/lib/hermes/home/homelab` and pushes via a write deploy key. Details: `services/hermes/README.md`.
+
 ## 2026-10-08 — Hermes moved off casaos to new NixOS host homelab-notebook
 New host `homelab-notebook` (192.168.11.21, Acer A315-34, Celeron N4020, 4 GB soldered RAM + empty
 SO-DIMM, 1 TB HDD; NixOS 26.05, flake in repo `notebook_home_lab`). Hermes now runs there natively (no
