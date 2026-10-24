@@ -8,14 +8,16 @@ Source of truth:
   * IMG_2196.HEIC: fan top view next to a caliper (scale: 12.04 px/mm from
     ~100 mm ticks). Cross-checked against IMG_2195.HEIC: width 70.3 mm in both.
   * Thickness 6.5 mm (given).
-  * Checked with calipers: holes 79.50 apart (model 79.33), ear hole to bottom
+  * Checked with calipers: holes 79.50 apart (model 79.33), ear hole to photo bottom
     edge 62.58 (62.57), width near the bottom 70.10.
   * Outline traced from the housing's edge highlight (radial scan from the
     impeller center), deskewed (fan sat ~0.8 deg rotated).
 
-Orientation, as photographed and as installed (looking down, inlet up):
-photo left = west = outlet side, photo up = north. Origin: SW corner of the
-housing, Z = 0 at the fan's bottom.
+Orientation: installed inlet up, as photographed, turned 90 deg clockwise so
+the outlet faces the west wall's exhaust grill. The outlet is the long flat
+side at the photo's bottom (the scroll runs clockwise and ends there):
+photo bottom = west, photo left = north, photo top = east (screw ear NE).
+Origin: SW corner of the housing, Z = 0 at the fan's bottom.
 
 Writes fan/out/fan.json (outline, holes, outlet) for case/build_case.py.
 """
@@ -54,7 +56,7 @@ EAR_TO_SCROLL = [(185, 190), (217, 182), (237, 169), (281, 146), (302, 135), (37
 HOLES_PX = [(125, 195), (880, 780)]               # M2.5 mounting holes
 HOLE_D = 2.7
 INLET_C, INLET_R, HUB_R = (530, 530), 260, 160
-OUTLET_Y_PX = (300, 940)                          # straight west wall = outlet (assumed)
+OUTLET_X_PX = (90, 896)                           # flat bottom edge = outlet mouth
 
 
 def outline_px():
@@ -76,9 +78,10 @@ def make_transform(pts):
     c, s = math.cos(-phi), math.sin(-phi)
     rot = lambda p: (p[0] * c - p[1] * s, p[0] * s + p[1] * c)
     r = [rot(p) for p in pts]
-    xmin = min(p[0] for p in r)
     ymax = max(p[1] for p in r)
-    return lambda p: ((rot(p)[0] - xmin) / PX_PER_MM, (ymax - rot(p)[1]) / PX_PER_MM), math.degrees(phi)
+    xmax = max(p[0] for p in r)
+    # turned 90 deg clockwise: X = up from the photo's bottom, Y = left from its right
+    return lambda p: ((ymax - rot(p)[1]) / PX_PER_MM, (xmax - rot(p)[0]) / PX_PER_MM), math.degrees(phi)
 
 
 def extrude(name, pts, z0, z1, coll, mat):
@@ -138,7 +141,7 @@ def main(outdir):
     r_in, r_hub = INLET_R / PX_PER_MM, HUB_R / PX_PER_MM
     w = max(x for x, _ in poly)
     d = max(y for _, y in poly)
-    outlet_y = sorted((tf((70, OUTLET_Y_PX[0]))[1], tf((70, OUTLET_Y_PX[1]))[1]))
+    outlet_y = sorted(tf((x, 940))[1] for x in OUTLET_X_PX)
 
     coll = bpy.data.collections.new("Fan")
     sc.collection.children.link(coll)

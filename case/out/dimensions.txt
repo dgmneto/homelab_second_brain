@@ -1,8 +1,8 @@
 front panel: 254.0 x 43.66 mm (1U, 10")
-body: 220.0 W x 236.9 D x 43.66 H mm (depth incl. panel)
+body: 220.0 W x 240.4 D x 43.66 H mm (depth incl. panel)
 board bottom at Z 25.1, tallest part top at Z 30.1, lid underside at Z 41.7
 drive: X 9.0-109.0, Y 66.0-135.8, Z 5.5-15.0
-RJ45: plug Z 22.6-29.4 (through the board, latch up), center X 28.2, nose stop Y 204.6, panel face Y 219.4
-fan: X -7.0-63.6, Y -12.8-56.9, Z 19.6-26.1; gap to tab 6.1
+RJ45: plug Z 22.6-30.0 (through the board, latch up), center X 27.7, nose stop Y 210.1, panel face Y 222.9
+fan: X -2.1-67.6, Y -13.7-57.0, Z 19.6-26.1; gap to tab 2.2
 child board: X 70.8-170.4, Y -14.7-4.3, PCB Z 6.1; MB_CONN X 131.3-155.3 Y -7.4--0.3 Z 8.9; motherboard header X 86.6-110.1 Y ~8.6 Z 26.1
-tray footprint for printing: 254 x 237 mm
+tray footprint for printing: 254 x 240 mm
