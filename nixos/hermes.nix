@@ -23,6 +23,14 @@ let
   # in `settings`. Opt out so the agent can update its own config.yaml.
   # The .managed marker still applies to interactive shells (admin CLI).
   hermesUnmanaged = { HERMES_MANAGED = lib.mkForce "false"; };
+  # `hermes gateway restart` looks for its own hermes-gateway unit, which the
+  # NixOS module doesn't use, and sudo is out (NoNewPrivileges). Restart the
+  # real units through systemd instead; polkit rule below allows it.
+  # --no-block: the caller lives in hermes-agent's cgroup and gets killed.
+  hermesRestart = pkgs.writeShellScriptBin "hermes-restart" ''
+    exec ${pkgs.systemd}/bin/systemctl restart --no-block \
+      "''${1:-hermes-agent}.service"
+  '';
 in
 {
   services.hermes-agent = {
@@ -65,6 +73,7 @@ in
       gnumake
       gcc
       nodejs
+      hermesRestart
     ];
   };
 
@@ -120,6 +129,21 @@ in
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
     };
   };
+
+  # Let Hermes restart its own units (and nothing else) via hermes-restart.
+  security.polkit.enable = true;
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          subject.user == "hermes" &&
+          ["hermes-agent.service", "hermes-backend.service"]
+            .indexOf(action.lookup("unit")) >= 0 &&
+          ["start", "restart", "try-restart"]
+            .indexOf(action.lookup("verb")) >= 0) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
 
   # Same limits the container had.
   systemd.services.hermes-agent.serviceConfig = {
