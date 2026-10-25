@@ -3,6 +3,15 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Delete device 5 ahead of USB reflash
+User chose to keep the device-5 edits, then to reflash the kit to FW1.8.17 via trmnl.com/flash
+(entry "Seeed Studio (TRMNL 7.5" OG DIY Kit)", ESP32-S3 — NOT "XIAO 7.5" ePaper Panel", which is
+ESP32-C3). Reason for delete: Terminus' provisioner returns a **blank api_key** to a known MAC unless
+`device.firmware_reset` is true, so a wiped device could not re-pair. Deleted device 5, playlist
+`device_5` + item, and screens `welcome_4`/`welcome_5` (welcome_4 was left by my earlier curl test).
+DB now: 0 devices/playlists/screens; local model `xiao_epaper_display` kept. To do after re-register:
+confirm model = xiao_epaper_display and set `firmware_update=false` (new devices default to true).
+
 ## 2026-10-25 — TRMNL registered (device id 5, firmware 1.5.12)
 Device kept 404ing on `GET /api/setup/` (old firmware's trailing slash). NPM `rewrite` attempt had no
 effect (NPM proxies `$request_uri`); replaced with exact `location = /api/setup/` in proxy host 25

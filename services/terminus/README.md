@@ -106,7 +106,12 @@ RESET (on the XIAO) only reboots; BOOT+power is flashing mode. Reflash/upgrade: 
 6. **Don't test `/api/setup` with curl + fake MAC** — on success it really provisions a device
    (+ playlist `device_<id>`). Happened once (id 4, MAC 00:00:00:00:00:00), deleted by SQL.
 7. `/api/log` returns 422 for firmware 1.5.12's log payload — harmless (logs just aren't stored).
-8. NPM access log for this host: `/footage/services/nginxIntern/data/logs/proxy-host-25_access.log`
+8. **Re-pairing a known device returns a blank key.** `aspects/devices/provisioner.rb`: if the MAC
+   exists, `/api/setup` redacts `api_key` unless `firmware_reset` is true. After a USB reflash (which
+   wipes the stored key) either delete the device in Terminus first or set its reset flag.
+9. **Flasher entry for our kit:** trmnl.com/flash → "Seeed Studio (TRMNL 7.5\" OG DIY Kit)" (ESP32-S3).
+   "Seeed Studio (XIAO 7.5\" ePaper Panel)" is the ESP32-C3 kit — wrong chip.
+10. NPM access log for this host: `/footage/services/nginxIntern/data/logs/proxy-host-25_access.log`
    — shows device requests (`ESP32HTTPClient`) with status, quickest way to see if the TRMNL reached us.
    Terminus' own log only prints status codes; problem details come back in the response body.
 
