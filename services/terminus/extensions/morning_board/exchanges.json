@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "verb": "get",
+    "template": "https://api.open-meteo.com/v1/forecast?latitude=51.5829&longitude=-0.0733&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,precipitation_probability,weather_code&timezone=Europe%2FLondon&forecast_days=2"
+  },
+  {
+    "id": 2,
+    "verb": "get",
+    "template": "https://api.tfl.gov.uk/Line/victoria,piccadilly,central/Status"
+  },
+  {
+    "id": 3,
+    "verb": "get",
+    "template": "https://api.tfl.gov.uk/Journey/JourneyResults/940GZZLUSVS/to/940GZZLUKSX?mode=tube{%- assign t = \"now\" | date: \"%s\" | plus: 7200 | date: \"%Y%m%d\" -%}{%- assign n = \"now\" | date: \"%Y%m%d\" -%}{%- if t != n -%}&date={{- t -}}&time=0830&timeIs=Departing{%- endif -%}"
+  },
+  {
+    "id": 4,
+    "verb": "get",
+    "template": "https://api.tfl.gov.uk/Line/victoria,piccadilly,central/Status/{{- \"now\" | date: \"%Y-%m-%dT%H:%M:%S\" -}}/to/{{- \"now\" | date: \"%s\" | plus: 7200 | date: \"%Y-%m-%dT23:59:59\" -}}"
+  },
+  {
+    "id": 5,
+    "verb": "get",
+    "template": "https://api.tfl.gov.uk/crowding/940GZZLUSVS/{{- \"now\" | date: \"%s\" | plus: 7200 | date: \"%a\" -}}"
+  },
+  {
+    "id": 6,
+    "verb": "get",
+    "template": "https://api.tfl.gov.uk/StopPoint/940GZZLUSVS,940GZZLUKSX/Disruption"
+  },
+  {
+    "id": 7,
+    "verb": "get",
+    "template": "https://api.tfl.gov.uk/crowding/940GZZLUKSX/{{- \"now\" | date: \"%s\" | plus: 7200 | date: \"%a\" -}}"
+  }
+]

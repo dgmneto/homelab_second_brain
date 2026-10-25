@@ -69,6 +69,11 @@ stick on the logo screen (upstream doc/devices.adoc).
 Terminus device **id 7**, MAC `7C:4F:AD:20:A9:6C`, firmware **1.8.17**, model `og_plus`,
 `firmware_update=false`, refresh 900 s, playlist `device_7`.
 
+### Screens
+- **Morning Board** (extension id 1) — weather + Victoria/Piccadilly/Central + Seven Sisters→King's
+  Cross commute verdict. Only item on device 7's playlist. Details, sources and gotchas:
+  [extensions/morning_board/README.md](extensions/morning_board/README.md).
+
 ### Our device: Seeed "TRMNL 7.5\" (OG) DIY Kit" (XIAO ESP32-S3 Plus)
 Firmware `DEVICE_MODEL` = `xiao_epaper_display` (Terminus maps it to `og_plus`). Its wake/config button is **D4 (GPIO5)** — from
 `trmnl-firmware` `src/display.cpp` device table (`intr`=5) + XIAO S3 pinout (D4=GPIO5). Not BOOT, not

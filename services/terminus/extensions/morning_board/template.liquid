@@ -1,0 +1,106 @@
+{%- comment -%}
+  Morning board: weather + tube lines + Seven Sisters -> King's Cross commute.
+  Sources: 1 weather (Open-Meteo), 2 line status now, 3 journey planner, 4 planned line status
+  for the target day, 5/7 typical crowding at Seven Sisters / King's Cross (target weekday),
+  6 station disruptions. TfL publishes no crowding % for Seven Sisters (all 0) — show peak windows.
+  Target day = today, or tomorrow from 22:00 (now + 2h rolls over at 22:00).
+{%- endcomment -%}
+{%- assign tnow = "now" | date: "%s" | plus: 0 -%}
+{%- assign today = tnow | date: "%Y-%m-%d" -%}
+{%- assign tday = tnow | plus: 7200 | date: "%Y-%m-%d" -%}
+{%- if tday == today -%}{%- assign day_label = "Today" -%}{%- else -%}{%- assign day_label = "Tomorrow" -%}{%- endif -%}
+{%- if source_1.daily.time[0] == tday -%}{%- assign d = 0 -%}{%- else -%}{%- assign d = 1 -%}{%- endif -%}
+
+{%- assign wc = source_1.daily.weather_code[d] -%}
+{%- case wc -%}
+  {%- when 0 -%}{%- assign wtext = "Clear" -%}
+  {%- when 1 -%}{%- assign wtext = "Mostly clear" -%}
+  {%- when 2 -%}{%- assign wtext = "Partly cloudy" -%}
+  {%- when 3 -%}{%- assign wtext = "Overcast" -%}
+  {%- when 45, 48 -%}{%- assign wtext = "Fog" -%}
+  {%- when 51, 53, 55, 56, 57 -%}{%- assign wtext = "Drizzle" -%}
+  {%- when 61, 66, 80 -%}{%- assign wtext = "Light rain" -%}
+  {%- when 63, 81 -%}{%- assign wtext = "Rain" -%}
+  {%- when 65, 67, 82 -%}{%- assign wtext = "Heavy rain" -%}
+  {%- when 71, 73, 75, 77, 85, 86 -%}{%- assign wtext = "Snow" -%}
+  {%- when 95, 96, 99 -%}{%- assign wtext = "Thunderstorms" -%}
+  {%- else -%}{%- assign wtext = "—" -%}
+{%- endcase -%}
+
+{%- comment -%} Commute verdict {%- endcomment -%}
+{%- assign j = source_3.journeys | first -%}
+{%- assign issues = "" -%}
+{%- assign route = "" -%}
+{%- for leg in j.legs -%}
+  {%- if leg.mode.id == "tube" -%}{%- assign route = route | append: leg.routeOptions[0].name | append: " " -%}{%- endif -%}
+  {%- for dis in leg.disruptions -%}
+    {%- assign t = dis.description | strip_newlines | truncate: 110 -%}{%- assign issues = issues | append: t | append: "||" -%}
+  {%- endfor -%}
+{%- endfor -%}
+{%- assign route = route | strip -%}
+{%- if j == nil -%}{%- assign issues = issues | append: "No journey found by TfL planner||" -%}{%- endif -%}
+{%- if route != "" and route != "Victoria" -%}{%- assign issues = issues | append: "Planner suggests a reroute: " | append: route | append: "||" -%}{%- endif -%}
+{%- if j.duration > 15 -%}{%- assign issues = issues | append: "Slow: " | append: j.duration | append: " min (usually ~9)||" -%}{%- endif -%}
+{%- for line in source_4 -%}{%- if line.id == "victoria" -%}{%- for st in line.lineStatuses -%}{%- if st.statusSeverity != 10 -%}
+  {%- assign t = st.reason | default: "" | strip_newlines | truncate: 90 -%}{%- assign issues = issues | append: "Planned " | append: st.statusSeverityDescription | append: ": " | append: t | append: "||" -%}
+{%- endif -%}{%- endfor -%}{%- endif -%}{%- endfor -%}
+{%- for dis in source_6 -%}
+  {%- assign t = dis.description | strip_newlines | truncate: 100 -%}{%- assign issues = issues | append: t | append: "||" -%}
+{%- endfor -%}
+{%- assign issue_list = issues | split: "||" | uniq -%}
+
+<div class="{{ extension.css_classes }}">
+  <div class="view view--full">
+    <div class="layout layout--col layout--stretch gap--space-between">
+
+      <div style="display:flex; justify-content:space-between; align-items:baseline; width:100%; border-bottom:2px solid black; padding-bottom:6px;">
+        <span class="title">{{ day_label }} · {{ tnow | plus: 7200 | date: "%a %-d %b" }}</span>
+        <span class="label">updated {{ tnow | date: "%H:%M" }}</span>
+      </div>
+
+      <div class="flex flex--row gap--large" style="width:100%; align-items:flex-start;">
+
+        <div class="flex flex--col gap--small" style="width:44%;">
+          <span class="label">Weather · Seven Sisters</span>
+          <span class="value value--xlarge">{{ source_1.daily.temperature_2m_max[d] | round }}° <span class="value value--small">/ {{ source_1.daily.temperature_2m_min[d] | round }}°</span></span>
+          <span class="title">{{ wtext }}</span>
+          <span class="description">Rain {{ source_1.daily.precipitation_probability_max[d] }}% · {{ source_1.daily.precipitation_sum[d] }} mm · wind {{ source_1.daily.wind_speed_10m_max[d] | round }} km/h</span>
+          <div style="display:flex; justify-content:space-around; width:100%; margin-top:8px;">
+            {%- for h in (8..20) -%}{%- assign m = h | modulo: 4 -%}{%- if m == 0 -%}
+              {%- assign i = d | times: 24 | plus: h -%}
+              <div class="flex flex--col" style="align-items:center; flex:1;">
+                <span class="label">{{ h }}h</span>
+                <span class="value value--small">{{ source_1.hourly.temperature_2m[i] | round }}°</span>
+                <span class="label">{{ source_1.hourly.precipitation_probability[i] }}%</span>
+              </div>
+            {%- endif -%}{%- endfor -%}
+          </div>
+        </div>
+
+        <div class="flex flex--col gap--small" style="width:56%;">
+          <span class="label">Commute · Seven Sisters → King's Cross</span>
+          {%- if issue_list.size == 0 -%}
+            <span class="value value--large">✓ Clear</span>
+            <span class="description">{{ route | default: "Victoria" }} · {{ j.duration }} min · no disruption reported</span>
+          {%- else -%}
+            <span class="value value--large">⚠ Check</span>
+            {%- for it in issue_list limit:3 -%}<span class="description">• {{ it }}</span>{%- endfor -%}
+          {%- endif -%}
+          <span class="label" style="margin-top:6px;">Busiest: Seven Sisters {{ source_5.amPeakTimeBand | default: "n/a" }} · King's Cross {{ source_7.amPeakTimeBand | default: "n/a" }}</span>
+        </div>
+      </div>
+
+      <div class="flex flex--col gap--xsmall" style="width:100%; border-top:2px solid black; padding-top:6px;">
+        {%- for line in source_2 -%}
+          {%- assign st = line.lineStatuses | first -%}
+          <div style="display:flex; justify-content:space-between; width:100%;">
+            <span class="title title--small">{{ line.name }}</span>
+            <span class="title title--small">{% if st.statusSeverity == 10 %}{{ st.statusSeverityDescription }}{% else %}■ {{ st.statusSeverityDescription }}{% endif %}</span>
+          </div>
+          {%- if st.statusSeverity != 10 and st.reason -%}<span class="description">{{ st.reason | remove_first: line.name | truncate: 120 }}</span>{%- endif -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</div>

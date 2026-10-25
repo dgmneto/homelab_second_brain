@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — TRMNL Morning Board screen
+Weather (today / tomorrow after 22:00), tube status (Victoria, Piccadilly, Central) and a Seven
+Sisters→King's Cross commute check (disruptions, planned works/strikes, reroutes, peak windows) as a
+Terminus extension on the TRMNL. Source in `services/terminus/extensions/morning_board/`.
+
 ## 2026-10-25 — TRMNL kit on firmware 1.8.17, registered and displaying
 Flashed the Seeed DIY kit from the Mac with esptool (web flasher's button dance didn't work),
 removed the now-harmful nginx `/api/setup/` shim, device registered (id 7, og_plus) and is fetching

@@ -1,0 +1,15 @@
+{
+  "label": "Morning Board",
+  "name": "morning_board",
+  "description": "Weather (today, or tomorrow from 22:00), Victoria/Piccadilly/Central status, Seven Sisters -> Kings Cross commute check.",
+  "kind": "poll",
+  "mode": "light",
+  "unit": "minute",
+  "interval": 10,
+  "tags": [
+    "commute"
+  ],
+  "model_ids": [
+    12
+  ]
+}

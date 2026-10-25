@@ -3,6 +3,15 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Morning Board extension on device 7
+Created Terminus poll extension 1 "Morning Board" via API (login `op://Personal/Terminus`): 7 Liquid-
+templated exchanges (Open-Meteo, TfL line status live + target-day window, Journey Planner Seven
+Sisters→King's Cross, crowding ×2, station disruptions), og_plus, every 10 min. Target day rolls to
+tomorrow at 22:00. Verified render (PNG reviewed), dry-rendered the "⚠ Check" branch with fake
+disruptions, set device 7 playlist (4) to this screen only. Gotchas: PATCH without `model_ids`
+cleared the build matrix (restored); TfL has no crowding % for Seven Sisters. Source exported to
+`services/terminus/extensions/morning_board/`.
+
 ## 2026-10-25 — Kit reflashed to FW1.8.17 over USB, registered as device 7
 User couldn't hit flashing mode; flashed from the Mac with esptool 5.1.0 instead (software reset into
 download mode via the S3's USB-Serial/JTAG): official `seeed_OG_DIY_Kit/flash/FW1.8.17.bin`
