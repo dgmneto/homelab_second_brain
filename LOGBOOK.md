@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — terminus device API moved to HTTPS
+TRMNL now pairs to `https://terminus.intern.dgmneto.com` (nginxIntern + wildcard LE cert) instead of
+plain http IP. Equivalent of trmnl-firmware#58's Caddy+DuckDNS recipe, using existing infra. Details
++ caveats (firmware skips cert verification; device depends on NPM) in `services/terminus/README.md`.
+
 ## 2026-10-25 — terminus gets its own IPs
 Web container now on macvlan `192.168.14.40` + internalNetwork `172.21.0.140` (static), host port 2300
 kept so the paired TRMNL is unaffected. Verified all three URLs from the Mac. TRMNL (Seeed DIY kit)

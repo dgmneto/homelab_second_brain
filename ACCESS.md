@@ -20,7 +20,7 @@ authoritative as of 2026-06-10, pulled from the NPM databases.
 | Home Assistant | https://ha.intern.dgmneto.com | not in op | [services/homeassistant/ACCESS.md](services/homeassistant/ACCESS.md) |
 | Zigbee2MQTT | https://z2m.intern.dgmneto.com | not in op | [services/z2mqtt/ACCESS.md](services/z2mqtt/ACCESS.md) |
 | Hermes (dashboard) | https://hermes.intern.dgmneto.com (→ homelab-notebook:9119) | 1Password Personal "Hermes - Dashboard" | [services/hermes/README.md](services/hermes/README.md) |
-| Terminus (TRMNL) | https://terminus.intern.dgmneto.com (direct: http://192.168.14.40:2300; device paired to http://192.168.11.13:2300) | local account (first registrant = admin), not in op | [services/terminus/README.md](services/terminus/README.md) |
+| Terminus (TRMNL) | https://terminus.intern.dgmneto.com (device API too; direct: http://192.168.14.40:2300) | local account (first registrant = admin), not in op | [services/terminus/README.md](services/terminus/README.md) |
 | NPM (internal) | https://nginx.intern.dgmneto.com | `op://Homelab/nginx` | [services/nginxIntern/ACCESS.md](services/nginxIntern/ACCESS.md) |
 | NPM (prod) | https://nginxprod.intern.dgmneto.com | `op://Homelab/NGINX Prod` | [services/nginxProd/ACCESS.md](services/nginxProd/ACCESS.md) |
 

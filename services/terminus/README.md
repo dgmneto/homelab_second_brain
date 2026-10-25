@@ -32,14 +32,19 @@ check upstream release notes, bump `TERMINUS_VERSION` in `.env` **and** `env.tpl
 (migrations run on web start). DB/valkey tags are pinned in compose.
 
 ## Access
-- UI + device API: **http://192.168.11.13:2300** (LAN only, plain HTTP). `API_URI` is set to this —
-  the device and server must use the same URI. If casaos' IP changes, update `API_URI`.
+- **`API_URI=https://terminus.intern.dgmneto.com`** (since 2026-10-25) — UI *and* device API go
+  through nginxIntern (proxy host id 25 → `terminus:2300`, wildcard LE cert id 1, SSL forced).
+  Device custom-server URL must be exactly `https://terminus.intern.dgmneto.com` (no trailing slash;
+  `http://` gets a 301 the firmware won't follow). Device and `API_URI` must match.
+- This is the house equivalent of trmnl-firmware issue #58 (Caddy + DuckDNS + LE): DNS for
+  `*.intern.dgmneto.com` resolves to 192.168.14.34 on **both** the router and public resolvers
+  (Cloudflare CNAME → `intern.dgmneto.com`), so the device resolves it with any DNS.
+- **TLS caveat:** firmware (`lib/trmnl/include/http_client.h`) calls `setInsecure()` for every https
+  URL — traffic is encrypted but the server cert is **not verified** (no MITM protection).
+- Direct fallbacks still work: `http://192.168.14.40:2300` (macvlan) and `http://192.168.11.13:2300`
+  (host port). If NPM is down, devices break — to decouple, switch `API_URI` back to one of those
+  and re-enter the URL in the device portal.
 - First account to **Register** becomes the verified admin; later sign-ups need manual verification.
-- **https://terminus.intern.dgmneto.com** — nginxIntern proxy host id 25 → `terminus:2300`
-  (docker DNS on `internalNetwork`, wildcard cert id 1, SSL forced). Created 2026-10-25 via the NPM API
-  (recipe in `services/nginxIntern/README.md`). Use this for the browser UI.
-- The device keeps using the plain-IP `API_URI` (no TLS / proxy dependency for the ESP32). Switching
-  the device to the hostname would mean changing `API_URI` too, since both must match.
 
 ### Networking
 Web container has three networks (2026-10-25):
@@ -55,13 +60,12 @@ House standard: internalNetwork for everything proxied by NPM (most with static 
 only when a container should have its own LAN address (plex, homeassistant, mosquitto, z2mqtt,
 matter, both NPMs, now terminus).
 
-`API_URI` is still `http://192.168.11.13:2300`. To move the device onto the macvlan IP: set
-`API_URI=http://192.168.14.40:2300` in `.env` **and** `env.tpl`, `docker compose up -d`, then re-enter
-the custom server URL in the device portal (hold D4 >5 s). Device and `API_URI` must match.
+Changing `API_URI`: edit `.env` **and** `env.tpl`, `docker compose up -d web worker`, then re-enter
+the custom server URL in the device portal (hold D4 >5 s).
 
 ## Pointing the TRMNL at it
 Hold the device button → captive portal Wi-Fi `TRMNL` on phone → pick Wi-Fi, then under custom
-server enter `http://192.168.11.13:2300`. Device auto-provisions on its first Display API call.
+server enter `https://terminus.intern.dgmneto.com`. Device auto-provisions on its first Display API call.
 TRMNL OG needs firmware ≥ 1.8.16; **disable auto firmware updates** after provisioning or it can
 stick on the logo screen (upstream doc/devices.adoc).
 

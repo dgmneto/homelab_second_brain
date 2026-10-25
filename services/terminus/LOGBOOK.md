@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Device API over HTTPS
+`API_URI` → `https://terminus.intern.dgmneto.com` (.env + env.tpl), recreated web+worker, healthy.
+Checked: hostname resolves to nginxIntern via router and 1.1.1.1; `/api/setup` over HTTPS returns the
+app's own JSON (TLS verify OK); plain http → 301. Firmware uses `setInsecure()` (encrypted, cert not
+verified). No device registered yet at time of change (`device` table empty).
+
 ## 2026-10-25 — Own IPs: macvlan 192.168.14.40 + internalNetwork 172.21.0.140
 Added `macVlanNetwork` (192.168.14.40) and pinned `internalNetwork` (172.21.0.140) on the web
 container; host port 2300 kept. IPs chosen after checking `docker network inspect` + compose files
