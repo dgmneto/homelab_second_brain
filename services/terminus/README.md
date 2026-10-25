@@ -20,7 +20,7 @@ e-ink display talks to casaos instead of trmnl.com. Deployed 2026-10-25, version
 ## Containers
 | Container | Image | Notes |
 |---|---|---|
-| `terminus` (web, puma) | `ghcr.io/usetrmnl/terminus:${TERMINUS_VERSION}` | host port **2300**; also on `internalNetwork` |
+| `terminus` (web, puma) | `ghcr.io/usetrmnl/terminus:${TERMINUS_VERSION}` | host port **2300**; macvlan **192.168.14.40**; internalNetwork **172.21.0.140** |
 | `terminus-worker` (sidekiq) | same | starts only after web is healthy |
 | `terminus-db` | `postgres:18.6-alpine` | not published |
 | `terminus-valkey` | `valkey/valkey:9.1-alpine` | not published, 256 MB maxmemory |
@@ -41,12 +41,23 @@ check upstream release notes, bump `TERMINUS_VERSION` in `.env` **and** `env.tpl
 - The device keeps using the plain-IP `API_URI` (no TLS / proxy dependency for the ESP32). Switching
   the device to the hostname would mean changing `API_URI` too, since both must match.
 
-### Networking choice (house standard)
-Web container joins **`internalNetwork`** (no static IP) and NPM proxies to it by container name —
-the same pattern as sonarr/radarr/overseerr/jellyfin. **macvlan** (`192.168.14.0/24`, VLAN 14) is
-reserved for containers that need their own LAN L2 presence: plex (discovery), homeassistant,
-mosquitto, z2mqtt, matter, and the two NPMs. Terminus doesn't need that; port 2300 on the host IP
-covers the device. Note the macvlan host-isolation gotcha: casaos itself can't reach macvlan IPs.
+### Networking
+Web container has three networks (2026-10-25):
+- **macVlanNetwork `192.168.14.40`** — its own LAN IP on VLAN 14 (`http://192.168.14.40:2300`).
+  Picked by ping/arp-probing; matches the house pattern of pairing last octets (`.40` ↔ `.140`).
+- **internalNetwork `172.21.0.140`** — static, how nginxIntern reaches it (`terminus:2300`).
+- **`terminus_default`** — private bridge to db/valkey/worker; host port 2300 is published via it,
+  so `http://192.168.11.13:2300` (the URI the device was paired with) keeps working.
+Macvlan gotcha: casaos itself cannot reach `192.168.14.40` (macvlan host isolation) — test it from
+the Mac, not from an SSH session on the server.
+
+House standard: internalNetwork for everything proxied by NPM (most with static IPs); macvlan added
+only when a container should have its own LAN address (plex, homeassistant, mosquitto, z2mqtt,
+matter, both NPMs, now terminus).
+
+`API_URI` is still `http://192.168.11.13:2300`. To move the device onto the macvlan IP: set
+`API_URI=http://192.168.14.40:2300` in `.env` **and** `env.tpl`, `docker compose up -d`, then re-enter
+the custom server URL in the device portal (hold D4 >5 s). Device and `API_URI` must match.
 
 ## Pointing the TRMNL at it
 Hold the device button → captive portal Wi-Fi `TRMNL` on phone → pick Wi-Fi, then under custom

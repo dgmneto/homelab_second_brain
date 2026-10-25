@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Own IPs: macvlan 192.168.14.40 + internalNetwork 172.21.0.140
+Added `macVlanNetwork` (192.168.14.40) and pinned `internalNetwork` (172.21.0.140) on the web
+container; host port 2300 kept. IPs chosen after checking `docker network inspect` + compose files
+and ping/arp from the Mac. `docker compose up -d web` → healthy. From Mac: 192.168.14.40:2300,
+192.168.11.13:2300 and https://terminus.intern.dgmneto.com all → 302 /login. API_URI unchanged
+(device stays paired). Server repo commit pushed.
+
 ## 2026-10-25 — Add terminus.intern.dgmneto.com
 nginxIntern proxy host id 25 created via NPM REST API (creds from `op://Homelab/nginx` piped, not
 printed): `terminus:2300`, cert 1, SSL forced, websockets on. Verified from Mac:
