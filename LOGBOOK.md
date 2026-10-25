@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — Terminus (TRMNL BYOS server) deployed on casaos
+Docker compose stack `terminus` (0.78.0, pinned, watchtower-excluded) at
+`~/homelab/services/terminus`, UI/API on http://192.168.11.13:2300, secrets in
+`op://Homelab/Terminus`. All containers healthy, login page reachable from LAN. Also fixed stale
+CLAUDE.md watchtower fact (it is weekly, Sun 10:00, not every 30 s). Details:
+`services/terminus/`.
+
 ## 2026-10-08 — Hermes gets SSH access to casaos + its own clone of this repo
 New casaos user `hermes` (uid 1305, `docker` group, password locked, **no sudo**), key-only from
 `192.168.11.21` with no forwarding. ACLs: `u:hermes:--x` on `/home/dgmneto`, rwX (+ default ACL for

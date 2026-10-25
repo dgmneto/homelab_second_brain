@@ -138,9 +138,10 @@ Rules:
 - **Orchestration:** plain `docker compose`, one directory per service under
   `/home/dgmneto/homelab/services/<svc>/compose.yaml`. List everything with `docker compose ls`.
   CasaOS is installed but **inactive** — do not manage services through it.
-- **Auto-update:** `watchtower` runs `--interval 30 --cleanup` — polls **every 30 seconds**, watches
-  **all** containers (no label filter), prunes old images. Nothing is version-pinned (`:latest`
-  everywhere), so a bad upstream release can propagate across the whole stack almost immediately.
+- **Auto-update:** `watchtower` runs `--schedule "0 0 10 * * 0" --cleanup` — **weekly, Sundays
+  10:00** (verified 2026-10-25 via `docker inspect watchtower`; older notes saying "every 30 s" are
+  stale). Watches **all** containers except those labelled `com.centurylinklabs.watchtower.enable=false`
+  (e.g. terminus). Most images are `:latest`, so a bad upstream release still lands stack-wide weekly.
 - **Self-heal:** `autoheal` restarts unhealthy containers **only if labeled `autoheal=true`** —
   currently **no container carries the label, so it is effectively a no-op**.
 - **Reverse proxy:** two nginx-proxy-manager instances — `nginxProd` (public) and `nginxIntern`
@@ -159,6 +160,7 @@ NPM and Plex also sit on a `macvlan` (VLAN 14, `192.168.14.0/24`) with static IP
 ### Service groups
 - **Media (arr stack):** prowlarr, sonarr, radarr, bazarr, qbittorrent, overseerr, plex.
 - **Home automation:** homeassistant, zigbee2mqtt (`z2mqtt`), mosquitto (MQTT broker), matter-server.
+- **Displays:** terminus (TRMNL BYOS server, :2300).
 - **Infra:** nginxProd, nginxIntern, ddns, watchtower, autoheal, gluetunProtonVPN.
 
 ## Storage layout (critical for outages)
