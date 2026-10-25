@@ -3,6 +3,19 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Kit reflashed to FW1.8.17 over USB, registered as device 7
+User couldn't hit flashing mode; flashed from the Mac with esptool 5.1.0 instead (software reset into
+download mode via the S3's USB-Serial/JTAG): official `seeed_OG_DIY_Kit/flash/FW1.8.17.bin`
+(merged image, written at 0x0, hash verified, chip ESP32-S3, MAC 7c:4f:ad:20:a9:6c). After re-pair it
+got **301** on `/api/setup` — caused by my `location = /api/setup/` shim (nginx trailing-slash
+redirect). Removed the shim (proxy host 25 advanced config emptied via API; first two attempts hit
+1Password `authorization timeout` until the user unlocked it). Device then registered: id 7,
+fw 1.8.17, model og_plus, `/api/display` 200 + image fetched, `/api/log` 204. Set
+`firmware_update=false`. Found Terminus maps `xiao_epaper_display` → `og_plus` itself, so deleted my
+redundant local model. Also deleted junk device 6 (+ playlist/screen) created by my bare
+`curl /api/setup` probe. Cleanup pattern: null `device.playlist_id`, delete device, null
+`playlist.current_item_id`, delete `playlist_item`s, playlist `device_<id>`, screen `welcome_<id>`.
+
 ## 2026-10-25 — Delete device 5 ahead of USB reflash
 User chose to keep the device-5 edits, then to reflash the kit to FW1.8.17 via trmnl.com/flash
 (entry "Seeed Studio (TRMNL 7.5" OG DIY Kit)", ESP32-S3 — NOT "XIAO 7.5" ePaper Panel", which is

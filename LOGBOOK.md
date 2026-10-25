@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — TRMNL kit on firmware 1.8.17, registered and displaying
+Flashed the Seeed DIY kit from the Mac with esptool (web flasher's button dance didn't work),
+removed the now-harmful nginx `/api/setup/` shim, device registered (id 7, og_plus) and is fetching
+screens over HTTPS. Firmware OTA disabled. Redundant local model + junk test devices removed.
+Method + gotchas in `services/terminus/README.md`.
+
 ## 2026-10-25 — TRMNL registered with Terminus
 Last blocker: firmware 1.5.12 calls `/api/setup/`; fixed with an exact-location shim in nginxIntern
 host 25 (NPM ignores `rewrite` — it proxies `$request_uri`). Device id 5 registered + fetched its

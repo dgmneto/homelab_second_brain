@@ -76,7 +76,9 @@ NPM's `conf.d/include/proxy.conf` does `proxy_pass $forward_scheme://$server:$po
 `$request_uri` is the *original* URI, so a server-level `rewrite` in a host's Advanced tab is
 silently ignored upstream. To remap a path, add an exact `location = /old { proxy_set_header Host
 $host; ... proxy_pass $forward_scheme://$server:$port/new$is_args$args; }` instead (example: proxy
-host 25 / terminus, `/api/setup/` → `/api/setup`). Advanced config lives in NPM's DB, not git — it
+host 25 / terminus, `/api/setup/` → `/api/setup`). **Beware:** a location ending in `/` that uses
+`proxy_pass` makes nginx return **301** for the same URI without the slash — that broke newer TRMNL
+firmware, so that terminus shim was removed again (host 25 Advanced is now empty). Advanced config lives in NPM's DB, not git — it
 is recorded in the service README that needs it.
 
 ## Quirks / runbook
