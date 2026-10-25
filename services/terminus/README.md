@@ -54,6 +54,15 @@ server enter `http://192.168.11.13:2300`. Device auto-provisions on its first Di
 TRMNL OG needs firmware ≥ 1.8.16; **disable auto firmware updates** after provisioning or it can
 stick on the logo screen (upstream doc/devices.adoc).
 
+### Our device: Seeed "TRMNL 7.5\" (OG) DIY Kit" (XIAO ESP32-S3 Plus)
+Firmware model `xiao_epaper_display`. Its wake/config button is **D4 (GPIO5)** — from
+`trmnl-firmware` `src/display.cpp` device table (`intr`=5) + XIAO S3 pinout (D4=GPIO5). Not BOOT, not
+RESET. Press semantics (`src/button.cpp`, `include/config.h`), measured on the press that wakes it:
+- hold **>5 s** (release before 15 s) → forget Wi-Fi → captive portal `TRMNL` comes up
+- hold **≥15 s** → soft reset (forgets device API key/credentials, then portal)
+- double-click → server-assigned special function
+RESET (on the XIAO) only reboots; BOOT+power is flashing mode. Reflash/upgrade: https://trmnl.com/flash.
+
 ## Checks
 ```
 cd ~/homelab/services/terminus && docker compose ps            # 4 Up (healthy) + init Exited (0)
