@@ -92,7 +92,21 @@ RESET (on the XIAO) only reboots; BOOT+power is flashing mode. Reflash/upgrade: 
    404 `model_id` not-null. Fix applied: local model **id 63 `xiao_epaper_display`**, clone of
    `og_png` (800x480, 1-bit, same palettes), `kind='terminus'` — the sync only deletes kinds
    byod/kindle/tidbyt/trmnl, so it survives. Recreate if the DB is ever rebuilt (SQL in LOGBOOK).
-4. NPM access log for this host: `/footage/services/nginxIntern/data/logs/proxy-host-25_access.log`
+4. **Old firmware calls `/api/setup/` (trailing slash)**; Terminus only routes `/api/setup` → 404
+   HTML page (Length 1064 in the NPM log). Our kit shipped with **firmware 1.5.12**. Fixed in NPM
+   proxy host 25 *Advanced* config with an exact `location = /api/setup/ { ... proxy_pass
+   $forward_scheme://$server:$port/api/setup$is_args$args; }`. A plain `rewrite` does **not** work:
+   NPM's `proxy.conf` uses `proxy_pass ...$request_uri`, which always forwards the original path.
+5. **Firmware 1.5.12 sends no `Model` header** → Terminus defaults the device to `og_plus`. Device
+   id 5 (`7C:4F:AD:20:A9:6C`, label "Seeed XIAO DIY") was manually set to model
+   `xiao_epaper_display` and **`firmware_update=false`**: Terminus syncs OG firmware (ESP32-C3
+   builds) for og_* models — must never be OTA'd to this ESP32-S3 board. Upgrade the kit only via
+   https://trmnl.com/flash (USB) choosing the XIAO/DIY-kit build. Once on ≥1.8.x it sends
+   `Model: xiao_epaper_display` and the `/api/setup/` shim becomes unnecessary.
+6. **Don't test `/api/setup` with curl + fake MAC** — on success it really provisions a device
+   (+ playlist `device_<id>`). Happened once (id 4, MAC 00:00:00:00:00:00), deleted by SQL.
+7. `/api/log` returns 422 for firmware 1.5.12's log payload — harmless (logs just aren't stored).
+8. NPM access log for this host: `/footage/services/nginxIntern/data/logs/proxy-host-25_access.log`
    — shows device requests (`ESP32HTTPClient`) with status, quickest way to see if the TRMNL reached us.
    Terminus' own log only prints status codes; problem details come back in the response body.
 

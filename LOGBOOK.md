@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — TRMNL registered with Terminus
+Last blocker: firmware 1.5.12 calls `/api/setup/`; fixed with an exact-location shim in nginxIntern
+host 25 (NPM ignores `rewrite` — it proxies `$request_uri`). Device id 5 registered + fetched its
+screen; firmware auto-update disabled (synced OG firmware is the wrong chip for the XIAO S3).
+
 ## 2026-10-25 — terminus: device registration fixed, exposed IPs removed
 TRMNL couldn't register: empty CA store from a bad certs bind mount broke model sync, and the Seeed
 DIY kit's model `xiao_epaper_display` isn't in TRMNL's catalog (added locally). Host port + macvlan

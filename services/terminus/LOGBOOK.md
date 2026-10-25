@@ -3,6 +3,15 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — TRMNL registered (device id 5, firmware 1.5.12)
+Device kept 404ing on `GET /api/setup/` (old firmware's trailing slash). NPM `rewrite` attempt had no
+effect (NPM proxies `$request_uri`); replaced with exact `location = /api/setup/` in proxy host 25
+advanced config via API. Device then registered (`7C:4F:AD:20:A9:6C`, fw 1.5.12, no Model header →
+defaulted `og_plus`), fetched `/api/display` 200 + its PNG. Set it to model `xiao_epaper_display`,
+label "Seeed XIAO DIY", `firmware_update=false` (synced firmware is OG/ESP32-C3; confirmed from NPM
+log that no firmware was downloaded). Deleted junk device id 4 + playlist `device_4` created by my
+curl test.
+
 ## 2026-10-25 — Fix "API connection cannot be established"; remove exposed IPs
 Symptom: TRMNL (Seeed DIY kit) on Wi-Fi but no API. NPM log showed it reaching us over HTTPS fine;
 `/api/setup` → 404 `Null value in column "model_id"`. Root causes:
