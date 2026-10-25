@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Add terminus.intern.dgmneto.com
+nginxIntern proxy host id 25 created via NPM REST API (creds from `op://Homelab/nginx` piped, not
+printed): `terminus:2300`, cert 1, SSL forced, websockets on. Verified from Mac:
+`https://terminus.intern.dgmneto.com/` → 302 `/login`, TLS verify OK. API_URI left on LAN IP.
+
 ## 2026-10-25 — Deploy Terminus (TRMNL BYOS) 0.78.0
 New stack at `~/homelab/services/terminus` (web, sidekiq worker, postgres 18.6, valkey 9.1), data under
 `/footage/services/terminus`, port 2300 on host, DB/valkey not published, watchtower disabled for

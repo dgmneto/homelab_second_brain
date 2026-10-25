@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — terminus.intern.dgmneto.com proxy host
+Added nginxIntern proxy host (id 25) → `terminus:2300` via NPM API; verified 302 → /login over valid
+TLS. Documented the network convention (internalNetwork by default, macvlan only for L2-needy
+services) in `services/terminus/README.md`.
+
 ## 2026-10-25 — Terminus (TRMNL BYOS server) deployed on casaos
 Docker compose stack `terminus` (0.78.0, pinned, watchtower-excluded) at
 `~/homelab/services/terminus`, UI/API on http://192.168.11.13:2300, secrets in

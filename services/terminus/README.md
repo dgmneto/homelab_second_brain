@@ -35,9 +35,18 @@ check upstream release notes, bump `TERMINUS_VERSION` in `.env` **and** `env.tpl
 - UI + device API: **http://192.168.11.13:2300** (LAN only, plain HTTP). `API_URI` is set to this —
   the device and server must use the same URI. If casaos' IP changes, update `API_URI`.
 - First account to **Register** becomes the verified admin; later sign-ups need manual verification.
-- No nginxIntern hostname yet. Web container is on `internalNetwork`, so a proxy host
-  `terminus.intern.dgmneto.com → terminus:2300` can be added in the NPM UI (would also need `API_URI` changed
-  if the device should use it).
+- **https://terminus.intern.dgmneto.com** — nginxIntern proxy host id 25 → `terminus:2300`
+  (docker DNS on `internalNetwork`, wildcard cert id 1, SSL forced). Created 2026-10-25 via the NPM API
+  (recipe in `services/nginxIntern/README.md`). Use this for the browser UI.
+- The device keeps using the plain-IP `API_URI` (no TLS / proxy dependency for the ESP32). Switching
+  the device to the hostname would mean changing `API_URI` too, since both must match.
+
+### Networking choice (house standard)
+Web container joins **`internalNetwork`** (no static IP) and NPM proxies to it by container name —
+the same pattern as sonarr/radarr/overseerr/jellyfin. **macvlan** (`192.168.14.0/24`, VLAN 14) is
+reserved for containers that need their own LAN L2 presence: plex (discovery), homeassistant,
+mosquitto, z2mqtt, matter, and the two NPMs. Terminus doesn't need that; port 2300 on the host IP
+covers the device. Note the macvlan host-isolation gotcha: casaos itself can't reach macvlan IPs.
 
 ## Pointing the TRMNL at it
 Hold the device button → captive portal Wi-Fi `TRMNL` on phone → pick Wi-Fi, then under custom

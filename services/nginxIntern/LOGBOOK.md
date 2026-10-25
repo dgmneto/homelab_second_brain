@@ -3,5 +3,8 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **nginxIntern** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-25 — Proxy host terminus.intern.dgmneto.com (id 25)
+Created via REST API (recipe in README) → `terminus:2300`, cert 1, ssl forced. Verified 302 → /login from Mac.
+
 ## 2026-06-09 — Hello World
 Logbook initiated alongside `README.md`. Documented from live server state; no change made to the running service.
