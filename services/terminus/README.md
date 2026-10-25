@@ -12,7 +12,8 @@ e-ink display talks to casaos instead of trmnl.com. Deployed 2026-10-25, version
   ```
   **Never regenerate those passwords** once data exists — Postgres/Valkey keep the first ones and
   the app then fails with `password authentication failed for user "terminus"`.
-- Data (bind mounts): `/footage/services/terminus/{postgres,valkey,fonts,uploads,certs}`.
+- Data (bind mounts): `/footage/services/terminus/{postgres,valkey,fonts,uploads}`. CA certs live in
+  the **named volume `terminus_certificates`** — see gotcha below; never bind-mount `/etc/ssl/certs`.
   `/footage/services` is root-owned and `dgmneto` has no passwordless sudo — dirs were created via a
   throwaway container: `docker run --rm -v /footage/services:/s alpine mkdir -p /s/terminus/...`
   (fonts/uploads chowned to uid 1000 = the image's `app` user).
@@ -20,7 +21,7 @@ e-ink display talks to casaos instead of trmnl.com. Deployed 2026-10-25, version
 ## Containers
 | Container | Image | Notes |
 |---|---|---|
-| `terminus` (web, puma) | `ghcr.io/usetrmnl/terminus:${TERMINUS_VERSION}` | host port **2300**; macvlan **192.168.14.40**; internalNetwork **172.21.0.140** |
+| `terminus` (web, puma) | `ghcr.io/usetrmnl/terminus:${TERMINUS_VERSION}` | **no host port**; internalNetwork **172.21.0.140** only |
 | `terminus-worker` (sidekiq) | same | starts only after web is healthy |
 | `terminus-db` | `postgres:18.6-alpine` | not published |
 | `terminus-valkey` | `valkey/valkey:9.1-alpine` | not published, 256 MB maxmemory |
@@ -41,24 +42,19 @@ check upstream release notes, bump `TERMINUS_VERSION` in `.env` **and** `env.tpl
   (Cloudflare CNAME → `intern.dgmneto.com`), so the device resolves it with any DNS.
 - **TLS caveat:** firmware (`lib/trmnl/include/http_client.h`) calls `setInsecure()` for every https
   URL — traffic is encrypted but the server cert is **not verified** (no MITM protection).
-- Direct fallbacks still work: `http://192.168.14.40:2300` (macvlan) and `http://192.168.11.13:2300`
-  (host port). If NPM is down, devices break — to decouple, switch `API_URI` back to one of those
-  and re-enter the URL in the device portal.
+- **No direct/fallback address** (removed 2026-10-25 at user request): no host port, no macvlan IP.
+  The only way in is nginxIntern. If NPM is down, the UI and every device are down.
 - First account to **Register** becomes the verified admin; later sign-ups need manual verification.
 
 ### Networking
-Web container has three networks (2026-10-25):
-- **macVlanNetwork `192.168.14.40`** — its own LAN IP on VLAN 14 (`http://192.168.14.40:2300`).
-  Picked by ping/arp-probing; matches the house pattern of pairing last octets (`.40` ↔ `.140`).
-- **internalNetwork `172.21.0.140`** — static, how nginxIntern reaches it (`terminus:2300`).
-- **`terminus_default`** — private bridge to db/valkey/worker; host port 2300 is published via it,
-  so `http://192.168.11.13:2300` (the URI the device was paired with) keeps working.
-Macvlan gotcha: casaos itself cannot reach `192.168.14.40` (macvlan host isolation) — test it from
-the Mac, not from an SSH session on the server.
+Web container: **internalNetwork `172.21.0.140`** (static; nginxIntern → `terminus:2300`) +
+**`terminus_default`** (private bridge to db/valkey/worker). Nothing published on the host or LAN.
+History: briefly had macvlan `192.168.14.40` + host port 2300 (2026-10-25), removed same day once
+the device moved to the HTTPS hostname. To test the backend bypassing NPM, curl from inside:
+`docker exec terminus curl -s -o /dev/null -w '%{http_code}' http://localhost:2300/up`.
 
-House standard: internalNetwork for everything proxied by NPM (most with static IPs); macvlan added
-only when a container should have its own LAN address (plex, homeassistant, mosquitto, z2mqtt,
-matter, both NPMs, now terminus).
+House standard: internalNetwork for everything proxied by NPM (most with static IPs); macvlan only
+when a container needs its own LAN address (plex, homeassistant, mosquitto, z2mqtt, matter, NPMs).
 
 Changing `API_URI`: edit `.env` **and** `env.tpl`, `docker compose up -d web worker`, then re-enter
 the custom server URL in the device portal (hold D4 >5 s).
@@ -78,10 +74,32 @@ RESET. Press semantics (`src/button.cpp`, `include/config.h`), measured on the p
 - double-click → server-assigned special function
 RESET (on the XIAO) only reboots; BOOT+power is flashing mode. Reflash/upgrade: https://trmnl.com/flash.
 
+## Gotchas (cost real time — read before debugging "API connection cannot be established")
+1. **Empty CA store → devices can't register.** A bind mount of an empty host dir over
+   `/etc/ssl/certs` hides the image's 301 CA certs. Outbound TLS then fails (`certificate verify
+   failed (unable to get local issuer certificate)` in `docker logs terminus-worker`), the nightly
+   model sync from `https://trmnl.com/api/models` never populates the `model` table, and
+   `/api/setup` returns 404 `Null value in column "model_id"`. Fixed by a named volume (Docker seeds
+   it from the image). Check: `docker exec terminus ls /etc/ssl/certs | wc -l` (~301).
+2. **Syncs run on cron only** (`config/sidekiq_scheduler.yml`: models + fonts daily at 00:00, firmware
+   6-hourly). On a fresh install, force them instead of waiting:
+   ```
+   echo 'Terminus::Jobs::Synchronizers::Model.new.perform' | docker exec -i terminus bundle exec hanami console
+   ```
+   (same for `::Firmware` and `::Font`). Check: `select count(*) from model` (~61).
+3. **The Seeed DIY kit's model isn't in TRMNL's catalog.** Firmware sends `Model: xiao_epaper_display`;
+   trmnl.com/api/models has no `xiao_*`. Terminus matches the header to `model.name` exactly, else
+   404 `model_id` not-null. Fix applied: local model **id 63 `xiao_epaper_display`**, clone of
+   `og_png` (800x480, 1-bit, same palettes), `kind='terminus'` — the sync only deletes kinds
+   byod/kindle/tidbyt/trmnl, so it survives. Recreate if the DB is ever rebuilt (SQL in LOGBOOK).
+4. NPM access log for this host: `/footage/services/nginxIntern/data/logs/proxy-host-25_access.log`
+   — shows device requests (`ESP32HTTPClient`) with status, quickest way to see if the TRMNL reached us.
+   Terminus' own log only prints status codes; problem details come back in the response body.
+
 ## Checks
 ```
 cd ~/homelab/services/terminus && docker compose ps            # 4 Up (healthy) + init Exited (0)
-curl -s -o /dev/null -w '%{http_code}\n' http://192.168.11.13:2300/   # 302 -> /login
+curl -s -o /dev/null -w '%{http_code}\n' https://terminus.intern.dgmneto.com/   # from Mac: 302 -> /login
 ```
 `/up` returns 302 too (healthcheck uses `curl --fail`, which accepts it). A bogus
 `/api/setup` call with a fake MAC returns a 404 "model_id not-null" problem — expected, not a fault.

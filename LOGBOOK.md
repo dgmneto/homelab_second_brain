@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-25 — terminus: device registration fixed, exposed IPs removed
+TRMNL couldn't register: empty CA store from a bad certs bind mount broke model sync, and the Seeed
+DIY kit's model `xiao_epaper_display` isn't in TRMNL's catalog (added locally). Host port + macvlan
+IP removed; Terminus is reachable only via `terminus.intern.dgmneto.com`. Details in
+`services/terminus/LOGBOOK.md` + README "Gotchas".
+
 ## 2026-10-25 — terminus device API moved to HTTPS
 TRMNL now pairs to `https://terminus.intern.dgmneto.com` (nginxIntern + wildcard LE cert) instead of
 plain http IP. Equivalent of trmnl-firmware#58's Caddy+DuckDNS recipe, using existing infra. Details
