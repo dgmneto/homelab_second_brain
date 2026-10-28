@@ -1,0 +1,32 @@
+bounding box (mm): X 118.5  Y 220.7  Z 5.0 (PCB 1.0 + tallest part)
+check vs hand measurements (mm):
+  A 48.93 (49.24)  B 114.46 (114.76)  C 129.11 (129.28)
+  hole near-edge distances, model (caliper):
+    H7-H3  67.76 (67.76)
+    H7-H6 118.07 (118.04)
+    H7-H4  69.19 (69.22)
+    H4-H3 103.89 (103.90)
+    H4-H6  48.97 (49.00)
+    H4-H5  77.57 (77.58)
+    H6-H5  99.01 (99.00)
+    H3-H5 105.30 (105.30)
+    H3-H2 109.30 (109.30)
+    H3-H1  75.10 (75.10)
+    H1-H2  40.50 (40.50)
+    H5-H2  69.60 (69.60)
+north edge Y (east, middle, west): 215.39 216.13 217.99, steps at X 69.66 48.75; port fronts Y 219.69
+  H2 edge->edge 13.60 (13.28)  H1 14.34 (14.52)
+ports (X west-east, below PCB bottom, above PCB top, mm):
+  power_dc  X   8.62- 15.10 (w  6.48)  -2.5  +1.4
+  hdmi      X  41.20- 56.30 (w 15.10)  -3.2  +1.89
+  usb_a_1   X  63.06- 76.26 (w 13.20)  -3.4  +2.0
+  usb_a_2   X  82.49- 95.69 (w 13.20)  -3.4  +2.0
+  rj45      X  19.70- 35.90 (w 16.20)  -3.9  +0
+holes (center X, Y mm, origin X = west edge, Y = south edge):
+  H1    56.89  200.01  round
+  H2   100.96  200.01  round
+  H3     4.61  141.24  round
+  H4    72.01   57.57  round
+  H5   112.63  127.79  slot_e
+  H6   113.40   25.22  slot_e
+  H7     0.33   70.05  slot_w
