@@ -1,6 +1,6 @@
 # notes/ — project memory (symlinked to the harness memory store)
 
-Durable, cross-cutting homelab knowledge that isn't tied to one service/cron/access doc. This folder
+Durable, cross-cutting homelab knowledge that isn't tied to one service (`../services/`) or one host (`../hosts/`). This folder
 **is** the agent's auto-memory: the harness memory directory is symlinked here, so what auto-recall
 loads at session start and what gets committed to git are the same files.
 
@@ -22,5 +22,5 @@ new `*.md` + a `MEMORY.md` line — commit and push them like any other change.
   leak) that surfaces as Home Assistant "down".
 - [qbittorrent-mass-stop](qbittorrent-mass-stop.md) — "all downloads paused" is usually a watchtower
   restart, not VPN/disk; diagnose via the Chrome WebUI.
-- [disk-health-storage-array](disk-health-storage-array.md) — `library`/`footage` LVM array has no
-  RAID, both disks show pending sectors; caused a 13-day silent full-box hang on 2026-08-03.
+- [disk-health-storage-array](disk-health-storage-array.md) — casaos `library`/`footage` LVM RAID1
+  mirror (rebuilt 2026-08-08 on new disks); checks + LVM traps. Old disks caused the 2026-08-03 hang.

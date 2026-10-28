@@ -44,13 +44,17 @@ Notes / quirks:
 Daily 03:00. Leftover band-aid from the old `/footage`-fill incident. It deletes the **wrong**
 directory — the actual leak was `*.pma` files under `~openclaw/.config/google-chrome/BrowserMetrics`
 from a crash-looping `chrome.service` (now removed). Harmless but useless; safe to delete.
-See `../services/homeassistant/LOGBOOK.md` and the `homelab-footage-chrome-leak` memory.
+See `../../services/homeassistant/LOGBOOK.md` and the `homelab-footage-chrome-leak` memory.
+
+### dgmneto crontab — arr-maintenance jobs
+`arr-stale-cleaner` (every 6h) and `arr-quality-fixer` (nightly) — see
+[../../services/arr-maintenance/README.md](../../services/arr-maintenance/README.md) for schedule and runbook.
 
 ## Not cron, but commonly mistaken for it
 - **plex-qbittorrent-watchdog** — pauses qBittorrent while Plex streams. It is a long-running
   `systemd --user` service for `dgmneto`, **not** a cron job, so it appears in neither crontabs nor
   system `systemctl`. Check with `systemctl --user status plex-qbittorrent-watchdog`. See
-  `../services/plex-qbittorrent-watchdog/README.md`.
+  `../../services/plex-qbittorrent-watchdog/README.md`.
 
 ## Stock Debian / vendor jobs (not homelab-specific, listed for completeness)
 

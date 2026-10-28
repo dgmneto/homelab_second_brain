@@ -32,65 +32,43 @@ the server actually shows, trust the server and update the repo.
 ## What this repo is
 
 It is **not** the deployment. There is no application code to build, lint, or test here.
-Durable cross-cutting facts (the "project memory") live in [notes/](notes/); per-service knowledge in
-`services/<svc>/`. This repo is the single source of truth — keep memory here, not in scratch stores.
+Durable cross-cutting facts (the "project memory") live in [notes/](notes/); per-machine knowledge in
+`hosts/<host>/`; per-service knowledge in `services/<svc>/`. This repo is the single source of truth — keep memory here, not in scratch stores.
 
-The actual deployment (docker-compose stacks) lives **on the server itself** at
-`/home/dgmneto/homelab` and is version-controlled separately at `git@github.com:dgmneto/homelab.git`.
-When asked to change a service, you edit compose files on the server, not in this repo.
+The casaos deployment (docker-compose stacks) lives **on that server** at `/home/dgmneto/homelab`,
+version-controlled separately at `git@github.com:dgmneto/homelab.git` — to change a casaos service you
+edit compose files on the server, not in this repo. Exception: homelab-notebook's NixOS config *is* in
+this repo (`hosts/homelab-notebook/nixos/`) and is deployed from here.
 
-Service-specific knowledge goes in subfolders under `./services/<service-name>/`.
+Knowledge has two axes:
+- **`hosts/<hostname>/`** — one per machine: hardware, OS, SSH access, storage, deploy method,
+  host-level cron/timers, host LOGBOOK. Index: [hosts/README.md](hosts/README.md).
+- **`services/<service>/`** — one per service, flat regardless of host; each README says where it runs.
+  Service → host map: [services/README.md](services/README.md).
+- **`notes/`** — cross-cutting memories (this folder *is* the harness auto-memory symlink; don't move it).
 
-[notebook/](notebook/) holds the notebook-server hardware work (imported from the old `notebook_home_lab`
-repo, history kept): its NixOS flake (`nixos/`), and Blender scripts + printable outputs for the board,
-child board, blower fan and the 10-inch 1U rack case. Source photos (`*.HEIC`) are gitignored, local only.
+Rule of thumb: "is it about the box or about the app?" Disk/OS/SSH/cron → `hosts/`; ports/config/
+quirks of one app → `services/`.
 
-## Accessing the server
+## Hosts — read the host README before touching a box
 
-The homelab is `homelab` (`192.168.11.13`, hostname `casaos`), an **x86_64 Debian 12 (bookworm)**
-box. (Older notes call it a Raspberry Pi — that is wrong; it is x86_64.)
+| Host | IP | Runtime | SSH | Read |
+|---|---|---|---|---|
+| `casaos` (alias `homelab`) | `192.168.11.13` | x86_64 Debian 12, docker compose | `ssh dgmneto@homelab` | [hosts/casaos/README.md](hosts/casaos/README.md) |
+| `homelab-notebook` | `192.168.11.21` | NixOS 26.05, native modules | `ssh homelab-notebook` | [hosts/homelab-notebook/README.md](hosts/homelab-notebook/README.md) |
 
-```
-ssh dgmneto@homelab
-```
-
-If the 1Password SSH agent is locked/dead, key signing fails (`Permission denied (publickey)`).
-Bypass the agent and use the key file directly:
-
-```
-ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab
-```
-
-For the deployment user add `-o User=openclaw`. **Verified 2026-07-04: this is stale** — `openclaw` has
-no passwordless sudo (`sudo -n true` fails, "a password is required") and cannot even read
-`/home/dgmneto/homelab` or `/footage/services` (permission denied). For anything under
-`/home/dgmneto/homelab` or root-owned paths like `/footage/services/<svc>`, SSH as `dgmneto` instead —
-it has `sudo` (interactive password required, ask the user) and owns the repo checkout directly.
-
-### Second host: `homelab-notebook` (NixOS) — added 2026-10-08
-
-`192.168.11.21` (DHCP — reserve it on the router), Acer Aspire A315-34, Celeron N4020 (2 cores),
-4 GB soldered RAM + one **empty** SO-DIMM slot (max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
-`HL-BOOT`/`HL-SWAP`/`HL-ROOT`). NixOS 26.05, **no Docker** — services are native NixOS modules.
-Runs: **hermes** (see `services/hermes/`). Hermes can SSH to casaos as user `hermes` (docker, no
-sudo) and **pushes to this repo**, so `git pull --rebase` before editing.
-
-```
-ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password ("homelab-notebook SSH")
-```
-- Key-only SSH, no passwords, no root login; `dgmneto` has **passwordless sudo**.
-- **If 1Password is locked, you are locked out** — there is no `id_rsa` fallback on this host. Agents
-  running while the user is away cannot reach it. (The Bash sandbox also can't reach the 1Password
-  agent socket; run ssh/op commands with the sandbox disabled.)
-- Config is a flake in the separate repo `~/notebook_home_lab` (`nixos/`). Deploy: rsync `nixos/` to
-  `homelab-notebook:nixos/`, then `sudo nixos-rebuild switch --flake path:.#homelab-notebook` in `~/nixos`.
-  **Always `git diff` before deploying** — other sessions edit that repo too (a 2026-10-07 label change
-  deployed unreviewed left the box in emergency mode; root is locked, so recovery needs the console +
-  picking the previous generation in the systemd-boot menu).
-- Builds are RAM-bound (4 GB + swap on HDD): big builds can take ~1 h and may push the box into heavy
-  swap; if `nix-daemon` balloons, kill the build + `sudo systemctl restart nix-daemon` (progress kept).
-  Run long switches via `sudo systemd-run --wait ...switch-to-configuration switch` so an SSH drop can't
-  kill them mid-activation.
+Top gotchas (detail in the host READMEs):
+- **casaos** is x86_64, not a Raspberry Pi. If the 1Password SSH agent is locked, bypass it:
+  `ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab`. Use `dgmneto`
+  (sudo needs the user's password), not `openclaw`. A service "down" is usually a **full disk** —
+  `df -h /footage /library` first. Both volumes are on an LVM RAID1 mirror; read
+  [notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) before touching storage.
+- **casaos** `qbittorrent` + `prowlarr` live in `gluetunProtonVPN`'s network namespace — recreating
+  gluetun takes them down. watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
+- **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),
+  and the Bash sandbox can't reach the agent socket (disable sandbox for ssh/op). Its NixOS flake is
+  **in this repo** at `hosts/homelab-notebook/nixos/`; `git diff` before every deploy. Hermes on it
+  pushes to this repo, so `git pull --rebase` before editing.
 
 ## Accessing service web UIs (Claude-in-Chrome)
 
@@ -137,79 +115,29 @@ Rules:
 - To wire a secret into a service, prefer reading it at run time (`op read`) or templating with
   `op inject`/`op run` on the server — do not bake literals into compose `.env` or scripts.
 
-## Deployment architecture (on the server)
-
-- **Orchestration:** plain `docker compose`, one directory per service under
-  `/home/dgmneto/homelab/services/<svc>/compose.yaml`. List everything with `docker compose ls`.
-  CasaOS is installed but **inactive** — do not manage services through it.
-- **Auto-update:** `watchtower` runs `--schedule "0 0 10 * * 0" --cleanup` — **weekly, Sundays
-  10:00** (verified 2026-10-25 via `docker inspect watchtower`; older notes saying "every 30 s" are
-  stale). Watches **all** containers except those labelled `com.centurylinklabs.watchtower.enable=false`
-  (e.g. terminus). Most images are `:latest`, so a bad upstream release still lands stack-wide weekly.
-- **Self-heal:** `autoheal` restarts unhealthy containers **only if labeled `autoheal=true`** —
-  currently **no container carries the label, so it is effectively a no-op**.
-- **Reverse proxy:** two nginx-proxy-manager instances — `nginxProd` (public) and `nginxIntern`
-  (internal/LAN).
-- **DNS:** `ddns` (cloudflare-ddns) keeps the public record current.
-
-### Networking gotcha — VPN-routed services
-`qbittorrent` AND `prowlarr` have **no network of their own**: `network_mode: container:gluetunProtonVPN`
-routes all their traffic through the `gluetunProtonVPN` (ProtonVPN / WireGuard, port-forwarding on)
-container. If gluetun is down or restarting, both lose connectivity, and **recreating gluetun takes
-them down with it**. Their WebUI ports live in gluetun's namespace (qbittorrent 9090, prowlarr 9696)
-but are **not published to any host port** — they are reached only via `nginxIntern` proxying to
-`gluetun:<port>`. `internalNetwork` (`172.21.0.0/24`) is an external bridge shared across stacks;
-NPM and Plex also sit on a `macvlan` (VLAN 14, `192.168.14.0/24`) with static IPs.
-
-### Service groups
-- **Media (arr stack):** prowlarr, sonarr, radarr, bazarr, qbittorrent, overseerr, plex.
-- **Home automation:** homeassistant, zigbee2mqtt (`z2mqtt`), mosquitto (MQTT broker), matter-server.
-- **Displays:** terminus (TRMNL BYOS server, :2300).
-- **Infra:** nginxProd, nginxIntern, ddns, watchtower, autoheal, gluetunProtonVPN.
-
-## Storage layout (critical for outages)
-
-| Mount | Size | Holds |
-|-------|------|-------|
-| `/` (`/dev/mmcblk0p2`) | 27G | OS root |
-| `/footage` | 492G | **service configs** — e.g. `/footage/services/<svc>/config`, HA config bind-mount |
-| `/library` | 3.1T | media + torrents (`/library/media`, `/library/torrent`) |
-
-Both volumes sit on an **LVM RAID1 mirror** across two 4TB disks (rebuilt 2026-08-08 — the old pair
-were failing and had no redundancy). A single disk failure is now survivable. Check with
-`sudo lvs -a -o name,attr,sync_percent,devices` — healthy is `rwi-aor---` at `100.00` with each LV's
-two `_rimage_` legs on **different** PVs. Read
-[notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) before touching storage; it
-carries the LVM traps (allocated ≠ used, `lvreduce` frees the LV *tail*, `lvextend` desyncs new
-extents) that cost real time to rediscover.
-
-Container configs are bind-mounted from `/footage`, **media** from `/library`. A service "down" is
-usually a **full disk**, not a crashed app — `df -h /footage /library` first.
-
-### Known recurring outage: `/footage` fills to 100%
-Home Assistant's config is bind-mounted on `/footage`; when `/footage` hits 100% HA crash-loops on
-`OSError: [Errno 28] No space left on device` and looks "down" while `/` is fine. Past root cause was
-the `openclaw` user's runaway `chrome.service` leaking `*.pma` files. If it recurs:
-`find ~openclaw/.config/google-chrome*/ -name '*.pma' -delete` and confirm `chrome.service` has not
-returned. Full write-up: [notes/footage-disk-leak.md](notes/footage-disk-leak.md).
 
 ## Working conventions
 
 - Document a service: create/update `./services/<service-name>/` with what you learned (ports, config
-  paths, quirks, runbooks). Keep it server-truth, not guesses.
-- When changing a running service, edit the compose file **on the server** under
+  paths, quirks, runbooks) and add/keep its row in `services/README.md` (service → host). Keep it
+  server-truth, not guesses.
+- Document a machine (disks, OS, users, SSH, cron/timers, hardware): `./hosts/<hostname>/`.
+- Changing a casaos service: edit the compose file **on the server** under
   `/home/dgmneto/homelab/services/<svc>/`, then `docker compose up -d` in that directory.
+- Changing a homelab-notebook service: edit `hosts/homelab-notebook/nixos/`, deploy per its README.
 
 ## MANDATORY — keep notes and logbooks current (every task)
 
 This is the whole point of the repo. On **every** task, before you finish:
 
-1. **Update the affected `services/<svc>/README.md`** if anything you learned or changed makes it
+1. **Update the affected `services/<svc>/README.md` / `hosts/<host>/README.md`** if anything you learned or changed makes it
    stale — new port, path, quirk, integration, runbook step. Server-truth only.
 2. **Append a logbook entry.** Two scopes of logbook exist:
    - `./LOGBOOK.md` — root, project-wide. Log every task here.
    - `./services/<svc>/LOGBOOK.md` — one per service. Also log here when a task touched that service.
-   A task that touched 2 services → 1 root entry + 2 service entries.
+   - `./hosts/<host>/LOGBOOK.md` — one per machine. Log here for host-level changes (disks, OS, users,
+     cron/timers, NixOS deploys, hardware).
+   A task that touched 2 services on one host's disk → 1 root entry + 2 service entries + 1 host entry.
 
 Logbook rules:
 - **Reverse chronological** — newest entry on top, directly under the header.

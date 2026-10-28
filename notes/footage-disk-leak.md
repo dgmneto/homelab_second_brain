@@ -24,7 +24,7 @@ launch dropped a 4MB `BrowserMetrics-*.pma` into `~/.config/google-chrome/Browse
 `~/chrome.service.removed.bak`, removed it, `daemon-reload`, cleared the `*.pma` files.
 `openclaw-gateway.service` (the real service, node) has no dependency on it and was unaffected. A
 useless crontab band-aid remains (`0 3 * * * rm -rf .../google-chrome-debug`) — it cleaned the wrong
-dir; harmless now (see [../cron/README.md](../cron/README.md)).
+dir; harmless now (see [hosts/casaos/cron.md](../hosts/casaos/cron.md)).
 
 If `/footage` fills again:
 ```

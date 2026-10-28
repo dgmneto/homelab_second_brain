@@ -9,8 +9,8 @@ AI agent (NousResearch Hermes Agent) — three Telegram bots, OpenRouter as mode
 ## Where it lives
 - Host: `homelab-notebook` (Acer Aspire A315-34, NixOS 26.05). Access: `ssh homelab-notebook`
   (key only in 1Password, item "homelab-notebook SSH" — 1Password must be unlocked).
-- Config (Nix, in git): `~/notebook_home_lab/nixos/hermes.nix` on the Mac (repo `notebook_home_lab`),
-  deployed by rsync to `~/nixos` on the notebook + `sudo nixos-rebuild switch --flake path:.#homelab-notebook`.
+- Config (Nix, in git): [`hosts/homelab-notebook/nixos/hermes.nix`](../../hosts/homelab-notebook/nixos/hermes.nix)
+  in this repo (the old `notebook_home_lab` repo was merged in; no separate checkout), deployed by rsync to `~/nixos` on the notebook + `sudo nixos-rebuild switch --flake path:.#homelab-notebook`.
 - Module: upstream `hermes-agent.nixosModules.default`, flake input pinned to
   `749220ef0007f8d87bd1531f1c24b0fe93816385` (v0.21.5, 2026.9.24 — same as the last Docker image).
   `hermes-agent.inputs.nixpkgs.follows = "nixpkgs"` because evaluating Hermes' own nixpkgs swaps the

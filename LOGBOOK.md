@@ -4,6 +4,17 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Repo restructure: `hosts/` + `services/`
+Two machines now, so knowledge split into `hosts/<host>/` (machine: hardware, OS, SSH, storage,
+cron, host LOGBOOK) and flat `services/<svc>/` (app). Moves: `cron/` → `hosts/casaos/{cron.md,LOGBOOK.md}`;
+`notebook/` → `hosts/homelab-notebook/{nixos,hardware}/` (Blender build scripts keep relative sibling
+paths). casaos access/architecture/storage moved from `CLAUDE.md` into `hosts/casaos/README.md`;
+CLAUDE.md keeps a hosts table + top gotchas. Added `hosts/README.md` and a service → host table in
+`services/README.md`. Fixed stale docs found on the way: hermes README + CLAUDE.md pointed at a
+`~/notebook_home_lab` checkout that no longer exists (flake is in this repo now); memory index still
+said the storage array had "no RAID" (RAID1 since 2026-08-08). `notes/` left at root — it's the
+harness memory symlink. Repo-only change, nothing on either server touched.
+
 ## 2026-10-25 — TRMNL Morning Board screen
 Weather (today / tomorrow after 22:00), tube status (Victoria, Piccadilly, Central) and a Seven
 Sisters→King's Cross commute check (disruptions, planned works/strikes, reroutes, peak windows) as a
