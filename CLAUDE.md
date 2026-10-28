@@ -41,6 +41,10 @@ When asked to change a service, you edit compose files on the server, not in thi
 
 Service-specific knowledge goes in subfolders under `./services/<service-name>/`.
 
+[notebook/](notebook/) holds the notebook-server hardware work (imported from the old `notebook_home_lab`
+repo, history kept): its NixOS flake (`nixos/`), and Blender scripts + printable outputs for the board,
+child board, blower fan and the 10-inch 1U rack case. Source photos (`*.HEIC`) are gitignored, local only.
+
 ## Accessing the server
 
 The homelab is `homelab` (`192.168.11.13`, hostname `casaos`), an **x86_64 Debian 12 (bookworm)**
