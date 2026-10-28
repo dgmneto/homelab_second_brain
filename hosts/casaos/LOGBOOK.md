@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — `claude` user with passwordless sudo
+`useradd -m -s /bin/bash -G docker claude`; `/etc/sudoers.d/90-claude` = `claude ALL=(ALL) NOPASSWD: ALL`
+(0440), `visudo -c` parsed OK. Run by user via sudo in terminal. Verified `id claude` → uid 1306,
+groups claude+docker. No SSH key / password set yet — login method pending.
+
 ## 2026-10-28 — Tailscale installed (native)
 Added apt repo `pkgs.tailscale.com/stable/debian` bookworm + keyring, installed `tailscale` 1.104.4,
 `tailscaled` enabled. New `/etc/sysctl.d/99-tailscale.conf` (`net.ipv4.ip_forward = 1`; IPv6 forwarding

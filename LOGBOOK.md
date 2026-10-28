@@ -24,6 +24,11 @@ env-provided `TS_AUTHKEY` → node `claude-cloud-session-1` (100.66.0.85, `tag:c
 `192.168.11.13:22` (OpenSSH via subnet route). Tailscale SSH as `dgmneto` **denied by tailnet policy**
 for `tag:claude` — needs an ssh ACL rule (see README). Recipe + gotchas added to README.
 
+## 2026-10-28 — `claude` user with passwordless sudo
+`useradd -m -s /bin/bash -G docker claude`; `/etc/sudoers.d/90-claude` = `claude ALL=(ALL) NOPASSWD: ALL`
+(0440), `visudo -c` parsed OK. Verified `id claude` → uid 1306,
+groups claude+docker. No SSH key / password set yet — login method pending.
+
 ## 2026-10-28 — Tailscale on casaos
 Installed Tailscale natively on casaos as tagged (`tag:server`) subnet router for 192.168.11/14/15.0/24
 with Tailscale SSH; `--accept-dns=false` so container DNS is untouched. Key read from
