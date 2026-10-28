@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Tailscale installed (native)
+Added apt repo `pkgs.tailscale.com/stable/debian` bookworm + keyring, installed `tailscale` 1.104.4,
+`tailscaled` enabled. New `/etc/sysctl.d/99-tailscale.conf` (`net.ipv4.ip_forward = 1`; IPv6 forwarding
+intentionally not set). Subnet router for .11/.14/.15. Seen during `apt-get update`: 1Password repo key
+expired (EXPKEYSIG) — not fixed. Verified containers/DNS/IPv6 routes unchanged. Detail:
+`../../services/tailscale/LOGBOOK.md`.
+
 ## 2026-10-28 — Repo restructure: host folder created
 Former `cron/` README + LOGBOOK moved here (`cron.md`, this file); casaos access, deployment
 architecture and storage layout moved out of `CLAUDE.md` into `README.md`. No change on the server.

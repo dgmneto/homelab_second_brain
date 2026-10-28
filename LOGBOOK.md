@@ -4,6 +4,15 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Tailscale on casaos
+Installed Tailscale natively on casaos as tagged (`tag:server`) subnet router for 192.168.11/14/15.0/24
+with Tailscale SSH; `--accept-dns=false` so container DNS is untouched. Key read from
+`op://Personal/Tailscale/CasaOs Auth Key` via tmpfs, shredded. All 23 containers unaffected; .15 route
+awaits manual approval. Found on the way: `*.intern.dgmneto.com` are in *public* DNS (→ 192.168.14.34),
+so no split DNS needed; CLAUDE.md claims "no app-UI logins in the vault" / "no qBittorrent item" were
+stale (Homelab vault has qbittorrent, Sonarr, Radarr, Prowlarr, Plex, nginx logins) — fixed. New
+`services/tailscale/`.
+
 ## 2026-10-28 — Repo restructure: `hosts/` + `services/`
 Two machines now, so knowledge split into `hosts/<host>/` (machine: hardware, OS, SSH, storage,
 cron, host LOGBOOK) and flat `services/<svc>/` (app). Moves: `cron/` → `hosts/casaos/{cron.md,LOGBOOK.md}`;

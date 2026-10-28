@@ -33,6 +33,12 @@ no passwordless sudo (`sudo -n true` fails, "a password is required") and cannot
 it has `sudo` (interactive password required, ask the user) and owns the repo checkout directly.
 
 
+### Remote access — Tailscale
+`tailscaled` runs **natively** (apt, not Docker) as tailnet node `casaos` / `100.79.139.39`, tagged
+`tag:server`, advertising subnet routes `192.168.11.0/24`, `192.168.14.0/24`, `192.168.15.0/24`, with
+Tailscale SSH on. Off-LAN: `ssh dgmneto@casaos` (no 1Password agent needed) and the `*.intern` URLs work
+over it. Details + why the flags matter: [services/tailscale](../../services/tailscale/README.md).
+
 ## Deployment architecture
 
 - **Orchestration:** plain `docker compose`, one directory per service under
@@ -56,6 +62,11 @@ them down with it**. Their WebUI ports live in gluetun's namespace (qbittorrent 
 but are **not published to any host port** — they are reached only via `nginxIntern` proxying to
 `gluetun:<port>`. `internalNetwork` (`172.21.0.0/24`) is an external bridge shared across stacks;
 NPM and Plex also sit on a `macvlan` (VLAN 14, `192.168.14.0/24`) with static IPs.
+
+## apt quirk
+The server's 1Password apt repo (`downloads.1password.com/linux/debian`) fails `apt-get update` with
+`EXPKEYSIG AC2D62742012EA22` (expired signing key, seen 2026-10-28). Harmless warning — other repos
+update fine — but re-import 1Password's current key to clear it.
 
 ## Service groups
 - **Media (arr stack):** prowlarr, sonarr, radarr, bazarr, qbittorrent, overseerr, plex.

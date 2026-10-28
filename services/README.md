@@ -33,6 +33,7 @@ This is the knowledge layer.
 | [qbittorrent](qbittorrent/README.md) | casaos | docker (gluetun netns) |
 | [radarr](radarr/README.md) | casaos | docker |
 | [sonarr](sonarr/README.md) | casaos | docker |
+| [tailscale](tailscale/README.md) | casaos | native apt + systemd (not docker) |
 | [terminus](terminus/README.md) | casaos | docker |
 | [watchtower](watchtower/README.md) | casaos | docker |
 | [z2mqtt](z2mqtt/README.md) | casaos | docker |

@@ -63,6 +63,8 @@ Top gotchas (detail in the host READMEs):
   (sudo needs the user's password), not `openclaw`. A service "down" is usually a **full disk** —
   `df -h /footage /library` first. Both volumes are on an LVM RAID1 mirror; read
   [notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) before touching storage.
+- **casaos** runs Tailscale natively (node `casaos`, subnet router for .11/.14/.15, Tailscale SSH) —
+  remote access path when off-LAN; see [services/tailscale](services/tailscale/README.md).
 - **casaos** `qbittorrent` + `prowlarr` live in `gluetunProtonVPN`'s network namespace — recreating
   gluetun takes them down. watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
 - **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),
@@ -82,13 +84,14 @@ nginx-proxy-manager hostnames that are not exposed to the public internet.
 - **Public hostnames (via `nginxProd`):** e.g. Plex at `https://filmin.3e.dgmneto.com`.
 
 Full authoritative URL list + which credential governs each UI is in `ACCESS.md` (pulled from the NPM
-databases). Note: the 1Password vault holds **no app-UI logins** — only infra secrets — so most UIs
-have no `op://` password to retrieve; see `ACCESS.md`.
+databases). The `Homelab` vault *does* hold some app-UI logins (qbittorrent, Prowlarr, Sonarr, Radarr,
+Plex, nginx, NGINX Prod) — check `op item list --vault Homelab` before assuming none; see `ACCESS.md`.
 
 How: `list_connected_browsers` → `switch_browser` (user clicks Connect in the right Chrome) →
 `tabs_context_mcp` (create a tab) → `navigate` to the hostname → `read_page`/screenshot/`computer` to
 drive it. Reaching `*.intern.dgmneto.com` requires the user's Chrome to be on the LAN (or via their
-remote-access path); an off-network browser won't resolve them. Do not type secrets into login forms —
+Tailscale — see [services/tailscale](services/tailscale/README.md)). The names resolve publicly (to
+private `192.168.14.34`), so off-network they resolve but are unreachable without Tailscale. Do not type secrets into login forms —
 pull from 1Password and have the user authenticate.
 
 ## Secrets — 1Password (`op` CLI)
@@ -105,9 +108,13 @@ op item list --vault Homelab --format json | jq    # scriptable
 op item get "<title>" --vault Homelab              # full item
 op read "op://Homelab/<title>/password"            # one field, by secret reference
 ```
-Known `Homelab` items: `Plex - Claim`, `Cloudflare - DDNS`, `ProtonVPN - Gluetun`,
-`Service Account Auth Token: Homelab`. (No qBittorrent item yet — relevant to the leaked watchdog
-password noted in `services/plex-qbittorrent-watchdog/README.md`.)
+Known `Homelab` items (2026-10-28): `Plex - Claim`, `Cloudflare - DDNS`, `ProtonVPN - Gluetun`,
+`Service Account Auth Token: Homelab`, `Terminus`, and LOGINs `qbittorrent`, `Prowlarr`, `Sonarr`,
+`Radarr`, `Plex`, `nginx`, `NGINX Prod`. **Not everything is in Homelab**: Tailscale lives in
+`Personal/Tailscale` (auth keys as fields, e.g. `op://Personal/Tailscale/CasaOs Auth Key`), Terminus
+login in `Personal/Terminus`. (The `qbittorrent` item now exists, so the leaked literal password in
+`services/plex-qbittorrent-watchdog/README.md` can be moved to an `op://` reference.) Search all vaults when a title isn't found:
+`op item list --format json | jq -r '.[] | select(.title|test("<name>";"i")) | "\(.vault.name)\t\(.title)"'`.
 
 Rules:
 - **Never** paste a retrieved secret value into a file, commit, logbook, or this repo. Reference
