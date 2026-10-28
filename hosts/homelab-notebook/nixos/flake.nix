@@ -19,6 +19,7 @@
         ./hardware-configuration.nix
         ./configuration.nix
         ./hermes.nix
+        ./pihole.nix
       ];
     };
   };

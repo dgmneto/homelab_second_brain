@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Pi-hole ad-blocking DNS on homelab-notebook
+Native NixOS Pi-hole (see `services/pihole/`), deployed and verified from casaos (ads → 0.0.0.0 over
+tailnet + LAN, UI password enforced, weekly gravity timer). Tailscale admin-console DNS (global
+nameserver 100.67.47.127 + override) and storing the UI password in 1Password left to the user.
+
 ## 2026-10-28 — Verified cloud-session access to both servers
 From a cloud session: `ssh casaos` → claude, `sudo -n whoami` = root; `ssh homelab-notebook` → claude,
 `sudo -n whoami` = root, NixOS 26.05.20261007.2efa67f. First notebook attempt failed (publickey) because

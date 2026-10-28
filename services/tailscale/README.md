@@ -114,6 +114,11 @@ Gotchas (verified 2026-10-28):
 - With file state, each session registered a new node (`claude-cloud-session-N`) that lingered offline;
   the hook's `--state=mem:` is meant to fix that. Delete pre-hook leftovers in the admin console.
 
+## Tailnet DNS = Pi-hole
+The tailnet's global nameserver is meant to be [pihole](../pihole/README.md) on homelab-notebook
+(`100.67.47.127`, admin console → DNS → Override DNS servers) — ad blocking on phones on any network.
+The servers' `--accept-dns=false` keeps them off it. Setup steps + trade-offs in the pihole README.
+
 ## `*.intern.dgmneto.com` from outside
 No split DNS needed: the names are in **public** DNS (Cloudflare) as CNAME → `intern.dgmneto.com` →
 `192.168.14.34` (nginxIntern's macvlan IP). Off-LAN, they already resolve; Tailscale's `192.168.14.0/24`

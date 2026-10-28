@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-10-28 — Pi-hole deployed (2 switches)
+Added `nixos/pihole.nix` + import in `flake.nix`; copied only those two files to `~/nixos` (box
+`hermes.nix` drift untouched; snapshot `~/nixos.bak-pre-pihole`). Firewall now also opens 53/tcp+udp
+and 80/tcp. New root-only `/etc/pihole-secrets.env`. Switch via the documented `systemd-run` (~35 s,
+all from cache). Verified pihole-ftl, hermes-agent/backend, tailscaled active; DNS answers from casaos.
+
 ## 2026-10-28 — Tailscale + `claude` user (generation 3)
 `configuration.nix`: `users.users.claude` (wheel → passwordless sudo, no password/keys) and
 `services.tailscale` (`openFirewall`, `extraSetFlags` `--ssh --accept-dns=false --operator=dgmneto`).

@@ -1,11 +1,11 @@
 # homelab-notebook — NixOS host (added 2026-10-08)
 
-Second host. Runs [hermes](../../services/hermes/README.md) natively (no Docker). Hermes can SSH to
+Second host. Runs [hermes](../../services/hermes/README.md) and [pihole](../../services/pihole/README.md) (tailnet DNS, ports 53 + 80) natively (no Docker). Hermes can SSH to
 [casaos](../casaos/README.md) as user `hermes` (docker group, no sudo) and **pushes to this repo**,
 so `git pull --rebase` before editing.
 
 Layout:
-- [nixos/](nixos/) — the system flake (`configuration.nix`, `hardware-configuration.nix`, `hermes.nix`).
+- [nixos/](nixos/) — the system flake (`configuration.nix`, `hardware-configuration.nix`, `hermes.nix`, `pihole.nix`).
   **This is the deploy source** (imported from the old `notebook_home_lab` repo, history kept; that repo
   is no longer checked out on the Mac).
 - [hardware/](hardware/) — Blender scripts + printable outputs: `board/`, `childboard/`, `fan/`, and
@@ -47,8 +47,11 @@ ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password
     -E PATH=/run/wrappers/bin:/run/current-system/sw/bin -p WorkingDirectory=$HOME/nixos \
     nixos-rebuild switch --flake path:.#homelab-notebook
   ```
+- **As `claude`** you can't `cd ~dgmneto/nixos` (home is 0700): copy files with `… | ssh homelab-notebook "sudo -u dgmneto tee /home/dgmneto/nixos/<f>"`
+  and run commands there via `sudo -u dgmneto bash -c 'cd ~/nixos && …'`; the `systemd-run` switch above works as-is with
+  `-p WorkingDirectory=/home/dgmneto/nixos`. Pre-pihole snapshot of the box copy: `/home/dgmneto/nixos.bak-pre-pihole`.
 - **Repo ↔ box drift (2026-10-28):** repo `nixos/hermes.nix` has a `hermes-restart` helper + polkit rule
   that has **never been deployed** — the box's `~/nixos/hermes.nix` is the older version, and the
-  2026-10-28 Tailscale deploy kept the box copy on purpose. Review before the next full deploy
+  2026-10-28 Tailscale and Pi-hole deploys kept the box copy on purpose (all other files are in sync). Review before the next full deploy
   (`diff` box vs repo first).
 

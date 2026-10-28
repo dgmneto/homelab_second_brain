@@ -27,6 +27,7 @@ This is the knowledge layer.
 | [nginxIntern](nginxIntern/README.md) | casaos | docker |
 | [nginxProd](nginxProd/README.md) | casaos | docker |
 | [overseerr](overseerr/README.md) | casaos | docker |
+| [pihole](pihole/README.md) | **homelab-notebook** | NixOS module (tailnet ad-blocking DNS) |
 | [plex](plex/README.md) | casaos | docker |
 | [plex-qbittorrent-watchdog](plex-qbittorrent-watchdog/README.md) | casaos | `systemd --user` unit |
 | [prowlarr](prowlarr/README.md) | casaos | docker (gluetun netns) |
