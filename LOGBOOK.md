@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Joined a Claude cloud session to the tailnet
+Downloaded tailscale 1.104.4 static tgz into the session, ran tailscaled in userspace mode, `up` with the
+env-provided `TS_AUTHKEY` → node `claude-cloud-session-1` (100.66.0.85, `tag:claude`). Verified:
+`tailscale ping casaos` pongs via DERP(lhr); SSH banners read from `100.79.139.39:22` (Tailscale) and
+`192.168.11.13:22` (OpenSSH via subnet route). Tailscale SSH as `dgmneto` **denied by tailnet policy**
+for `tag:claude` — needs an ssh ACL rule (see README). Recipe + gotchas added to README.
+
 ## 2026-10-28 — Tailscale on casaos
 Installed Tailscale natively on casaos as tagged (`tag:server`) subnet router for 192.168.11/14/15.0/24
 with Tailscale SSH; `--accept-dns=false` so container DNS is untouched. Key read from

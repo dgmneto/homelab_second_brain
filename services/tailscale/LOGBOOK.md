@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **tailscale** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-28 — Joined a Claude cloud session to the tailnet
+Downloaded tailscale 1.104.4 static tgz into the session, ran tailscaled in userspace mode, `up` with the
+env-provided `TS_AUTHKEY` → node `claude-cloud-session-1` (100.66.0.85, `tag:claude`). Verified:
+`tailscale ping casaos` pongs via DERP(lhr); SSH banners read from `100.79.139.39:22` (Tailscale) and
+`192.168.11.13:22` (OpenSSH via subnet route). Tailscale SSH as `dgmneto` **denied by tailnet policy**
+for `tag:claude` — needs an ssh ACL rule (see README). Recipe + gotchas added to README.
+
 ## 2026-10-28 — Installed on casaos as tagged subnet router
 Native apt install (1.104.4) from pkgs.tailscale.com bookworm repo; persisted `net.ipv4.ip_forward=1`
 (IPv6 forwarding left off on purpose — would kill SLAAC). Joined with one-off key

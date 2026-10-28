@@ -46,6 +46,31 @@ Required pieces (added 2026-10-28):
 - `ssh`: `{action: accept, src: [autogroup:admin], dst: [tag:server], users: [dgmneto]}` — the default
   SSH rule (`autogroup:self`) does **not** cover tagged devices.
 
+## Claude cloud sessions (claude.ai/code) on the tailnet
+Cloud sessions are **not** on the tailnet by default (no binary, LAN unreachable) — but the environment
+injects **`TS_AUTHKEY`** (a `tag:claude` key; check `env | cut -d= -f1 | grep TS_`). Bring it up yourself:
+```
+cd <scratchpad> && curl -fsSL https://pkgs.tailscale.com/stable/tailscale_latest_amd64.tgz | tar xz
+D=$PWD/tailscale_*_amd64; mkdir -p /run/ts
+nohup $D/tailscaled --tun=userspace-networking --socks5-server=localhost:1055 \
+  --state=$D/tailscaled.state --socket=/run/ts/s.sock >$D/tailscaled.log 2>&1 &
+$D/tailscale --socket=/run/ts/s.sock up --auth-key="$TS_AUTHKEY" --hostname=claude-cloud-session --accept-routes
+```
+Gotchas (verified 2026-10-28):
+- **`--socket` must be a short path** (`/run/ts/s.sock`): the scratchpad path exceeds the unix-socket
+  length limit → `bind: invalid argument` and tailscaled exits.
+- Control plane + DERP work through the session's HTTPS proxy (tailscaled honours `HTTPS_PROXY`);
+  traffic is DERP-relayed (`lhr`, ~115 ms), no direct path. Userspace mode → use
+  `tailscale nc <host> <port>` as ssh `ProxyCommand` (or SOCKS5 on `localhost:1055`).
+- No `ssh` client in the image: `apt-get install -y openssh-client`.
+- Reachability is fine (casaos `100.79.139.39:22` = Tailscale SSH, `192.168.11.13:22` = OpenSSH via the
+  subnet route), but **Tailscale SSH denies `tag:claude`** ("tailnet policy does not permit you to SSH
+  to this node") — the `ssh` rule above only allows `autogroup:admin`. To log in, either add an `ssh`
+  rule `src: [tag:claude] → dst: [tag:server], users: [dgmneto]` (`action: accept`) or give the session
+  an OpenSSH key.
+- Each session registers a new node (`claude-cloud-session-N`); stale ones linger offline unless the key
+  is ephemeral — `tailscale logout` at the end, or use an ephemeral key.
+
 ## `*.intern.dgmneto.com` from outside
 No split DNS needed: the names are in **public** DNS (Cloudflare) as CNAME → `intern.dgmneto.com` →
 `192.168.14.34` (nginxIntern's macvlan IP). Off-LAN, they already resolve; Tailscale's `192.168.14.0/24`
