@@ -45,6 +45,8 @@ Required pieces (added 2026-10-28):
   device page (or add it to autoApprovers). Check with `tailscale status --json | jq .Self.PrimaryRoutes`.
 - `ssh`: `{action: accept, src: [autogroup:admin], dst: [tag:server], users: [dgmneto]}` — the default
   SSH rule (`autogroup:self`) does **not** cover tagged devices.
+- `ssh` (added 2026-10-28): `{action: accept, src: [tag:claude], dst: [tag:server], users: [dgmneto]}` —
+  lets Claude cloud sessions `ssh casaos` (verified working).
 
 ## Claude cloud sessions (claude.ai/code) on the tailnet
 **Automated:** [`.claude/hooks/session-start.sh`](../../.claude/hooks/session-start.sh) (SessionStart hook,
@@ -69,13 +71,11 @@ Gotchas (verified 2026-10-28):
   traffic is DERP-relayed (`lhr`, ~115 ms), no direct path. Userspace mode → use
   `tailscale nc <host> <port>` as ssh `ProxyCommand` (or SOCKS5 on `localhost:1055`).
 - No `ssh` client in the image by default (the hook installs `openssh-client`).
-- Reachability is fine (casaos `100.79.139.39:22` = Tailscale SSH, `192.168.11.13:22` = OpenSSH via the
-  subnet route), but **Tailscale SSH denies `tag:claude`** ("tailnet policy does not permit you to SSH
-  to this node") — the `ssh` rule above only allows `autogroup:admin`. To log in, either add a second entry to the
-  **existing** top-level `"ssh": [ ... ]` array (pasting it at the policy's top level fails with
-  `json: unknown field "action"`):
-  `{"action": "accept", "src": ["tag:claude"], "dst": ["tag:server"], "users": ["dgmneto"]}`
-  — or give the session an OpenSSH key.
+- `ssh casaos` (= Tailscale SSH as `dgmneto`, no key needed) **works** since the `tag:claude` ssh rule
+  was added (see Tailnet policy above). If it ever says "tailnet policy does not permit you to SSH to this
+  node", that rule is missing — it must sit **inside** the existing `"ssh": [ ... ]` array (pasting it at
+  the policy's top level fails with `json: unknown field "action"`). `192.168.11.13:22` (OpenSSH via the
+  subnet route) is also reachable but needs a key the session doesn't have.
 - With file state, each session registered a new node (`claude-cloud-session-N`) that lingered offline;
   the hook's `--state=mem:` is meant to fix that. Delete pre-hook leftovers in the admin console.
 

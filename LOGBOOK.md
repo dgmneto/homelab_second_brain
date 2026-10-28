@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Claude cloud sessions can SSH to casaos
+User added tailnet ssh rule `tag:claude → tag:server` as `dgmneto` (first attempt failed with
+`json: unknown field "action"` — rule must go inside the existing `ssh` array). Verified from a cloud
+session: `ssh casaos 'hostname; whoami; df -h /footage /library'` → casaos / dgmneto; /footage 7%,
+/library 41% used. README updated.
+
 ## 2026-10-28 — SessionStart hook: cloud sessions auto-join the tailnet
 Added `.claude/hooks/session-start.sh` + `.claude/settings.json` so every Claude cloud session joins the
 tailnet (ephemeral `--state=mem:`, `TS_AUTHKEY`) and gets `ssh casaos`/`homelab`/`homelab-notebook`
