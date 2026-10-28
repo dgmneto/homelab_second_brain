@@ -32,8 +32,8 @@ Layout:
 Parts to print: tray (floor + walls + front panel with rack ears) and lid.
 Test first: pin_gauge.stl, a row of pins around the hole size to pick a snug
 PIN_D; rj45_test.stl, a small cut of the panel + hood to check plug fit;
-fit_test.stl (panel strip + all board/fan mounts on a light frame, lowered) to
-check the hole positions (loose pins) and port openings against the real parts;
+fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
+check the port openings against the real board (snug PIN_D pins: two pins must hold it square);
 fit_childboard.stl for the child board's holes.
 """
 
@@ -84,7 +84,6 @@ BOARD_Z = PANEL_H - LID_T - BOARD_TOP_CLEAR - brd.PCB_T   # board bottom
 STANDOFF_D = 7.5          # tall standoffs now (~30 mm), so thicker
 PILOT = 2.5                # M3 self-tapping into the print (lid screws)
 PIN_D = 3.40               # standoff pin through the board's 3.56 mm holes; pick from pin_gauge.stl
-FIT_PIN_D = 3.00           # fit test: loose pins (+-0.28 mm slack) to check positions, not grip
 PIN_ABOVE = 2.0            # pin length above the board top
 PIN_CHAMFER = 0.4          # lead-in at the pin tip
 GAUGE_PINS = [3.20 + 0.05 * i for i in range(9)]   # 3.20 .. 3.60
@@ -93,6 +92,10 @@ GAUGE_PINS = [3.20 + 0.05 * i for i in range(9)]   # 3.20 .. 3.60
 POST = 7.0                 # corner posts for lid screws
 VENT_W, VENT_PITCH = 3.0, 6.0
 PORT_MARGIN = 1.0
+# Fit test 1: board 3.5 mm north, ports into the panel. Port fronts end this far
+# behind its outer face; the board edge and RJ45 jack get pockets in its inner face.
+PORT_RECESS = 1.0
+EDGE_CLEAR = 0.5           # board edge / RJ45 jack -> pocket walls
 
 # ---------------------------------------------------------------- RJ45 hood (estimates; tune with rj45_test.stl)
 # First print (11.9 / 6.8 / 6.6) was too tight for the plug to go in at all.
@@ -116,8 +119,9 @@ NOTCH_Y = brd.px2mm(780, 1126)[1]   # wide section south edge
 # F2-H4 90.74, F2-H7 76.5, F1-F2 77.2. Least-squares centres, residuals <= 0.02 mm.
 # The fan body goes on their midpoint; it sits ~0.8 deg turned there, ignored
 # (<= 0.5 mm at its corners). The west wall goes against the fan's outlet.
+# Solved in the photo frame; levelled with the board (brd.level).
 FAN = json.load(open(os.path.join(HERE, "..", "fan", "out", "fan.json")))
-FAN_HOLES = [(60.26, 52.12), (11.36, -11.08)]       # F1 (screw ear), F2
+FAN_HOLES = [brd.level(*p) for p in [(60.26, 52.12), (11.36, -11.08)]]   # F1 (screw ear), F2
 FAN_GAP = 0.5                                        # outlet face -> inner west wall
 FAN_X0, FAN_Y0 = (sum(m[i] - f[i] for m, f in zip(FAN_HOLES, FAN["holes"])) / 2 for i in (0, 1))
 
@@ -127,12 +131,11 @@ X_OUT1 = X_OUT0 + BODY_W
 X_IN1 = X_OUT1 - WALL
 Y_IN0 = -GAP_SOUTH
 Y_OUT0 = Y_IN0 - WALL
-Y_FRONT = brd.PORT_FRONT_Y + 0.3                   # panel inner face
+Y_FRONT = brd.PORT_FRONT_Y + PORT_RECESS - PANEL_T   # panel inner face
 Z_TOP = PANEL_H - LID_T                            # top of walls / bottom of lid
 CX = (X_OUT0 + X_OUT1) / 2
 
 RJ45_CX = brd.rj45_center_x()
-RJ45_EDGE = brd.north_edge_y(RJ45_CX)                  # board edge at the jack
 RJ45_FLOOR = BOARD_Z - brd.RJ45_PLUG_FLOOR              # plug's contact face, on the springs
 RJ45_FRAME_TOP = BOARD_Z + brd.PCB_T + brd.RJ45_TOP_H   # top-side frame around the cutout
 RJ45_STOP_Y = brd.rj45_frame_rect()[1]                 # nose stop = back wall of the frame
@@ -249,15 +252,41 @@ def post_xy():
     ]
 
 
+def _clip(p, q, x0, y0, x1, y1):
+    """Segment p-q clipped to a rectangle (Liang-Barsky): its end points, or []."""
+    t0, t1 = 0.0, 1.0
+    dx, dy = q[0] - p[0], q[1] - p[1]
+    for d, e in ((-dx, p[0] - x0), (dx, x1 - p[0]), (-dy, p[1] - y0), (dy, y1 - p[1])):
+        if d == 0:
+            if e < 0:
+                return []
+        elif d < 0:
+            t0 = max(t0, e / d)
+        else:
+            t1 = min(t1, e / d)
+    return [] if t0 > t1 else [(p[0] + t * dx, p[1] + t * dy) for t in (t0, t1)]
+
+
+def post_notch(px, py):
+    """(x0, y0, x1, y1): the part of a corner post the board outline (+ EDGE_CLEAR)
+    reaches, out to the post's inner sides; None if clear."""
+    c, ol = EDGE_CLEAR, brd.outline_mm()
+    pts = [v for a, b in zip(ol, ol[1:] + ol[:1])
+           for v in _clip(a, b, px - c, py - c, px + POST + c, py + POST + c)]
+    if not pts:
+        return None
+    xs, ys = [x for x, _ in pts], [y for _, y in pts]
+    x0, x1 = (min(xs) - c, px + POST + 0.01) if px < CX else (px - 0.01, max(xs) + c)
+    y0, y1 = (py - 0.01, max(ys) + c) if py > 0 else (min(ys) - c, py + POST + 0.01)
+    return x0, y0, x1, y1
+
+
 # ---------------------------------------------------------------- RJ45 hood
 def rj45_hood_adds(coll):
     w = RJ45_OPEN_W / 2 + RJ45_WALL
     top = min(RJ45_FLOOR + RJ45_POCKET_H + RJ45_WALL, Z_TOP)   # the lid caps the latch pocket
     # hood: sits 0.3 above the top-side frame, hangs off the panel
     box("rj45_hood", RJ45_CX - w, RJ45_STOP_Y - RJ45_WALL, RJ45_FRAME_TOP + 0.3,
-        RJ45_CX + w, Y_FRONT + 0.01, top, coll)
-    # collar: between the board edge and the panel, walls and floor down past the plug
-    box("rj45_collar", RJ45_CX - w, RJ45_EDGE + 0.5, RJ45_FLOOR - 2,
         RJ45_CX + w, Y_FRONT + 0.01, top, coll)
 
 
@@ -332,6 +361,16 @@ def build_tray(root, pin_d=PIN_D):
         box(f"cut_{name}", ax - PORT_MARGIN, Y_FRONT - 1, BOARD_Z - below - PORT_MARGIN,
             bx + PORT_MARGIN, Y_FRONT + PANEL_T + 1, top + above + PORT_MARGIN, cuts)
     rj45_hood_cuts(cuts)
+    # pockets in the panel's inner face: board north edge where it reaches in, and
+    # the RJ45 jack (under the board, and its top-side frame)
+    north = brd.outline_mm()[:6]
+    for i, ((ax, ay), (bx, by)) in enumerate(zip(north, north[1:])):
+        if ay == by and ay + EDGE_CLEAR > Y_FRONT:
+            box(f"edge_pocket_{i}", ax - EDGE_CLEAR, Y_FRONT - 1, BOARD_Z - EDGE_CLEAR,
+                bx + EDGE_CLEAR, ay + EDGE_CLEAR, top + EDGE_CLEAR, cuts)
+    jx0, jx1 = brd.PORT_X["rj45"]
+    box("rj45_jack_pocket", jx0 - EDGE_CLEAR, Y_FRONT - 1, BOARD_Z - brd.RJ45_JACK_BELOW - EDGE_CLEAR,
+        jx1 + EDGE_CLEAR, brd.rj45_front_y() + EDGE_CLEAR, RJ45_FRAME_TOP + 0.3, cuts)
     # rack ear slots
     z_off = (U - PANEL_H) / 2
     for sx in (-1, 1):
@@ -351,6 +390,10 @@ def build_tray(root, pin_d=PIN_D):
     # lid screw pilots in corner posts
     for i, (px, py) in enumerate(post_xy()):
         cyl(f"post_pilot_{i}", px + POST / 2, py + POST / 2, Z_TOP, PILOT, 24, cuts)
+        # notch where the board outline reaches the post, open upward so the board drops in
+        n = post_notch(px, py)
+        if n:
+            box(f"post_notch_{i}", *n[:2], BOARD_Z - EDGE_CLEAR, *n[2:], Z_TOP + 1, cuts)
     # child board: post pilots, rear-wall openings for its jacks
     for i, h in enumerate(CB["holes"]):
         cyl(f"cb_pilot_{i}", CB_X0 + h["x"], CB_Y0 + h["y"], CB_Z0, CB_PILOT, 10, cuts)
@@ -435,12 +478,12 @@ def bar(name, p, q, z0, z1, coll, w=FIT_BAR_W):
 
 
 def build_fit_test(tray, root):
-    """Tray cut down to the front panel strip (ports + RJ45 hood) and the board and
-    fan mounts, re-based on a light bar frame. Everything drops by the same amount,
-    so board-to-panel alignment is exact; only the standoffs get shorter."""
+    """Tray cut down to the front panel strip (ports + RJ45 hood) and the two north
+    board mounts (H1, H2; the rest checked out in fit test 1), re-based on a light
+    bar frame. Everything drops by the same amount, so board-to-panel alignment is
+    exact; only the standoffs get shorter."""
     zb = BOARD_Z - FIT_STANDOFF - FIT_BASE_T          # bottom of the frame
-    holes = {f"H{i + 1}": (x, y) for i, (x, y, _) in enumerate(brd.HOLES_MM)}
-    fans = {f"F{i + 1}": p for i, p in enumerate(FAN_HOLES)}
+    holes = {f"H{i + 1}": (x, y) for i, (x, y, _) in enumerate(brd.HOLES_MM[:2])}
     cut_x = [x for x0x1 in brd.PORT_X.values() for x in x0x1]
     px0, px1 = min(cut_x) - 8, max(cut_x) + 8
 
@@ -450,7 +493,7 @@ def build_fit_test(tray, root):
     work = new_coll("_work", root)
     keep_parts = new_coll("_keep_parts", work)
     keep = box("keep_panel", px0, Y_FRONT - 18, zb, px1, Y_FRONT + PANEL_T + 1, BOARD_Z + 14, work)
-    for n, (x, y) in {**holes, **fans}.items():
+    for n, (x, y) in holes.items():
         # from inside the frame (no face coplanar with its bottom) to above the pin tips
         cyl(f"keep_{n}", x, y, (zb + 1 + BOARD_Z + 4) / 2, STANDOFF_D + 0.5, BOARD_Z + 3 - zb, keep_parts)
     boolean(keep, "UNION", keep_parts)          # one keep volume: a collection INTERSECT would AND them all
@@ -460,13 +503,11 @@ def build_fit_test(tray, root):
     boolean(fit, "INTERSECT", only)
 
     frame = new_coll("_frame", work)
-    P = {**holes, **fans,
+    P = {**holes,
          "P1": (holes["H1"][0], Y_FRONT + 1), "P2": (holes["H2"][0], Y_FRONT + 1), "P3": (RJ45_CX, Y_FRONT + 1)}
-    for a, b in [("H1", "H2"), ("H1", "H3"), ("H3", "H7"), ("H7", "H4"), ("H4", "H6"), ("H6", "H5"),
-                 ("H5", "H2"), ("H3", "H4"), ("F1", "H7"), ("F2", "H4"), ("F2", "H6"), ("F1", "F2"),
-                 ("P1", "H1"), ("P2", "H2"), ("P3", "H1"), ("P1", "P2")]:
+    for a, b in [("H1", "H2"), ("P1", "H1"), ("P2", "H2"), ("P3", "H1"), ("P1", "P2")]:
         bar(f"bar_{a}_{b}", P[a], P[b], zb, zb + FIT_BASE_T, frame)
-    for n, (x, y) in {**holes, **fans}.items():          # pads so posts sit on solid base
+    for n, (x, y) in holes.items():                       # pads so posts sit on solid base
         cyl(f"pad_{n}", x, y, zb + FIT_BASE_T / 2, STANDOFF_D + 3, FIT_BASE_T, frame)
     boolean(fit, "UNION", frame)
     bpy.data.collections.remove(work)
@@ -565,9 +606,7 @@ def main(outdir):
 
     export_stl(tray, os.path.join(outdir, "tray.stl"))
     export_stl(lid, os.path.join(outdir, "lid.stl"))
-    loose = build_tray(case, pin_d=FIT_PIN_D)
-    fit = build_fit_test(loose, case)
-    bpy.data.objects.remove(loose, do_unlink=True)
+    fit = build_fit_test(tray, case)
     export_stl(fit, os.path.join(outdir, "fit_test.stl"))
     fit.hide_render = True
     cbfit = build_childboard_fit(case)

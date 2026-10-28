@@ -65,10 +65,15 @@ def _frame():
     return rot, x0, y0
 
 
-def px2mm(x, y):
+def _photo_mm(x, y):
     rot, x0, y0 = _FRAME
     u, v = rot(_project(x, y))
     return u - x0, y0 - v      # image y grows south; model Y grows north
+
+
+def px2mm(x, y):
+    """Image px -> board mm, levelled to the north edge (see level)."""
+    return level(*_photo_mm(x, y))
 
 
 _FRAME = _frame()
@@ -90,7 +95,6 @@ OUTLINE_PX = [
     (430, 406.5),                    # NW notch SE corner (C starts here)
     (430, 299), (405, 295), (404, 274), (409, 270), (429, 268),  # small ear
 ]
-NW_X = px2mm(431, 236.5)[0]          # NW corner (narrow top section), from the photo
 
 # 7 mounting holes. Caliper triangulation (IMG_2289): 12 hole-to-hole distances,
 # each taken between the holes' NEAR edges, so centre distance = d + HOLE_D.
@@ -104,7 +108,7 @@ HOLE_EDGE_DIST = [            # (H_a, H_b, near-edge distance mm)
 # redundant loop through H3-H7), then placed on the board by a best rigid fit
 # to the old photo-derived centres (moves of 0.5-7.8 mm; the photo had H6 too
 # far north). "slot" = half-hole open to the nearest edge.
-HOLES_MM = [
+_HOLES_PHOTO = [               # in the photo frame (west edge vertical)
     (56.90, 199.47, "round"),     # H1  RM
     (100.95, 200.55, "round"),    # H2  BR
     (6.07, 139.44, "round"),      # H3  TR
@@ -113,6 +117,22 @@ HOLES_MM = [
     (117.67, 26.12, "slot_e"),    # H6  BL
     (3.54, 68.16, "slot_w"),      # H7  TL
 ]
+# Fit test 1: H1-H2 is parallel to the board's north edge (and so to the panel),
+# but 1.40 deg off it in the photo frame (1.08 mm over 44 mm). Everything taken
+# from the photo (outline, parts, holes; the case's fan holes too) turns as one
+# about the H1-H2 midpoint to level it; the north edge and ports stay square.
+_PIVOT = tuple((a + b) / 2 for a, b in zip(_HOLES_PHOTO[0][:2], _HOLES_PHOTO[1][:2]))
+_LEVEL = -math.atan2(_HOLES_PHOTO[1][1] - _HOLES_PHOTO[0][1], _HOLES_PHOTO[1][0] - _HOLES_PHOTO[0][0])
+
+
+def level(x, y):
+    """Photo-frame mm -> board mm (H1-H2 level)."""
+    c, s = math.cos(_LEVEL), math.sin(_LEVEL)
+    dx, dy = x - _PIVOT[0], y - _PIVOT[1]
+    return _PIVOT[0] + dx * c - dy * s, _PIVOT[1] + dx * s + dy * c
+
+
+HOLES_MM = [(*level(x, y), kind) for x, y, kind in _HOLES_PHOTO]
 # ---------------------------------------------------------------- north edge + ports (caliper)
 # IMG_2290, front view (east -> west along the north edge, mm): edge gaps and
 # port widths. The ports' front faces are in one line; the board edge behind
@@ -130,7 +150,17 @@ H2_TO_EDGE, H1_TO_EDGE = 13.28, 14.52
 # Hole near edge -> east board edge, square to it: H2 (caliper). The east edge is
 # taken as straight up to the NE corner, where the port chain starts.
 H2_TO_EAST_EDGE = 12.30
-NE_X = HOLES_MM[1][0] + HOLE_D / 2 + H2_TO_EAST_EDGE
+# Fit test 1 (board on the rig's loose pins): the ports sat 1.35 mm east of the
+# panel cutouts, and their fronts 1.2 mm further from the panel than modelled
+# (USB face 4.5 mm from the panel's outer face, model 3.3; RJ45 nose stop 14.4 mm
+# deep, hood 13.2). Fit test 2 (snug pins on H1/H2 only): ports in their cutouts,
+# the board's holes sat 1.30 mm east and 1.27 mm south of the pins (H2 north edge
+# 18.9 mm from the panel's outer face; hood/panel inner corner -> H1 far edge
+# 29.04). Net: the caliper chain and edge steps hold almost as measured; the
+# whole edge moves by the difference.
+FIT1_PORTS, FIT2_HOLES = (1.35, -1.20), (1.30, -1.27)
+FIT_PORT_SHIFT = tuple(p - h for p, h in zip(FIT1_PORTS, FIT2_HOLES))
+NE_X = HOLES_MM[1][0] + HOLE_D / 2 + H2_TO_EAST_EDGE + FIT_PORT_SHIFT[0]
 
 
 def _port_x():
@@ -143,12 +173,14 @@ def _port_x():
 
 
 PORT_X = _port_x()
+PWR_TO_WEST_EDGE = 7.3               # power jack west face -> board west edge (caliper, fit test 1)
+NW_X = PORT_X["power_dc"][0] - PWR_TO_WEST_EDGE   # NW corner (narrow top section)
 STEP_X = (sum(PORT_X["usb_a_1"]) / 2,      # edge steps, hidden under these two ports
           sum(PORT_X["hdmi"]) / 2)
 # Edge at the east level, from both holes (they agree +-0.3 mm).
 _E = ((HOLES_MM[1][1] + HOLE_D / 2 + H2_TO_EDGE)
       + (HOLES_MM[0][1] + HOLE_D / 2 + H1_TO_EDGE - (STICK_OUT[0] - STICK_OUT[1]))) / 2
-PORT_FRONT_Y = _E + STICK_OUT[0]
+PORT_FRONT_Y = _E + STICK_OUT[0] + FIT_PORT_SHIFT[1]
 EDGE_Y = tuple(PORT_FRONT_Y - s for s in STICK_OUT)     # east, middle, west
 
 
@@ -166,6 +198,7 @@ def outline_mm():
     # Taken straight at the tab end's height until measured.
     sw = OUTLINE_PX.index((416, 1128))
     pts[sw] = (pts[sw][0], px2mm(780, 1126)[1])
+    pts[-1] = (NW_X, pts[-1][1])     # narrow section's west edge, square down to the ear
     return north + pts
 
 
@@ -210,6 +243,7 @@ RJ45_TOP_H = 2.6                     # top-side frame height
 RJ45_SPRINGS_PX = (533, 252, 578, 278)
 RJ45_JACK_BELOW = 3.9                # underside housing hangs below the PCB bottom
 RJ45_PLUG_FLOOR = 2.5                # plug's contact face rests this far below the PCB bottom
+RJ45_STICK_OUT = 1.48                # jack front past the board edge (caliper, fit test 1)
 
 
 def rj45_center_x():
@@ -221,7 +255,11 @@ def _rj45_rect(r, to_front=False):
     x1, y1 = near_edge_mm(r[2], r[1])
     sx0, sx1 = (px2mm(x, RJ45_SPRINGS_PX[3])[0] for x in RJ45_SPRINGS_PX[::2])
     dx = rj45_center_x() - (sx0 + sx1) / 2      # plug centre = centre of the springs
-    return x0 + dx, y0, x1 + dx, PORT_FRONT_Y if to_front else y1
+    return x0 + dx, y0, x1 + dx, rj45_front_y() if to_front else y1
+
+
+def rj45_front_y():
+    return north_edge_y(rj45_center_x()) + RJ45_STICK_OUT
 
 
 def rj45_frame_rect():
@@ -381,7 +419,7 @@ def build(outdir):
     fx0, fy0, fx1, fy1 = rj45_frame_rect()
     box("ethernet_top_block", fx0, fy0, fx1, fy1, PCB_T, PCB_T + RJ45_TOP_H, "dark", coll)
     jx0, jx1 = PORT_X["rj45"]
-    box("ethernet_jack", jx0, fy0, jx1, PORT_FRONT_Y, -RJ45_JACK_BELOW, 0, "dark", coll)
+    box("ethernet_jack", jx0, fy0, jx1, rj45_front_y(), -RJ45_JACK_BELOW, 0, "dark", coll)
     sx0, sy0, sx1, sy1 = rj45_springs_rect()
     box("ethernet_springs", sx0, sy0, sx1, sy1, -RJ45_PLUG_FLOOR, -RJ45_PLUG_FLOOR + 0.6, "gold", coll)
 
