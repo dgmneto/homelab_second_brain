@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Verified cloud-session access to both servers
+From a cloud session: `ssh casaos` → claude, `sudo -n whoami` = root; `ssh homelab-notebook` → claude,
+`sudo -n whoami` = root, NixOS 26.05.20261007.2efa67f. First notebook attempt failed (publickey) because
+this session's `~/.ssh/config` predated the hook update in 7b2df0b — re-ran the hook; noted in tailscale README.
+
 ## 2026-10-28 — Tailscale + `claude` user on homelab-notebook
 NixOS deploy (generation 3): `claude` user (wheel, passwordless sudo) + `services.tailscale`; node
 `homelab-notebook` (tag:server, Tailscale SSH, no routes). Cloud-session hook now reaches it as `claude`

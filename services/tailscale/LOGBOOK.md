@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **tailscale** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-28 — Verified cloud-session access to both servers
+From a cloud session: `ssh casaos` → claude, `sudo -n whoami` = root; `ssh homelab-notebook` → claude,
+`sudo -n whoami` = root, NixOS 26.05.20261007.2efa67f. First notebook attempt failed (publickey) because
+this session's `~/.ssh/config` predated the hook update in 7b2df0b — re-ran the hook; noted in tailscale README.
+
 ## 2026-10-28 — homelab-notebook joined (tag:server, Tailscale SSH)
 NixOS `services.tailscale` + `extraSetFlags`, joined with `Laptop Server Auth Key` piped over stdin →
 `homelab-notebook` 100.67.47.127, no routes. Cloud hook's `homelab-notebook` ssh entry switched from

@@ -88,6 +88,9 @@ downloads tailscale to `/opt/tailscale`, installs `openssh-client`, writes `~/.s
 confirmed in the admin console) and `tailscale up` with the env-injected **`TS_AUTHKEY`** (`tag:claude`).
 Cold run ~11 s, warm re-run ~0.03 s. Default socket path → plain `tailscale status` works. If it
 didn't run: `CLAUDE_CODE_REMOTE=true .claude/hooks/session-start.sh`; daemon log `/var/log/tailscaled.log`.
+**Re-run the hook after `git pull` brings a hook change** — `~/.ssh/config` is only rewritten when the
+hook runs, so a long session keeps the old config (seen 2026-10-28: stale config sent `homelab-notebook`
+to `dgmneto@192.168.11.21` → `Permission denied (publickey)`; re-running fixed it).
 
 Manual equivalent (what the hook does):
 ```
