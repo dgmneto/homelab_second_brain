@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Tailscale + `claude` user on homelab-notebook
+NixOS deploy (generation 3): `claude` user (wheel, passwordless sudo) + `services.tailscale`; node
+`homelab-notebook` (tag:server, Tailscale SSH, no routes). Cloud-session hook now reaches it as `claude`
+over Tailscale SSH. Fixed stale docs: notebook RAM 11.7 GB (not 4), the README's `systemd-run` switch
+recipe needed `-E PATH=…`; recorded undeployed `hermes.nix` drift. Detail in host + tailscale logbooks.
+
 ## 2026-10-28 — Removed stale sudoers drop-in `migration-task2`
 `/etc/sudoers.d/migration-task2` (Apr 29, leftover from an old migration per user) gave dgmneto NOPASSWD
 for rsync/mkdir/mv/rm/sed/usermod/find/crontab — near-root. Checked nothing used it first: no crontab

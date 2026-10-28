@@ -29,7 +29,21 @@ in
     extraGroups = [ "wheel" "networkmanager" ];
     openssh.authorizedKeys.keys = [ adminKey ];
   };
+  # Agent account for Claude sessions: no password/keys, reached via Tailscale SSH
+  # (tailnet policy: tag:claude -> tag:server as "claude"). Passwordless sudo via wheel.
+  users.users.claude = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+  };
   security.sudo.wheelNeedsPassword = false;
+
+  # Tailscale: tagged tag:server node with Tailscale SSH. Joined once by hand with a
+  # one-off auth key (see services/tailscale/README.md); no subnet routes (casaos does that).
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+    extraSetFlags = [ "--ssh" "--accept-dns=false" "--operator=dgmneto" ];
+  };
 
   # SSH: keys only, no root.
   services.openssh = {

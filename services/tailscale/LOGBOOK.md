@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **tailscale** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-28 — homelab-notebook joined (tag:server, Tailscale SSH)
+NixOS `services.tailscale` + `extraSetFlags`, joined with `Laptop Server Auth Key` piped over stdin →
+`homelab-notebook` 100.67.47.127, no routes. Cloud hook's `homelab-notebook` ssh entry switched from
+`dgmneto@192.168.11.21` (needs a key cloud sessions lack) to Tailscale SSH as `claude`. Gotchas
+(RemoveIPC wipes /dev/shm, empty key ⇒ interactive login hang) in README.
+
 ## 2026-10-28 — Cloud sessions log in to casaos as `claude` (passwordless sudo)
 User switched the tailnet ssh rule for `tag:claude` to `users: ["claude"]`. Verified from a cloud session:
 `ssh claude@casaos` → uid 1306, groups claude+docker, `sudo -n true` OK; `ssh dgmneto@casaos` now refused

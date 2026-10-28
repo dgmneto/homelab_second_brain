@@ -16,7 +16,7 @@ Layout:
 ## Hardware
 
 `192.168.11.21` (DHCP — reserve it on the router), Acer Aspire A315-34, Celeron N4020 (2 cores),
-4 GB soldered RAM + one **empty** SO-DIMM slot (max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
+4 GB soldered RAM + SO-DIMM slot now populated (**11.7 GB total** per `free -m`, 2026-10-28; slot max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
 `HL-BOOT`/`HL-SWAP`/`HL-ROOT`). NixOS 26.05, **no Docker** — services are native NixOS modules.
 
 ## Access
@@ -25,6 +25,10 @@ Layout:
 ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password ("homelab-notebook SSH")
 ```
 - Key-only SSH, no passwords, no root login; `dgmneto` has **passwordless sudo**.
+- **Tailscale** (since 2026-10-28): node `homelab-notebook` / `100.67.47.127`, `tag:server`, Tailscale SSH.
+  User **`claude`** (wheel → passwordless sudo, no password/keys) is for agents: Claude cloud sessions
+  `ssh homelab-notebook` as `claude` via the tailnet — no 1Password needed. Details:
+  [services/tailscale](../../services/tailscale/README.md#homelab-notebook-node).
 - **If 1Password is locked, you are locked out** — there is no `id_rsa` fallback on this host. Agents
   running while the user is away cannot reach it. (The Bash sandbox also can't reach the 1Password
   agent socket; run ssh/op commands with the sandbox disabled.)
@@ -35,6 +39,16 @@ ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password
   picking the previous generation in the systemd-boot menu).
 - Builds are RAM-bound (4 GB + swap on HDD): big builds can take ~1 h and may push the box into heavy
   swap; if `nix-daemon` balloons, kill the build + `sudo systemctl restart nix-daemon` (progress kept).
-  Run long switches via `sudo systemd-run --wait ...switch-to-configuration switch` so an SSH drop can't
-  kill them mid-activation.
+  Run switches under `systemd-run` so an SSH drop can't kill them mid-activation. **Pass a PATH** —
+  systemd-run's default PATH has none of NixOS's bin dirs, and nixos-rebuild-ng then dies at activation
+  with `[Errno 2] No such file or directory: 'test'` (build succeeds, switch doesn't happen). Verified:
+  ```
+  cd ~/nixos && sudo systemd-run --wait --collect --unit=nixos-switch \
+    -E PATH=/run/wrappers/bin:/run/current-system/sw/bin -p WorkingDirectory=$HOME/nixos \
+    nixos-rebuild switch --flake path:.#homelab-notebook
+  ```
+- **Repo ↔ box drift (2026-10-28):** repo `nixos/hermes.nix` has a `hermes-restart` helper + polkit rule
+  that has **never been deployed** — the box's `~/nixos/hermes.nix` is the older version, and the
+  2026-10-28 Tailscale deploy kept the box copy on purpose. Review before the next full deploy
+  (`diff` box vs repo first).
 

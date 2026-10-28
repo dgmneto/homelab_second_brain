@@ -70,7 +70,9 @@ Top gotchas (detail in the host READMEs):
 - **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),
   and the Bash sandbox can't reach the agent socket (disable sandbox for ssh/op). Its NixOS flake is
   **in this repo** at `hosts/homelab-notebook/nixos/`; `git diff` before every deploy. Hermes on it
-  pushes to this repo, so `git pull --rebase` before editing.
+  pushes to this repo, so `git pull --rebase` before editing. On the tailnet too
+  (`homelab-notebook`, `tag:server`, Tailscale SSH): cloud sessions reach it as `claude` (passwordless
+  sudo) without the 1Password key.
 
 ## Accessing service web UIs (Claude-in-Chrome)
 

@@ -1,6 +1,7 @@
 # tailscale
 
-Remote access to the whole homelab LAN. Runs on **casaos**, **natively** (apt package + systemd
+Remote access to the whole homelab LAN. Two server nodes: **casaos** (subnet router, below) and
+**homelab-notebook** (plain node, see "homelab-notebook node"). On casaos it runs **natively** (apt package + systemd
 `tailscaled`), **not** in Docker — on purpose: it's the remote lifeline, so it must survive Docker /
 gluetun breakage, and it stays out of watchtower's weekly `:latest` pulls.
 
@@ -25,6 +26,35 @@ Updates come via `apt` (not watchtower).
 --ssh --accept-dns=false --accept-routes=false --operator=dgmneto
 ```
 Prefer `tailscale set --<flag>` for single changes; it doesn't reset the others.
+
+## homelab-notebook node
+Added 2026-10-28. Declarative in [`configuration.nix`](../../hosts/homelab-notebook/nixos/configuration.nix)
+(`services.tailscale` with `openFirewall` + `extraSetFlags = [--ssh --accept-dns=false --operator=dgmneto]`,
+applied by the `tailscaled-set` oneshot); version from nixpkgs (1.98.10 at install), not the apt repo.
+
+| | |
+|---|---|
+| Tailnet name | `homelab-notebook` → `homelab-notebook.tailaec82a.ts.net` |
+| Tailscale IP | `100.67.47.127` (direct path `192.168.11.21:41641` from casaos) |
+| Tag | `tag:server` (key expiry off) |
+| Subnet routes | **none** — casaos already routes the LAN |
+| Tailscale SSH | on; `claude` user exists (wheel, passwordless sudo) → `ssh claude@homelab-notebook` from `tag:claude` |
+
+Joined once by hand, not via `authKeyFile` (keeps the key out of the store/disk):
+```
+K=$(op read "op://Personal/Tailscale/Laptop Server Auth Key") && [ "${K#tskey-auth-}" != "$K" ] && \
+printf '%s' "$K" | ssh homelab-notebook 'k=$(cat); [ -n "$k" ] || exit 9; printf "%s" "$k" | \
+  sudo timeout 60 tailscale up --auth-key=file:/dev/stdin --hostname=homelab-notebook \
+  --advertise-tags=tag:server --ssh --accept-dns=false --operator=dgmneto'
+```
+Gotchas hit on the way:
+- **Don't stage the key in `/dev/shm` on NixOS across ssh sessions** — logind `RemoveIPC=yes` (NixOS
+  default; Debian patches it off) wipes a user's `/dev/shm` files when their last session ends. Pipe it in
+  the same session instead.
+- **Guard against an empty key.** If `op read` fails (1Password "authorization timeout"), an empty
+  `file:/dev/stdin` makes `tailscale up` fall back to **interactive login** and hang printing a login
+  URL. Hence the `tskey-auth-` check + `timeout 60`. Don't `pkill -f "tailscale up"` over ssh — the
+  pattern matches your own `bash -c` and kills the session; use `pgrep -x tailscale`.
 
 ## Why these flags (don't "fix" them)
 - **`--accept-dns=false`** — otherwise Tailscale rewrites `/etc/resolv.conf`, and every container that
@@ -88,8 +118,9 @@ route makes them reachable. If a name fails on some network, suspect that resolv
 protection (drops public answers with private IPs) — fix would be split DNS for `intern.dgmneto.com`
 → `192.168.11.1` in the admin console.
 
-## Auth key
-One-off, pre-approved, `tag:server` key at **`op://Personal/Tailscale/CasaOs Auth Key`** (note: Personal
+## Auth keys
+All in **`Personal/Tailscale`** (not Homelab), one field per key: `CasaOs Auth Key`, `Laptop Server Auth
+Key` (homelab-notebook), `Claude Code Auth Key` (cloud sessions, `tag:claude`). casaos used the one-off, pre-approved, `tag:server` key at **`op://Personal/Tailscale/CasaOs Auth Key`** (note: Personal
 vault, item `Tailscale`, not Homelab). It's consumed — only needed for a reinstall, and it expires
 ~90 days after creation; mint a new one then. Install method that kept it off disk: `op read … | ssh
 homelab 'umask 077; cat > /dev/shm/ts-authkey'`, then `tailscale up --auth-key=file:/dev/shm/ts-authkey`

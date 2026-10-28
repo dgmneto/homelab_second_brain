@@ -29,9 +29,9 @@ Host casaos homelab
   User claude  # passwordless sudo; tailnet ssh rule only allows this user
   ProxyCommand tailscale nc casaos %p
 Host homelab-notebook
-  HostName 192.168.11.21
-  User dgmneto
-  ProxyCommand tailscale nc %h %p
+  HostName homelab-notebook
+  User claude  # passwordless sudo; Tailscale SSH, same tailnet rule as casaos
+  ProxyCommand tailscale nc homelab-notebook %p
 Host *
   StrictHostKeyChecking accept-new
 CFG
