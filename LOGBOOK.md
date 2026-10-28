@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — SessionStart hook: cloud sessions auto-join the tailnet
+Added `.claude/hooks/session-start.sh` + `.claude/settings.json` so every Claude cloud session joins the
+tailnet (ephemeral `--state=mem:`, `TS_AUTHKEY`) and gets `ssh casaos`/`homelab`/`homelab-notebook`
+config. Verified from scratch in this session: hook rc=0 in 11 s, node `claude-cloud-session`
+100.89.53.35 `tag:claude`; re-run 0.03 s; no-op outside remote. `ssh casaos` still denied by tailnet SSH
+policy for `tag:claude` (ACL change pending on the user's side).
+
 ## 2026-10-28 — Joined a Claude cloud session to the tailnet
 Downloaded tailscale 1.104.4 static tgz into the session, ran tailscaled in userspace mode, `up` with the
 env-provided `TS_AUTHKEY` → node `claude-cloud-session-1` (100.66.0.85, `tag:claude`). Verified:
