@@ -71,9 +71,11 @@ Gotchas (verified 2026-10-28):
 - No `ssh` client in the image by default (the hook installs `openssh-client`).
 - Reachability is fine (casaos `100.79.139.39:22` = Tailscale SSH, `192.168.11.13:22` = OpenSSH via the
   subnet route), but **Tailscale SSH denies `tag:claude`** ("tailnet policy does not permit you to SSH
-  to this node") — the `ssh` rule above only allows `autogroup:admin`. To log in, either add an `ssh`
-  rule `src: [tag:claude] → dst: [tag:server], users: [dgmneto]` (`action: accept`) or give the session
-  an OpenSSH key.
+  to this node") — the `ssh` rule above only allows `autogroup:admin`. To log in, either add a second entry to the
+  **existing** top-level `"ssh": [ ... ]` array (pasting it at the policy's top level fails with
+  `json: unknown field "action"`):
+  `{"action": "accept", "src": ["tag:claude"], "dst": ["tag:server"], "users": ["dgmneto"]}`
+  — or give the session an OpenSSH key.
 - With file state, each session registered a new node (`claude-cloud-session-N`) that lingered offline;
   the hook's `--state=mem:` is meant to fix that. Delete pre-hook leftovers in the admin console.
 
