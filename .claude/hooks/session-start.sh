@@ -26,7 +26,7 @@ mkdir -p ~/.ssh && chmod 700 ~/.ssh
 cat > ~/.ssh/config <<'CFG'
 Host casaos homelab
   HostName casaos
-  User dgmneto
+  User claude  # passwordless sudo; tailnet ssh rule only allows this user
   ProxyCommand tailscale nc casaos %p
 Host homelab-notebook
   HostName 192.168.11.21

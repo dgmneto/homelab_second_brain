@@ -64,7 +64,7 @@ Top gotchas (detail in the host READMEs):
   `df -h /footage /library` first. Both volumes are on an LVM RAID1 mirror; read
   [notes/disk-health-storage-array.md](notes/disk-health-storage-array.md) before touching storage.
 - **casaos** runs Tailscale natively (node `casaos`, subnet router for .11/.14/.15, Tailscale SSH) —
-  remote access path when off-LAN; see [services/tailscale](services/tailscale/README.md). Claude **cloud** sessions join automatically via the SessionStart hook `.claude/hooks/session-start.sh` (uses the injected `TS_AUTHKEY`) and can then `ssh casaos` directly (Tailscale SSH, no key; details in that README).
+  remote access path when off-LAN; see [services/tailscale](services/tailscale/README.md). Claude **cloud** sessions join automatically via the SessionStart hook `.claude/hooks/session-start.sh` (uses the injected `TS_AUTHKEY`) and can then `ssh casaos` as user `claude` (Tailscale SSH, no key, passwordless sudo; details in that README).
 - **casaos** `qbittorrent` + `prowlarr` live in `gluetunProtonVPN`'s network namespace — recreating
   gluetun takes them down. watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
 - **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),

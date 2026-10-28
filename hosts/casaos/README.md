@@ -42,10 +42,13 @@ over it. Details + why the flags matter: [services/tailscale](../../services/tai
 ### `claude` user (agent account)
 Created 2026-10-28: `claude` (uid 1306), home `/home/claude`, shell bash, groups `claude,docker`,
 **passwordless sudo** via `/etc/sudoers.d/90-claude` (`claude ALL=(ALL) NOPASSWD: ALL`) — i.e. root-
-equivalent; use it instead of `dgmneto` when an agent needs `sudo` non-interactively. **No login
-method configured yet** (no password, no `~/.ssh/authorized_keys`, not in the tailnet `ssh` rule's
-`users`) — until one is added, nothing can log in as it. Other sudoers drop-in present:
-`/etc/sudoers.d/migration-task2` (Apr 29, origin unknown, not yet reviewed).
+equivalent; use it instead of `dgmneto` when an agent needs `sudo` non-interactively. **Login: Tailscale SSH
+only** — the tailnet `ssh` rule `tag:claude → tag:server` has `users: ["claude"]` (no password, no
+`authorized_keys`). Claude cloud sessions: `ssh casaos` (hook-written `~/.ssh/config` uses `User claude`);
+verified 2026-10-28 `sudo -n true` OK. That rule no longer lists `dgmneto`, so `ssh dgmneto@casaos` from
+a cloud session is refused ("not permit you to SSH as user dgmneto") — use `claude` + sudo. Other sudoers
+drop-in: `/etc/sudoers.d/migration-task2` (Apr 29, origin unknown) = `dgmneto` NOPASSWD for
+`rsync, mkdir, mv, rm, sed, usermod, find, crontab` only (note `sed`/`usermod` make it near-root).
 
 ## Deployment architecture
 
