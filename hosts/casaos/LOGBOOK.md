@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-10-28 — Removed stale sudoers drop-in `migration-task2`
+`/etc/sudoers.d/migration-task2` (Apr 29, leftover from an old migration per user) gave dgmneto NOPASSWD
+for rsync/mkdir/mv/rm/sed/usermod/find/crontab — near-root. Checked nothing used it first: no crontab
+or systemd unit mentions sudo, no script under ~/homelab or /usr/local/bin calls those via sudo, auth
+log shows no NOPASSWD use. `sudo rm` it (as `claude`), `visudo -c` OK, `sudo -l -U dgmneto` → only
+`(ALL : ALL) ALL` (password required).
+
 ## 2026-10-28 — Cloud sessions log in to casaos as `claude` (passwordless sudo)
 User switched the tailnet ssh rule for `tag:claude` to `users: ["claude"]`. Verified from a cloud session:
 `ssh claude@casaos` → uid 1306, groups claude+docker, `sudo -n true` OK; `ssh dgmneto@casaos` now refused

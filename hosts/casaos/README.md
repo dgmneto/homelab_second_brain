@@ -46,9 +46,9 @@ equivalent; use it instead of `dgmneto` when an agent needs `sudo` non-interacti
 only** — the tailnet `ssh` rule `tag:claude → tag:server` has `users: ["claude"]` (no password, no
 `authorized_keys`). Claude cloud sessions: `ssh casaos` (hook-written `~/.ssh/config` uses `User claude`);
 verified 2026-10-28 `sudo -n true` OK. That rule no longer lists `dgmneto`, so `ssh dgmneto@casaos` from
-a cloud session is refused ("not permit you to SSH as user dgmneto") — use `claude` + sudo. Other sudoers
-drop-in: `/etc/sudoers.d/migration-task2` (Apr 29, origin unknown) = `dgmneto` NOPASSWD for
-`rsync, mkdir, mv, rm, sed, usermod, find, crontab` only (note `sed`/`usermod` make it near-root).
+a cloud session is refused ("not permit you to SSH as user dgmneto") — use `claude` + sudo. `/etc/sudoers.d/` now holds only
+`90-claude` (+ README); the old `migration-task2` drop-in (dgmneto NOPASSWD for rsync/mkdir/mv/rm/sed/
+usermod/find/crontab) was removed 2026-10-28 — `dgmneto` sudo always needs the password now.
 
 ## Deployment architecture
 
