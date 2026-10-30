@@ -6,7 +6,7 @@ Eclipse Mosquitto — the MQTT broker for the homelab. Central message bus: zigb
 > `192.168.11.21:1883`, users `zigbee2mqtt`/`homeassistant`/`dgmneto` (hashes in root-only
 > `/etc/mosquitto-secrets/<user>.hash`, never in the repo), `readwrite #` ACL each, persistence in
 > `/var/lib/mosquitto/mosquitto.db`, logs `journalctl -u mosquitto`. casaos clients reach it as `mosquitto` via
-> compose `extra_hosts`. The casaos container below still runs **idle, for rollback only** (Phase 5 removes it).
+> compose `extra_hosts` (now only homeassistant; z2m runs on the laptop itself). The casaos container was **removed** 2026-10-30 (`compose down`, 0 clients since cutover); its data in `/footage/services/mosquitto` is kept.
 > Runbook: [MIGRATION.md](../homeassistant/MIGRATION.md). The rest of this file describes the casaos container.
 
 ## Image

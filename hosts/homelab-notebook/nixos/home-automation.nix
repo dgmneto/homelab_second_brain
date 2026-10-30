@@ -113,8 +113,10 @@ in
             log_level = "info";
             channel = 25;
             network_key = "!secret.yaml network_key";
-            pan_id = "!secret.yaml pan_id";
-            ext_pan_id = "!secret.yaml ext_pan_id";
+            # z2m only resolves `!secret` for network_key and mqtt.password. These two
+            # aren't secret anyway (the coordinator broadcasts them in its beacons).
+            pan_id = 62;
+            ext_pan_id = [ 183 78 140 21 176 218 0 157 ];
             timestamp_format = "YYYY-MM-DD HH:mm:ss.SSS";
             log_console_json = true;
             log_debug_to_mqtt_frontend = false;

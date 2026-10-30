@@ -1,6 +1,14 @@
 # z2mqtt (zigbee2mqtt)
 
-Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. ~25 devices (lights, TRV valves, air sensors, switches, thermostats, blinds).
+Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. 26 devices (lights, TRV valves, air sensors, switches, thermostats, blinds).
+
+> **Moved 2026-10-30 to homelab-notebook** (NixOS `services.zigbee2mqtt`, `hosts/homelab-notebook/nixos/home-automation.nix`).
+> Data `/var/lib/zigbee2mqtt` (uid 317): `configuration.yaml` is **regenerated from Nix on every start**, so
+> change settings in the Nix file. Devices/groups live in `devices.yaml`/`groups.yaml` (z2m edits these), and
+> `mqtt_password` + `network_key` in root-readable-only `secret.yaml` (never in the repo). Logs: `journalctl -u zigbee2mqtt`
+> (JSON) + `/var/lib/zigbee2mqtt/log/`. UI `http://192.168.11.21:8080` / `https://z2m.intern.dgmneto.com`.
+> Health check from the laptop: `mosquitto_sub/pub -h 127.0.0.1 -u zigbee2mqtt -P <mqtt_password from secret.yaml>`.
+> casaos container **removed**; `/footage/services/z2mqtt/data` kept as of the cutover. Below = the old casaos setup.
 
 ## Image
 `ghcr.io/koenkk/zigbee2mqtt:latest` (**unpinned**)

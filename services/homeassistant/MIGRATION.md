@@ -13,8 +13,8 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 | Phase | Service | State |
 |---|---|---|
 | 0 | groundwork | **done 2026-10-30** (DHCP reserved, nightly backup to casaos live) |
-| 1 | mosquitto | **done 2026-10-30**: broker on the laptop; casaos container left running idle for rollback |
-| 2 | zigbee2mqtt | not started |
+| 1 | mosquitto | **done 2026-10-30**: broker on the laptop; casaos container removed 21:42 (data kept in `/footage/services/mosquitto`) |
+| 2 | zigbee2mqtt | **done 2026-10-30**: on the laptop, network resumed, casaos container removed (data kept) |
 | 3 | matter-server | not started |
 | 4 | home-assistant | not started |
 | 5 | decommission on casaos | not started |
@@ -39,6 +39,8 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 
 - **zigbee2mqtt module overwrites `configuration.yaml` on every start** (`ExecStartPre cp`). So the
   device list and secrets must live outside it: `devices.yaml`, `groups.yaml` and `secret.yaml`
+  (`mqtt_password`, `network_key` only: **z2m does not resolve `!secret` for `pan_id`/`ext_pan_id`**, it
+  refuses to start with "should be number or 'GENERATE'"; those two are literals in the Nix config)
   (`mqtt_password`, `network_key`, `pan_id`, `ext_pan_id`) in `/var/lib/zigbee2mqtt`.
 - **Broker hostname:** HA's MQTT entry (`broker: mosquitto`) and z2m (`mqtt://mosquitto:1883`) use the
   old Docker DNS name. On the laptop the module maps `mosquitto` → `127.0.0.1` (since Phase 1); on casaos
@@ -89,12 +91,29 @@ diff box vs repo, `systemd-run` switch). Pre-build first:
 - **Rollback:** delete the `extra_hosts` block in both compose files and `up -d`. The casaos broker is still running.
   Its retained state is as of the cutover, so `docker restart z2mqtt` afterwards.
 
-**Phase 2 — zigbee2mqtt.** `docker compose down` z2mqtt on casaos. Copy `/footage/services/z2mqtt/data`
-to `/var/lib/zigbee2mqtt` (incl. `database.db`, `coordinator_backup.json`, `state.json`,
-`external_converters/`). Split the `devices:`/`groups:` blocks into `devices.yaml`/`groups.yaml`, the
-four secrets into `secret.yaml`, chown to `zigbee2mqtt`. Enable and deploy. Check: the UI on
-`:8080` shows ~26 devices and a light toggles. Repoint nginxIntern's z2m host. Rollback: stop the
-laptop service, `docker compose up -d` on casaos.
+**Phase 2 — zigbee2mqtt (done 2026-10-30, as actually run).**
+Danger to avoid: z2m starting on the laptop **without** the network key and data could form a *new* network on
+the coordinator. So the data goes in place (uid/gid **317**, fixed by NixOS) **before** the first deploy that
+enables it. (z2m validates its config first, so a bad config refuses to start without touching the adapter.
+That's what happened on the first try.)
+1. Prep, no downtime: build with `zigbee2mqtt.enable = true` (don't switch). Dry-run
+   [`z2m-split.js`](z2m-split.js) on a copy of the casaos config. It writes `devices.yaml`/`groups.yaml`/`secret.yaml`
+   and checks every remaining setting equals the Nix-generated yaml (`SETTINGS MATCH`), printing no secrets.
+   Run it with the z2m package's node + `JSYAML=<z2m>/lib/node_modules/zigbee2mqtt/node_modules/js-yaml`.
+2. `sudo docker compose -f …/z2mqtt/compose.yaml down` on casaos. **Run the tar in its own ssh command**:
+   the first try shared stdout with `compose down` output, which corrupted the gzip stream ("not in gzip format").
+3. `tar` `configuration.yaml database.db state.json coordinator_backup.json external_converters` → laptop
+   `/var/lib/zigbee2mqtt` (0700, 317:317), run the split, keep the original as `/root/z2m/configuration.casaos.yaml`, delete it from the data dir.
+4. Copy `flake.nix` to the box and switch. **The switch (re)starts z2m itself; don't add a manual `restart`**
+   (the race logs a harmless winston "write after end").
+5. Log must say `[INIT TC] Adapter network matches config` and `zigbee-herdsman started (resumed)`, then
+   `Currently 26 devices are joined` and `Connected to MQTT server`. Verified: bridge online, health_check healthy,
+   265 discovery configs, frontend 200.
+6. nginxIntern proxy host 21 (`z2m.intern.dgmneto.com`) `192.168.14.96` → `192.168.11.21:8080` (DB row + `21.conf` +
+   reload; recipe in [nginxIntern README](../nginxIntern/README.md#editing-a-proxy-host-without-the-ui)). 200 through the proxy.
+- **Zigbee downtime:** 21:53:30 → 21:56:00 (~2.5 min; ~1 min was the pan_id fix).
+- **Rollback:** `systemctl stop zigbee2mqtt` on the laptop and set the toggle back; on casaos `docker compose -f …/z2mqtt/compose.yaml up -d`
+  (its data dir is untouched as of the cutover; later device renames live only in the laptop's `devices.yaml`); proxy host 21 back to `192.168.14.96`.
 
 **Phase 3 — matter.** First prove mDNS/IPv6 (see findings). Stop casaos `matter-server`; keep an
 untouched dated copy of `/footage/services/matter/data`; copy it into `/var/lib/private/matter-server`;
@@ -130,5 +149,5 @@ via HACS.
 1. ~~DHCP reservation~~ for `192.168.11.21`: done by the user 2026-10-30 (laptop still leases .21 from 192.168.11.1, 24h lease).
 2. ~~Backup~~: done, see above.
 3. An off-host copy of the latest HA backup is at `homelab-notebook:/var/backups/ha-migration/`.
-4. Phase 5: `docker compose down` the idle casaos mosquitto.
-5. Check for a `permit_join` complaint at Phase 2: the NixOS z2m module emits `permit_join: false`, which z2m 2.x removed.
+4. ~~casaos mosquitto~~ removed 2026-10-30 (`compose down`; data kept).
+5. ~~`permit_join`~~: harmless, since z2m 2.14's schema doesn't reject extra top-level keys.

@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **nginxIntern** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — HA migration Phase 2
+Proxy host 21 (`z2m.intern.dgmneto.com`) forward_host 192.168.14.96 → 192.168.11.21 (z2m moved to homelab-notebook). Edited the DB via knex in the container + `21.conf`, `nginx -t` OK, reloaded; 200 via proxy. Recipe added to README.
+
 ## 2026-10-25 — Removed terminus /api/setup/ shim
 Proxy host 25 advanced config emptied: the exact `location = /api/setup/` made nginx 301 `/api/setup`
 (no slash), breaking TRMNL firmware 1.8.17. Verified `/api/setup` reaches Terminus afterwards.

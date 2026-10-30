@@ -81,6 +81,25 @@ host 25 / terminus, `/api/setup/` → `/api/setup`). **Beware:** a location endi
 firmware, so that terminus shim was removed again (host 25 Advanced is now empty). Advanced config lives in NPM's DB, not git — it
 is recorded in the service README that needs it.
 
+## Editing a proxy host without the UI
+
+No API credentials needed if you're on casaos: update NPM's SQLite through the container's own node + knex,
+then make the **same** change in the generated `data/nginx/proxy_host/<id>.conf` and reload. Both have to change:
+the conf is what nginx serves, and the DB is what the UI re-renders from on the next save. Verified 2026-10-30 (host 21):
+```
+sudo cp -p /footage/services/nginxIntern/data/database.sqlite{,.bak-<why>}
+sudo docker exec -w /app nginxIntern node -e '
+const k=require("knex")({client:"sqlite3",connection:{filename:"/data/database.sqlite"},useNullAsDefault:true});
+k("proxy_host").where({id:21}).update({forward_host:"192.168.11.21"}).then(n=>{console.log(n);return k.destroy()})'
+sudo sed -i 's/set $server         "OLD";/set $server         "NEW";/' /footage/services/nginxIntern/data/nginx/proxy_host/21.conf
+sudo docker exec nginxIntern nginx -t && sudo docker exec nginxIntern nginx -s reload
+```
+There's no `sqlite3` CLI on casaos or in the container; the knex route is the way.
+
+## Proxy hosts that point off-casaos
+- **21 `z2m.intern.dgmneto.com` → `192.168.11.21:8080`** (homelab-notebook, since 2026-10-30). Pre-change DB copy:
+  `data/database.sqlite.bak-pre-z2m-move`.
+
 ## Quirks / runbook
 
 - This is the **internal** twin of `nginxProd` (`192.168.14.33`). The two are

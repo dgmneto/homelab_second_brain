@@ -33,7 +33,10 @@
     {
       # Migration progress: flip one service per phase (services/homeassistant/MIGRATION.md).
       nixosConfigurations.homelab-notebook = mkHost [
-        { homelab.homeAutomation.mosquitto.enable = true; }
+        {
+          homelab.homeAutomation.mosquitto.enable = true;
+          homelab.homeAutomation.zigbee2mqtt.enable = true;
+        }
       ];
       # Build-only (never switch to it): the whole home-automation stack enabled, so
       # `nix build` pre-fetches/compiles it before each migration phase.

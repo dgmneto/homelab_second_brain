@@ -23,7 +23,7 @@ This is the knowledge layer.
 | [homeassistant](homeassistant/README.md) | casaos | docker |
 | [jellyfin](jellyfin/README.md) | casaos | docker |
 | [matter](matter/README.md) | casaos | docker |
-| [mosquitto](mosquitto/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30; idle casaos container kept for rollback) |
+| [mosquitto](mosquitto/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30) |
 | [nginxIntern](nginxIntern/README.md) | casaos | docker |
 | [nginxProd](nginxProd/README.md) | casaos | docker |
 | [overseerr](overseerr/README.md) | casaos | docker |
@@ -38,6 +38,6 @@ This is the knowledge layer.
 | [terminus](terminus/README.md) | casaos | docker |
 | [trmnl-ai](trmnl-ai/README.md) | casaos | docker (LLM-designed TRMNL screen for terminus) |
 | [watchtower](watchtower/README.md) | casaos | docker |
-| [z2mqtt](z2mqtt/README.md) | casaos | docker |
+| [z2mqtt](z2mqtt/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30) |
 
 Adding a service: new folder here + a row in this table.

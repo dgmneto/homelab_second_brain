@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — HA migration Phase 2
+Moved to homelab-notebook (NixOS). casaos container removed 21:53:30; data split into devices/groups/secret.yaml; network resumed on the laptop at ~21:56 with all 26 devices. pan_id/ext_pan_id must be literals (no `!secret` support). UI proxy (nginxIntern host 21) repointed.
+
 ## 2026-10-30 — HA migration Phase 1 (mosquitto → homelab-notebook)
 compose: `extra_hosts: mosquitto:192.168.11.21`, recreated 21:33:48. Reconnected to the laptop broker within ~10 s; `bridge/state` online, health_check healthy.
 

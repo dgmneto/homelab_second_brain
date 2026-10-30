@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — HA migration Phase 2: zigbee2mqtt moved to homelab-notebook; casaos mosquitto removed
+casaos mosquitto `compose down` (0 clients since Phase 1; data kept). z2m: casaos container down 21:53:30, data staged
+into `/var/lib/zigbee2mqtt` with `z2m-split.js` (SETTINGS MATCH), deployed. First start refused (pan_id/ext_pan_id
+can't be `!secret`), so I made them Nix literals and redeployed: "Adapter network matches config", resumed, 26 devices, MQTT
+connected ~21:56. Verified: health_check healthy, 265 discovery configs, frontend 200. nginxIntern host 21 repointed
+to 192.168.11.21:8080 (200 via proxy). Backup now includes zigbee2mqtt. Details: `services/homeassistant/MIGRATION.md`.
+
 ## 2026-10-30 — HA migration Phase 1: mosquitto moved to homelab-notebook
 Laptop: hashes → `/etc/mosquitto-secrets/`, `mosquitto.enable = true` deployed, seeded with casaos' `mosquitto.db`
 (265 retained discovery configs on both). casaos: `extra_hosts: mosquitto:192.168.11.21` in z2mqtt + homeassistant
