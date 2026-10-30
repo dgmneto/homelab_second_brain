@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-10-30 — Deployed home-automation.nix (all toggles off) + homelab-backup timer
+Snapshot `~/nixos.bak-pre-homeautomation`. Copied only `flake.nix`, `flake.lock`, `home-automation.nix` to the box
+(box was in sync before; `hermes.nix` drift kept on purpose). `systemd-run … nixos-rebuild switch`: OK, no failed
+units; hermes-agent/pihole-ftl/tailscaled active. New: `/etc/hosts` `192.168.14.82 mosquitto`, `homelab-backup.timer`
+(next 03:33), key `/var/lib/homelab-backup/id_ed25519` (root 0700). `systemctl start homelab-backup` → success,
+"nothing to back up yet".
+
 ## 2026-10-30 — Home-automation modules staged (not deployed)
 New `nixos/home-automation.nix` (mosquitto/zigbee2mqtt/matter-server/home-assistant, each behind
 `homelab.homeAutomation.<svc>.enable`, all false), `nixpkgs-unstable` input (HA only) and build-only

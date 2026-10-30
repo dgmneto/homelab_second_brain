@@ -12,7 +12,7 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 
 | Phase | Service | State |
 |---|---|---|
-| 0 | groundwork | done 2026-10-30 (DHCP reserved by the user) except backup access (open item 2) |
+| 0 | groundwork | **done 2026-10-30** (DHCP reserved, nightly backup to casaos live) |
 | 1 | mosquitto | not started |
 | 2 | zigbee2mqtt | not started |
 | 3 | matter-server | not started |
@@ -91,16 +91,26 @@ via HACS.
 **Phase 5.** Everything `down` on casaos (not just stopped), README/service-map updates, archive the
 `/footage/services/*` dirs after ~1 week.
 
-## Open items (need the user)
+## Backups (live since 2026-10-30)
+
+`homelab-backup.service` on the laptop (timer 03:23 nightly ±20 min, `Persistent`) rsyncs whichever of
+`/var/lib/{hass,zigbee2mqtt,mosquitto,private/matter-server}` exist to casaos over the **plain LAN**
+(`192.168.11.13`, no Tailscale needed: same network) as `nbbackup`, key `/var/lib/homelab-backup/id_ed25519`.
+- casaos side: system user `nbbackup` (uid 998), home = `/footage/backups/homelab-notebook` (0700, on RAID1);
+  `authorized_keys` forces `/usr/bin/rrsync -wo /footage/backups/homelab-notebook`, `restrict`,
+  `from="192.168.11.21"`. Verified 2026-10-30: writes OK, **read-back, `../../` escape and shell all refused**.
+- Layout: `current/` = mirror; `history/<YYYY-MM-DD>/` = files changed or deleted that night (rrsync maps the
+  absolute `/current/` and `--backup-dir=/history/…` inside its root, as verified). Pruned after 14 days
+  by casaos `/etc/cron.d/homelab-notebook-backup` (05:41).
+- Until Phase 1 it logs `nothing to back up yet` (verified). **Restore:** files are owned by `nbbackup`
+  on casaos; `rsync` them back as root and `chown` to the service user (`hass`, `zigbee2mqtt`,
+  `mosquitto`; matter-server is DynamicUser, so just stop it and copy into `/var/lib/private/matter-server`).
+- Quirk: an `nbbackup` login started a PulseAudio user session that wrote `~/.config/pulse` into the backup
+  dir (deleted; harmless if it reappears).
+
+## Open items
 
 1. ~~DHCP reservation~~ for `192.168.11.21`: done by the user 2026-10-30 (laptop still leases .21 from 192.168.11.1, 24h lease).
-2. **Backup** (decided 2026-10-30: casaos `/footage`, plain SSH over the LAN; same network, so no
-   Tailscale). The `homelab-backup` service/timer (03:23 nightly) is in `home-automation.nix`, built but
-   **not deployed**. Still needed, and blocked on the user approving the new access: on casaos create system user
-   `nbbackup` (home `/footage/backups/homelab-notebook`, 0700) with one `authorized_keys` line
-   `command="/usr/bin/rrsync -wo /footage/backups/homelab-notebook",restrict,from="192.168.11.21" <pubkey>`;
-   on the laptop generate `/var/lib/homelab-backup/id_ed25519` (root 0700 dir); add casaos
-   `/etc/cron.d/homelab-notebook-backup` pruning `history/*` older than 14 days. **First-run check:** confirm
-   rrsync maps the absolute `/current/` and `--backup-dir=/history/<date>` inside its root. Restore note:
-   files land owned by `nbbackup`, so `chown` them back on restore. Must be working **before Phase 3**.
+2. ~~Backup~~: done, see above.
 3. An off-host copy of the latest HA backup is at `homelab-notebook:/var/backups/ha-migration/`.
+4. Check for a `permit_join` complaint at Phase 2: the NixOS z2m module emits `permit_join: false`, which z2m 2.x removed.

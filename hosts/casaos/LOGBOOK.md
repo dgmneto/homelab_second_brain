@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — Added `nbbackup` user + backup-prune cron (homelab-notebook backups)
+`useradd --system --home-dir /footage/backups/homelab-notebook --shell /bin/sh nbbackup` (uid 998);
+`/footage/backups{,/homelab-notebook{,/.ssh}}` 0700 nbbackup; authorized_keys = laptop key with
+`command="/usr/bin/rrsync -wo /footage/backups/homelab-notebook",restrict,from="192.168.11.21"`.
+`/etc/cron.d/homelab-notebook-backup`: 05:41 daily, delete `history/*` dirs older than 14 days. Verified from the
+laptop: write OK (+ history copy), read/escape/shell refused; test files removed afterwards.
+
 ## 2026-10-28 — Removed stale sudoers drop-in `migration-task2`
 `/etc/sudoers.d/migration-task2` (Apr 29, leftover from an old migration per user) gave dgmneto NOPASSWD
 for rsync/mkdir/mv/rm/sed/usermod/find/crontab — near-root. Checked nothing used it first: no crontab

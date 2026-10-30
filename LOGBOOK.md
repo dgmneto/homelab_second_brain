@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — HA migration: nightly laptop→casaos backup live; Phase 0 complete
+User approved creating the access. casaos: `nbbackup` user, write-only rrsync key from 192.168.11.21, prune cron.
+Laptop: deployed `home-automation.nix` (services still off) with the `homelab-backup` timer; verified the
+restriction (read/escape/shell refused) and a successful service run. Details: `services/homeassistant/MIGRATION.md`
+§ Backups; host logbooks for both machines.
+
 ## 2026-10-30 — HA migration: backup to casaos designed, access step pending
 User reserved 192.168.11.21 on the router and chose casaos `/footage` as the backup target, over the plain LAN
 (no Tailscale). Added the `homelab-backup` service+timer and pinned casaos' ed25519 host key (verified the same

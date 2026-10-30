@@ -50,6 +50,12 @@ a cloud session is refused ("not permit you to SSH as user dgmneto") — use `cl
 `90-claude` (+ README); the old `migration-task2` drop-in (dgmneto NOPASSWD for rsync/mkdir/mv/rm/sed/
 usermod/find/crontab) was removed 2026-10-28 — `dgmneto` sudo always needs the password now.
 
+### `nbbackup` user (backup sink for homelab-notebook)
+Created 2026-10-30: system user `nbbackup` (uid 998), home `/footage/backups/homelab-notebook` (0700). One
+`authorized_keys` entry: the laptop's backup key, forced to `rrsync -wo` (write-only into that dir), `restrict`,
+`from="192.168.11.21"`. No other login. Pruned by `/etc/cron.d/homelab-notebook-backup`. Details:
+[MIGRATION.md § Backups](../../services/homeassistant/MIGRATION.md#backups-live-since-2026-10-30).
+
 ## Deployment architecture
 
 - **Orchestration:** plain `docker compose`, one directory per service under

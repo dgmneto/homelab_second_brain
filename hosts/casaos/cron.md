@@ -5,6 +5,13 @@ Probe sources: `crontab -l`, `sudo crontab -l`, `/etc/crontab`, `/etc/cron.d`, `
 
 ## Homelab-specific jobs (the ones that matter)
 
+### `/etc/cron.d/homelab-notebook-backup` — prune laptop backup history (added 2026-10-30)
+```
+41 5 * * * root find /footage/backups/homelab-notebook/history -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
+```
+Keeps 14 days of `history/` for the nightly push from homelab-notebook (see
+[MIGRATION.md § Backups](../../services/homeassistant/MIGRATION.md#backups-live-since-2026-10-30)).
+
 ### root crontab — weekly deployment-repo backup
 ```
 0 5 * * 0  cd /home/dgmneto/homelab && ./services/backup.sh
