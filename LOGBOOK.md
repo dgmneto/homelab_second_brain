@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — trmnl-ai model bake-off
+10 OpenRouter models on one data snapshot; 4 never finished, DeepSeek overlapped text, GPT ones
+clipped. Finalists sent to user: Claude Haiku 5.5, Gemini 3.8 Flash, Claude Sonnet 5.5. Detail in
+`services/trmnl-ai/`.
+
 ## 2026-10-30 — AI Board live on the TRMNL
 OpenRouter key installed (server `.env` only), prompt tuned over 4 reviewed renders (2-bit legibility,
 overflow, single-file bind-mount gotcha), device 7 playlist switched to AI Board; Morning Board kept

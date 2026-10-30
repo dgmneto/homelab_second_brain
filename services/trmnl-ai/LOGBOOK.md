@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **trmnl-ai** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Model bake-off (10 OpenRouter models)
+Ran the same data snapshot through 10 cheap/mid models, rendered 6 valid outputs via Terminus as
+throwaway `bakeoff_*` screens (not on a playlist). Finalists for the user: Haiku 5.5 ($0.002),
+Gemini 3.8 Flash ($0.017), Sonnet 5.5 ($0.049). Results table in README; scripts in `src/bakeoff/`.
+Total spend ≈ $0.12.
+
 ## 2026-10-30 — OpenRouter key in, first AI screens, prompt tuning, on device 7
 User supplied a new OpenRouter key; written to the server `.env` only (600, ACLs stripped with
 `setfacl -b` — the dir's default ACL had made it 664), container recreated. Iterated 4 renders,

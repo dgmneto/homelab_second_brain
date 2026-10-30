@@ -52,6 +52,24 @@ add a function + entry in `collect()` in `app.py` and mention it in `prompt.md`.
   ```
   `env_file` is read at container create → a key change needs `up -d --force-recreate`, not `restart`.
 
+## Choosing a model (bake-off 2026-10-30)
+Same data snapshot (12:11, Piccadilly part closure), current prompt, one sample each, rendered by
+Terminus as throwaway screens. Cost = OpenRouter-reported per screen; ≈ ×25/day.
+
+| Model | $/screen | Result |
+|---|---|---|
+| `anthropic/claude-haiku-5.5` | 0.0024 | fits, clean, sensible priorities — **cheapest that passes** |
+| `openai/gpt-6-luna` | 0.0019 | crowding line clipped at right edge, busy |
+| `deepseek/deepseek-v4.1-flash` | 0.0032 | overlapping text in tube list — fail |
+| `google/gemini-3.8-flash` | 0.0167 | fits, most polished boxed layout — best mid-price |
+| `openai/gpt-6.1-terra` | 0.0153 | strong headline banner but weather text clipped |
+| `anthropic/claude-sonnet-5.5` | 0.0495 | best overall polish/hierarchy, fits perfectly |
+| minimax-m3.1-flash, mistral-large-4-0, glm-5.3-flash, qwen3.8-flash | — | hit 8000 max_tokens without finishing (no valid HTML) |
+
+Finalists shown to the user: Haiku 5.5, Gemini 3.8 Flash, Sonnet 5.5. Rerun with
+`src/bakeoff/bakeoff.py` (models as args) then `src/bakeoff/render.rb` (copy the HTML into the
+terminus container's `/tmp/bakeoff/` first); delete the `bakeoff_*` screens afterwards.
+
 ## Iterating on the design (user feedback loop)
 1. Add the feedback as a rule under **"User feedback"** at the bottom of `prompt.md` (on the server;
    it is re-read every call, no restart).
