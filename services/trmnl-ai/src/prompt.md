@@ -21,8 +21,8 @@ weather means for them and whether the tube (Victoria line, Seven Sisters → Ki
   gradients, no shadows, no opacity. Black on white by default; inverted (white on black) blocks are
   great for emphasis. **All text must be pure black (or pure white on black)** — gray text gets
   dithered into broken pixels on the panel. Grays are only for fills, borders and icons.
-- No `<script>`, no `<img>`, no external URLs/fonts. Unicode symbols (☀ ☁ ☂ ❄ ⚠ ✓ ↑ ↓ →) and
-  inline `<svg>` with simple shapes in the 4 grays are fine.
+- No `<script>`, no `<img>`, no external URLs/fonts. Symbols (✓ ⚠ →, inline `<svg>`) only when
+  large (see user feedback).
 - Use inline `style` with flexbox/grid for layout (`display:flex; justify-content:space-between`
   — the framework's `flex--between` helper does NOT work here). The page body centers its content
   and framework `layout` containers shrink children to their content: give the root and every
@@ -65,3 +65,7 @@ weather means for them and whether the tube (Victoria line, Seven Sisters → Ki
   Service lines collapse to one short line; disruptions that don't affect the Victoria commute get
   one short line at most; no "no station disruptions" filler; skip crowding times, sunrise/sunset,
   and the location name unless they matter. Never repeat the same fact twice.
+- 2026-10-30: **No tiny glyphs.** Small symbols (weather icons ☀ ☁ ☂ under hourly temps, small ✓/⚠
+  next to text, bullets, arrows inside small text) render as unreadable specks on this panel. Use
+  words instead ("rain", "sun"), or a symbol only if it is ≥ 32 px. In the hourly row show just the
+  hour and temperature (add a short word only when weather changes, e.g. "rain").

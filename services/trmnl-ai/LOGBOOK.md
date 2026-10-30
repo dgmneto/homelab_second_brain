@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **trmnl-ai** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Feedback: no tiny glyphs
+User: small weather symbols can't show on the panel. `prompt.md`: removed the "Unicode symbols are
+fine" line, added feedback rule (words instead of icons, symbols only ≥32 px, hourly row = hour +
+temp + word on change). Regenerated with previous-screen context (`--force`, not `--fresh`) →
+layout kept, icons became words ("cloud", "sun"), small ✓/⚠ gone; render viewed. Note: sending the
+previous screen raises input to ~5.5k tokens → ~$0.004/screen on DeepSeek V4.1 Flash (≈$3/mo).
+
 ## 2026-10-30 — Live model → DeepSeek V4.1 Flash; "be bold" feedback
 User picked DeepSeek V4.1 Flash. `.env` + `env.tpl` `OPENROUTER_MODEL=deepseek/deepseek-v4.1-flash`
 (`.env` re-chmod 600 after `sed -i`), `app.py` now sends `reasoning:{enabled:false}` (env
