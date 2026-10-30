@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **trmnl-ai** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Bake-off round 2: cheap / open-weight models
+User asked for cheaper/open-source options. Re-ran with reasoning disabled (+ raw replies saved,
+finish_reason recorded): 11 models, all produced HTML. Passed: DeepSeek V4 Flash ($0.0006),
+DeepSeek V4.1 Flash ($0.0010), Gemma 4 31B ($0.0011), Haiku 5.5 reasoning-off ($0.0014), GLM 5.3
+Flash (minor clip). Found Haiku had been reasoning in production (off = ~40% cheaper). MiniMax/GLM
+reject `enabled:false` (400) → `effort:low`. All renders sent to user; table in README. Deleted the
+`bakeoff_*` Terminus screens afterwards. Spend ≈ $0.02.
+
 ## 2026-10-30 — Model bake-off (10 OpenRouter models)
 Ran the same data snapshot through 10 cheap/mid models, rendered 6 valid outputs via Terminus as
 throwaway `bakeoff_*` screens (not on a playlist). Finalists for the user: Haiku 5.5 ($0.002),

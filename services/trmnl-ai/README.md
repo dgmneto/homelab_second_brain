@@ -66,7 +66,30 @@ Terminus as throwaway screens. Cost = OpenRouter-reported per screen; ≈ ×25/d
 | `anthropic/claude-sonnet-5.5` | 0.0495 | best overall polish/hierarchy, fits perfectly |
 | minimax-m3.1-flash, mistral-large-4-0, glm-5.3-flash, qwen3.8-flash | — | hit 8000 max_tokens without finishing (no valid HTML) |
 
-Finalists shown to the user: Haiku 5.5, Gemini 3.8 Flash, Sonnet 5.5. Rerun with
+Finalists shown to the user: Haiku 5.5, Gemini 3.8 Flash, Sonnet 5.5.
+
+**Round 2 (cheap / open-weight), reasoning OFF** (`"reasoning":{"enabled":false}`). Round 1's
+"never finished" models were burning max_tokens on hidden reasoning; with it off every model
+finishes in 1.5–2.5k output tokens. **Haiku 5.5 was reasoning too**: off → $0.0014 vs $0.0024,
+same quality. MiniMax M3.1 Flash and GLM 5.3 Flash return HTTP 400 for `enabled:false` — use
+`{"effort":"low"}` for them.
+
+| Model (open = open weights) | $/screen | Result |
+|---|---|---|
+| `deepseek/deepseek-v4-flash` (open) | 0.0006 | fits, clean boxed layout — **cheapest that passes** |
+| `deepseek/deepseek-v4.1-flash` (open) | 0.0010 | fits, clean (round-1 overlap was variance) |
+| `google/gemma-4-31b-it` (open) | 0.0011 | fits, plain, some empty space |
+| `anthropic/claude-haiku-5.5` (reasoning off) | 0.0014 | fits, best of round 2 |
+| `z-ai/glm-5.3-flash` (open, effort low) | 0.0008 | strong design, bottom-left text slightly clipped |
+| `minimax/minimax-m3.1-flash` (open, effort low) | 0.0017 | commute box text cut off |
+| `deepseek/deepseek-v4-flash-0731` (open) | 0.0008 | crowding box overflows |
+| `qwen/qwen3.8-flash` (open) | 0.0015 | half the screen empty, overlapping lines |
+| `google/gemma-4-26b-a4b-it` (open) | 0.0003 | thin regular-weight text, empty space |
+| `qwen/qwen3.7-flash` (open) | 0.0004 | broken layout, thin gray text |
+| `qwen/qwen3.6-35b-a3b` (open) | 0.0020 | broken layout |
+
+At ~25 screens/day: DeepSeek V4 Flash ≈ $0.45/mo, Haiku (reasoning off) ≈ $1/mo.
+`bakeoff.py` env: `SUFFIX` (keep rounds apart), `REASONING` (JSON), `MAX_TOKENS`. Rerun with
 `src/bakeoff/bakeoff.py` (models as args) then `src/bakeoff/render.rb` (copy the HTML into the
 terminus container's `/tmp/bakeoff/` first); delete the `bakeoff_*` screens afterwards.
 
