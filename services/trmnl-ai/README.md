@@ -37,7 +37,10 @@ A failing source becomes `{"error": …}` in the data; the prompt says to show "
 add a function + entry in `collect()` in `app.py` and mention it in `prompt.md`.
 
 ## LLM / cost
-- `OPENROUTER_MODEL` in `.env` (default `anthropic/claude-haiku-5.5`, $0.1/$0.5 per M tokens on
+- **Live model: `deepseek/deepseek-v4.1-flash`** (user's pick after the bake-off below, 2026-10-30),
+  reasoning **off** (`app.py` sends `reasoning:{enabled:false}`; env `REASONING` overrides, e.g.
+  `{"effort":"low"}` for MiniMax/GLM which 400 on `enabled:false`). Measured ~$0.0014/screen.
+- `OPENROUTER_MODEL` in `.env` (was `anthropic/claude-haiku-5.5`, $0.1/$0.5 per M tokens on
   2026-10-30; `anthropic/claude-sonnet-5.5` is $2/$10). Measured: ~3.9k tokens in + 3.5–5k out
   = **~$0.002–0.003 per call** on Haiku, ~6 s.
   The previous screen's HTML is sent along ("keep its layout") so the design stays stable between

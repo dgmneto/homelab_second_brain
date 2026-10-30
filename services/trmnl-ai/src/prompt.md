@@ -60,4 +60,8 @@ weather means for them and whether the tube (Victoria line, Seven Sisters → Ki
    rule violations.
 
 ## User feedback (newest last — these override anything above)
-- (none yet)
+- 2026-10-30: **Be bold.** Big type, strong black/inverted blocks, few elements. Be ruthless about
+  cutting irrelevant info: if it doesn't change what someone does this morning, drop it. Good
+  Service lines collapse to one short line; disruptions that don't affect the Victoria commute get
+  one short line at most; no "no station disruptions" filler; skip crowding times, sunrise/sunset,
+  and the location name unless they matter. Never repeat the same fact twice.

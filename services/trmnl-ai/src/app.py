@@ -178,7 +178,10 @@ def llm(data, feedback=None, previous=None):
         messages += [{"role": "assistant", "content": feedback[0]},
                      {"role": "user", "content": f"That output was rejected: {feedback[1]}. "
                       "Return the corrected complete HTML only."}]
-    body = json.dumps({"model": MODEL, "messages": messages, "max_tokens": 6000, "temperature": 0.4}).encode()
+    # Reasoning off: the bake-off showed models burn thousands of hidden tokens otherwise (Haiku 40%
+    # pricier, some never finish). Override with REASONING='{"effort":"low"}' for models that reject it.
+    body = json.dumps({"model": MODEL, "messages": messages, "max_tokens": 8000, "temperature": 0.4,
+                       "reasoning": json.loads(os.environ.get("REASONING", '{"enabled": false}'))}).encode()
     req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=body, headers={
         "Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json",
         "HTTP-Referer": "https://terminus.intern.dgmneto.com", "X-Title": "trmnl-ai"})

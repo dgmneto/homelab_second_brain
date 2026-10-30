@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — AI Board now on DeepSeek V4.1 Flash, bolder prompt
+User's model pick + first design feedback applied and verified by viewing the render. Detail in
+`services/trmnl-ai/LOGBOOK.md`.
+
 ## 2026-10-30 — trmnl-ai bake-off round 2 (open-weight, reasoning off)
 11 cheap models; DeepSeek V4 Flash ($0.0006/screen) is the cheapest that renders cleanly; Haiku 5.5
 with reasoning off is $0.0014. All renders sent to the user to pick. Detail in `services/trmnl-ai/`.

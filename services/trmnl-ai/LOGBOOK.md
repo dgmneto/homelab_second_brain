@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **trmnl-ai** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Live model → DeepSeek V4.1 Flash; "be bold" feedback
+User picked DeepSeek V4.1 Flash. `.env` + `env.tpl` `OPENROUTER_MODEL=deepseek/deepseek-v4.1-flash`
+(`.env` re-chmod 600 after `sed -i`), `app.py` now sends `reasoning:{enabled:false}` (env
+`REASONING` override), max_tokens 8000; `docker compose up -d --force-recreate`. First user feedback
+added to `prompt.md`: bold, ruthless about irrelevant info, no repeats. `--once --force --fresh` →
+2054 out tokens, $0.0014; Terminus build of ext 2 viewed: big inverted temp + "✓ Clear" blocks, one
+line per tube line, footer only for real disruptions (Central minor delays live). Preview updated.
+
 ## 2026-10-30 — Bake-off round 2: cheap / open-weight models
 User asked for cheaper/open-source options. Re-ran with reasoning disabled (+ raw replies saved,
 finish_reason recorded): 11 models, all produced HTML. Passed: DeepSeek V4 Flash ($0.0006),
