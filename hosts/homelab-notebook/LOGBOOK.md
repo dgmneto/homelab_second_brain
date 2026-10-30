@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-10-30 — HA migration Phase 1 (mosquitto → homelab-notebook)
+Deployed `homelab.homeAutomation.mosquitto.enable = true` (only flake.nix changed on the box). mosquitto active on 0.0.0.0/[::]:1883, `/etc/hosts` now `127.0.0.1 mosquitto`, no failed units. Created `/etc/mosquitto-secrets/` (root 0700, 3 hash files 0600). Seeded `/var/lib/mosquitto/mosquitto.db` from casaos.
+
 ## 2026-10-30 — Deployed home-automation.nix (all toggles off) + homelab-backup timer
 Snapshot `~/nixos.bak-pre-homeautomation`. Copied only `flake.nix`, `flake.lock`, `home-automation.nix` to the box
 (box was in sync before; `hermes.nix` drift kept on purpose). `systemd-run … nixos-rebuild switch`: OK, no failed

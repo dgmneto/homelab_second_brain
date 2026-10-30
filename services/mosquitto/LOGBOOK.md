@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **mosquitto** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — HA migration Phase 1 (mosquitto → homelab-notebook)
+Broker now runs on homelab-notebook (NixOS) with the same users, seeded with the casaos `mosquitto.db`. casaos container left running idle for rollback. Password-extraction gotcha recorded in README (grep/sed → wrong pw; use js-yaml in the z2m container).
+
 ## 2026-09-22 — Enabled persistence (retained discovery was wiped on restart)
 09-20 watchtower restart (→ 2.1.2) dropped all retained msgs incl. HA discovery → all Zigbee entities
 unavailable in HA. Appended `persistence true` / `persistence_location /mosquitto/data/` /

@@ -13,7 +13,7 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 | Phase | Service | State |
 |---|---|---|
 | 0 | groundwork | **done 2026-10-30** (DHCP reserved, nightly backup to casaos live) |
-| 1 | mosquitto | not started |
+| 1 | mosquitto | **done 2026-10-30**: broker on the laptop; casaos container left running idle for rollback |
 | 2 | zigbee2mqtt | not started |
 | 3 | matter-server | not started |
 | 4 | home-assistant | not started |
@@ -41,8 +41,8 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
   device list and secrets must live outside it: `devices.yaml`, `groups.yaml` and `secret.yaml`
   (`mqtt_password`, `network_key`, `pan_id`, `ext_pan_id`) in `/var/lib/zigbee2mqtt`.
 - **Broker hostname:** HA's MQTT entry (`broker: mosquitto`) and z2m (`mqtt://mosquitto:1883`) use the
-  old Docker DNS name. The module maps `mosquitto` in `/etc/hosts` → casaos `192.168.14.82` until Phase
-  1, then `127.0.0.1`. **Neither app's config needs editing for the broker move.**
+  old Docker DNS name. On the laptop the module maps `mosquitto` → `127.0.0.1` (since Phase 1); on casaos
+  `extra_hosts` maps it → `192.168.11.21`. **Neither app's config was edited for the broker move.**
 - **matter-server** runs with `DynamicUser`; state is `/var/lib/private/matter-server` (copy the casaos
   `/data` contents there, minus `credentials/` which the module keeps in its cache dir).
 - **HA custom components:** the module only prunes *symlinks* in `custom_components`, so copied dirs
@@ -64,13 +64,30 @@ General deploy: per [hosts/homelab-notebook/README.md](../../hosts/homelab-noteb
 diff box vs repo, `systemd-run` switch). Pre-build first:
 `nix build path:.#nixosConfigurations.homelab-notebook-ha-preview.config.system.build.toplevel`.
 
-**Phase 1 — mosquitto.** For each user in casaos `/footage/services/mosquitto/config/passwd`
-(`zigbee2mqtt`, `homeassistant`, `dgmneto`), write the hash part (after `user:`) to
-`/etc/mosquitto-secrets/<user>.hash` on the laptop (root, 0600, readable by mosquitto). Set
-`mosquitto.enable = true` and deploy: the hosts entry flips to `127.0.0.1`, but casaos' containers still
-use Docker DNS. Then point HA's MQTT entry at `192.168.11.21` and z2m's `mqtt.server` at
-`mqtt://192.168.11.21:1883` on casaos, `docker restart z2mqtt` (it republishes ~253 discovery configs), and
-check that no Zigbee entities are `unavailable`. Rollback: revert those two settings.
+**Phase 1 — mosquitto (done 2026-10-30, as actually run).**
+1. Hashes: pipe casaos `passwd` straight into the laptop, one root-0600 file per user:
+   `ssh casaos 'sudo cat /footage/services/mosquitto/config/passwd' | ssh homelab-notebook 'sudo install -d -m 700 /etc/mosquitto-secrets && while IFS=: read -r u h; do printf %s "$h" | sudo install -m 600 /dev/stdin /etc/mosquitto-secrets/$u.hash; done'`
+   (systemd `LoadCredential` reads them as root; the generated `passwd-0` came out 373 B, same as casaos).
+2. `mosquitto.enable = true` in `flake.nix` → deploy. Then `systemctl stop mosquitto`, copy casaos'
+   live `/footage/services/mosquitto/data/mosquitto.db` to `/var/lib/mosquitto/mosquitto.db` (owner
+   `mosquitto`, 0600), and start it again. Retained state carried over: **265** `homeassistant/#` discovery
+   configs on both brokers, so HA never had to wait for a z2m republish.
+3. Cutover without touching either app's config: added to both casaos compose files (z2mqtt, homeassistant)
+   ```yaml
+       extra_hosts:
+         - "mosquitto:192.168.11.21"
+   ```
+   and `sudo docker compose -f /home/dgmneto/homelab/services/<svc>/compose.yaml up -d` (**`-f`, not `cd`:
+   `claude` can't enter `/home/dgmneto`**). `/etc/hosts` beats Docker DNS: `getent hosts mosquitto` in
+   the container → `192.168.11.21`. Committed in the server repo (`511e3d6`, local; `backup.sh` pushes Sundays).
+4. Verified: z2m `bridge/state` online + `health_check` healthy via the new broker; 76 `zigbee2mqtt/#` msgs in
+   20 s; casaos broker got 0 clients after the cutover; no MQTT errors in the HA log.
+- **Downtime:** z2m ~30 s. **HA ~3m45s** (21:34:06 → 21:37:50): recreating the LinuxServer container runs a
+  one-off "New container detected, fixing python package permissions" pass before HA starts. Budget for
+  that on any HA container *recreate* (a plain restart doesn't do it).
+- Clients reach the laptop NATed: z2m appears as `192.168.11.13` (bridge network), HA as `192.168.15.73`.
+- **Rollback:** delete the `extra_hosts` block in both compose files and `up -d`. The casaos broker is still running.
+  Its retained state is as of the cutover, so `docker restart z2mqtt` afterwards.
 
 **Phase 2 — zigbee2mqtt.** `docker compose down` z2mqtt on casaos. Copy `/footage/services/z2mqtt/data`
 to `/var/lib/zigbee2mqtt` (incl. `database.db`, `coordinator_backup.json`, `state.json`,
@@ -113,4 +130,5 @@ via HACS.
 1. ~~DHCP reservation~~ for `192.168.11.21`: done by the user 2026-10-30 (laptop still leases .21 from 192.168.11.1, 24h lease).
 2. ~~Backup~~: done, see above.
 3. An off-host copy of the latest HA backup is at `homelab-notebook:/var/backups/ha-migration/`.
-4. Check for a `permit_join` complaint at Phase 2: the NixOS z2m module emits `permit_join: false`, which z2m 2.x removed.
+4. Phase 5: `docker compose down` the idle casaos mosquitto.
+5. Check for a `permit_join` complaint at Phase 2: the NixOS z2m module emits `permit_join: false`, which z2m 2.x removed.

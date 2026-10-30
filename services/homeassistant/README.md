@@ -21,7 +21,8 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 ## Integrations
 - **Zigbee:** HA ← MQTT ← zigbee2mqtt. z2mqtt publishes to the `mosquitto` broker (`zigbee2mqtt` base topic) with HA discovery enabled; HA's MQTT integration subscribes.
 - **Matter:** HA ← matter-server websocket at `ws://192.168.15.25:5580/ws` (matter-server `stable`).
-- Broker = `mosquitto` (`192.168.14.82:1883`, anonymous disabled — auth required).
+- Broker = `mosquitto` → since 2026-10-30 **homelab-notebook `192.168.11.21:1883`** via compose `extra_hosts` (MQTT entry still says `mosquitto`); anonymous disabled, auth required.
+- **Recreating this container costs ~4 min:** the LinuxServer image re-fixes Python package permissions on a new container before HA starts.
 
 ## Quirks / runbook
 - **`/footage` full → HA crash-loop.** HA's config is bind-mounted on the `/footage` LVM volume (`/footage/services/homeassistant/config`). When `/footage` fills to 100%, HA fails to write its SQLite recorder DB / config and crash-loops with `OSError: [Errno 28] No space left on device`, appearing "down" even though `/` has plenty of free space. **Check `df -h /footage` first.** Past recurring filler was the `openclaw` `chrome.service` crash-loop (see memory note) — `openclaw` was decommissioned 2026-08-03, so that specific cause no longer applies, but the "check `/footage` first" advice still holds for whatever fills it next.

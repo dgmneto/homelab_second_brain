@@ -1,6 +1,6 @@
 # homelab-notebook — NixOS host (added 2026-10-08)
 
-Second host. Runs [hermes](../../services/hermes/README.md) and [pihole](../../services/pihole/README.md) (tailnet DNS, ports 53 + 80) natively (no Docker). Hermes can SSH to
+Second host. Runs [hermes](../../services/hermes/README.md), [pihole](../../services/pihole/README.md) (tailnet DNS, ports 53 + 80) and, since 2026-10-30, [mosquitto](../../services/mosquitto/README.md) (1883; HA-stack migration in progress, see [MIGRATION.md](../../services/homeassistant/MIGRATION.md)) natively (no Docker). Nightly `homelab-backup.timer` pushes HA-stack state to casaos. Hermes can SSH to
 [casaos](../casaos/README.md) as user `hermes` (docker group, no sudo) and **pushes to this repo**,
 so `git pull --rebase` before editing.
 

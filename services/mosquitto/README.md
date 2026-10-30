@@ -2,6 +2,13 @@
 
 Eclipse Mosquitto — the MQTT broker for the homelab. Central message bus: zigbee2mqtt publishes, Home Assistant subscribes.
 
+> **Moved 2026-10-30 to homelab-notebook** (NixOS `services.mosquitto`, `hosts/homelab-notebook/nixos/home-automation.nix`):
+> `192.168.11.21:1883`, users `zigbee2mqtt`/`homeassistant`/`dgmneto` (hashes in root-only
+> `/etc/mosquitto-secrets/<user>.hash`, never in the repo), `readwrite #` ACL each, persistence in
+> `/var/lib/mosquitto/mosquitto.db`, logs `journalctl -u mosquitto`. casaos clients reach it as `mosquitto` via
+> compose `extra_hosts`. The casaos container below still runs **idle, for rollback only** (Phase 5 removes it).
+> Runbook: [MIGRATION.md](../homeassistant/MIGRATION.md). The rest of this file describes the casaos container.
+
 ## Image
 `eclipse-mosquitto:latest` (**unpinned**)
 
@@ -42,7 +49,9 @@ Pre-change copy: `/mosquitto/config/mosquitto.conf.bak-20260922`. The config dir
   now on; if it recurs, count discovery configs:
   `docker exec mosquitto mosquitto_sub -u zigbee2mqtt -P <pw> -t 'homeassistant/#' -W 5 | wc -l`
   (pw = `mqtt.password` in `/footage/services/z2mqtt/data/configuration.yaml`, read into a shell var,
-  never print it). `0` → `docker restart z2mqtt` republishes them. Note: publishing
+  never print it). **Don't grep/sed it out**: that yields a wrong value (YAML quoting) → "not authorised". Use z2m's parser:
+  `PW=$(sudo docker exec -w /app z2mqtt node -e 'const y=require("js-yaml");process.stdout.write(String(y.load(require("fs").readFileSync("/app/data/configuration.yaml","utf8")).mqtt.password))')`.
+  Since Phase 1 query the laptop broker with `-h 192.168.11.21` (265 configs on 2026-10-30). `0` → `docker restart z2mqtt` republishes them. Note: publishing
   `homeassistant/status online` by hand did **not** make z2m republish (waited 15s).
 - Single plain `1883` listener, no TLS — fine because traffic stays on the LAN/macvlan.
 - To add an MQTT user: `docker exec -it mosquitto mosquitto_passwd /mosquitto/config/passwd <user>` then restart. Do not commit the `passwd` file.

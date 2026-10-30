@@ -23,7 +23,7 @@ This is the knowledge layer.
 | [homeassistant](homeassistant/README.md) | casaos | docker |
 | [jellyfin](jellyfin/README.md) | casaos | docker |
 | [matter](matter/README.md) | casaos | docker |
-| [mosquitto](mosquitto/README.md) | casaos | docker |
+| [mosquitto](mosquitto/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30; idle casaos container kept for rollback) |
 | [nginxIntern](nginxIntern/README.md) | casaos | docker |
 | [nginxProd](nginxProd/README.md) | casaos | docker |
 | [overseerr](overseerr/README.md) | casaos | docker |

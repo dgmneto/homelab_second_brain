@@ -20,7 +20,7 @@ Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume the
 - Zigbee network: channel 25, pan_id 62.
 
 ## Integrations
-- **MQTT:** connects to broker at `mqtt://mosquitto:1883` (resolves to `192.168.14.82`) as user `zigbee2mqtt`, base topic `zigbee2mqtt`, `retain: true`. Password is in `configuration.yaml` (not reproduced here).
+- **MQTT:** connects to broker at `mqtt://mosquitto:1883` (since 2026-10-30 resolves to **homelab-notebook `192.168.11.21`** via compose `extra_hosts`; was `192.168.14.82`) as user `zigbee2mqtt`, base topic `zigbee2mqtt`, `retain: true`. Password is in `configuration.yaml` (not reproduced here).
 - **HA:** `homeassistant.enabled: true` → publishes HA MQTT-discovery messages. Flow: HA ← MQTT (mosquitto) ← z2mqtt.
 
 ## Quirks / runbook

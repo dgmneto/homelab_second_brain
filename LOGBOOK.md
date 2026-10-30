@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — HA migration Phase 1: mosquitto moved to homelab-notebook
+Laptop: hashes → `/etc/mosquitto-secrets/`, `mosquitto.enable = true` deployed, seeded with casaos' `mosquitto.db`
+(265 retained discovery configs on both). casaos: `extra_hosts: mosquitto:192.168.11.21` in z2mqtt + homeassistant
+compose, recreated with `docker compose -f … up -d` (server repo commit 511e3d6). Verified via the new broker: z2m online +
+health_check healthy, device traffic flowing, old broker 0 clients, no HA MQTT errors. Downtime: z2m ~30 s, HA ~3m45s
+(LSIO image permission pass on recreate). Details: `services/homeassistant/MIGRATION.md`.
+
 ## 2026-10-30 — HA migration: nightly laptop→casaos backup live; Phase 0 complete
 User approved creating the access. casaos: `nbbackup` user, write-only rrsync key from 192.168.11.21, prune cron.
 Laptop: deployed `home-automation.nix` (services still off) with the `homelab-backup` timer; verified the
