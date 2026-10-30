@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — HA migration: backup to casaos designed, access step pending
+User reserved 192.168.11.21 on the router and chose casaos `/footage` as the backup target, over the plain LAN
+(no Tailscale). Added the `homelab-backup` service+timer and pinned casaos' ed25519 host key (verified the same
+over the LAN and on the box: SHA256:Pi5MQV0M…) in `home-automation.nix`; the all-off config builds
+(EXIT=0). Creating the `nbbackup` user + forced-command key on casaos was **blocked by the permission
+classifier** (new cross-host access), so nothing was created on either host. Pending user approval; steps in
+`services/homeassistant/MIGRATION.md` open item 2. casaos has `/usr/bin/rrsync` (rsync 3.2.7), `/footage` 437G free.
 ## 2026-10-30 — HA stack → homelab-notebook: Phase 0 (groundwork, nothing switched)
 Planned moving mosquitto/z2mqtt/matter-server/homeassistant from casaos Docker to homelab-notebook
 NixOS in 5 phases; runbook + findings in `services/homeassistant/MIGRATION.md`. Verified from the laptop:

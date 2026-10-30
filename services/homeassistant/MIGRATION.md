@@ -12,7 +12,7 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 
 | Phase | Service | State |
 |---|---|---|
-| 0 | groundwork | **done 2026-10-30** except the DHCP reservation and the backup destination (see open items) |
+| 0 | groundwork | done 2026-10-30 (DHCP reserved by the user) except backup access (open item 2) |
 | 1 | mosquitto | not started |
 | 2 | zigbee2mqtt | not started |
 | 3 | matter-server | not started |
@@ -93,8 +93,14 @@ via HACS.
 
 ## Open items (need the user)
 
-1. **DHCP reservation** for `192.168.11.21` on the router — not done; nobody has documented router access.
-2. **Backup destination.** The laptop is a single HDD; casaos' copies were on RAID1. Matter fabric
-   loss = re-pair every device. Decide where nightly copies of `/var/lib/{hass,zigbee2mqtt,mosquitto,
-   private/matter-server}` go (casaos `/footage` via Tailscale SSH is the obvious one) **before Phase 3**.
+1. ~~DHCP reservation~~ for `192.168.11.21`: done by the user 2026-10-30 (laptop still leases .21 from 192.168.11.1, 24h lease).
+2. **Backup** (decided 2026-10-30: casaos `/footage`, plain SSH over the LAN; same network, so no
+   Tailscale). The `homelab-backup` service/timer (03:23 nightly) is in `home-automation.nix`, built but
+   **not deployed**. Still needed, and blocked on the user approving the new access: on casaos create system user
+   `nbbackup` (home `/footage/backups/homelab-notebook`, 0700) with one `authorized_keys` line
+   `command="/usr/bin/rrsync -wo /footage/backups/homelab-notebook",restrict,from="192.168.11.21" <pubkey>`;
+   on the laptop generate `/var/lib/homelab-backup/id_ed25519` (root 0700 dir); add casaos
+   `/etc/cron.d/homelab-notebook-backup` pruning `history/*` older than 14 days. **First-run check:** confirm
+   rrsync maps the absolute `/current/` and `--backup-dir=/history/<date>` inside its root. Restore note:
+   files land owned by `nbbackup`, so `chown` them back on restore. Must be working **before Phase 3**.
 3. An off-host copy of the latest HA backup is at `homelab-notebook:/var/backups/ha-migration/`.

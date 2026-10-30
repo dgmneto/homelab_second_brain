@@ -7,8 +7,11 @@
 let
   cfg = config.homelab.homeAutomation;
   casaos = {
+    lan = "192.168.11.13";
     mosquitto = "192.168.14.82";
   };
+  # State dirs copied nightly to casaos /footage (RAID1); this laptop is a single HDD.
+  backupDirs = [ "hass" "zigbee2mqtt" "mosquitto" "private/matter-server" ];
 in
 {
   options.homelab.homeAutomation = {
@@ -23,6 +26,45 @@ in
       # HA and z2m address the broker by its old Docker DNS name. Map it here so the
       # phase-1 cutover is a hosts change, not an edit of both apps' configs.
       networking.hosts.${if cfg.mosquitto.enable then "127.0.0.1" else casaos.mosquitto} = [ "mosquitto" ];
+
+      # Nightly push over the LAN (no Tailscale needed) to casaos user `nbbackup`, whose
+      # authorized_keys forces `rrsync -wo /footage/backups/homelab-notebook` (write-only,
+      # from 192.168.11.21 only). Key: /var/lib/homelab-backup/id_ed25519, generated on the box.
+      # current/ = latest mirror; history/<date>/ = files changed or deleted that night,
+      # pruned after 14 days by casaos /etc/cron.d/homelab-notebook-backup.
+      programs.ssh.knownHosts.casaos = {
+        hostNames = [ casaos.lan ];
+        publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBxYWEfoHxVn+vZRSFCbn14/EbX31lhVh6obxpumvldr";
+      };
+      systemd.services.homelab-backup = {
+        description = "Push home-automation state to casaos";
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        path = with pkgs; [ rsync openssh coreutils ];
+        serviceConfig.Type = "oneshot";
+        script = ''
+          cd /var/lib
+          dirs=()
+          for d in ${lib.escapeShellArgs backupDirs}; do
+            if [ -d "$d" ]; then dirs+=("$d"); fi
+          done
+          if [ ''${#dirs[@]} -eq 0 ]; then
+            echo "nothing to back up yet"
+            exit 0
+          fi
+          rsync -aR --delete --backup --backup-dir="/history/$(date +%F)" \
+            -e "ssh -i /var/lib/homelab-backup/id_ed25519 -o BatchMode=yes" \
+            "''${dirs[@]}" nbbackup@${casaos.lan}:/current/
+        '';
+      };
+      systemd.timers.homelab-backup = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "*-*-* 03:23";
+          Persistent = true;
+          RandomizedDelaySec = "20m";
+        };
+      };
     }
 
     (lib.mkIf cfg.mosquitto.enable {
