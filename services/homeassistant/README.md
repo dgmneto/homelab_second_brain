@@ -20,7 +20,7 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 
 ## Integrations
 - **Zigbee:** HA ← MQTT ← zigbee2mqtt. z2mqtt publishes to the `mosquitto` broker (`zigbee2mqtt` base topic) with HA discovery enabled; HA's MQTT integration subscribes.
-- **Matter:** HA ← matter-server websocket at `ws://192.168.15.25:5580/ws` (matter-server `stable`).
+- **Matter:** HA ← matter-server websocket at `ws://192.168.11.21:5580/ws` (homelab-notebook since 2026-10-30; was `192.168.15.25`). No Matter devices commissioned yet.
 - Broker = `mosquitto` → since 2026-10-30 **homelab-notebook `192.168.11.21:1883`** via compose `extra_hosts` (MQTT entry still says `mosquitto`); anonymous disabled, auth required.
 - **Recreating this container costs ~4 min:** the LinuxServer image re-fixes Python package permissions on a new container before HA starts.
 

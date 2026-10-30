@@ -140,8 +140,17 @@ in
       services.matter-server = {
         enable = true;
         openFirewall = true;
-        extraArgs.primary-interface = "enp2s0";
+        extraArgs = {
+          primary-interface = "enp2s0";
+          # The module defaults to 4939; the fabric admin in casaos' storage was created
+          # under upstream's default 0xFFF1. A mismatch makes the server try a new admin on
+          # fabric 1 and crash ("fabricId of 1 collides with an existing FabricAdmin").
+          vendorid = 65521;
+        };
       };
+      # Discovery is mDNS: multicast answers arrive as new inbound packets, so
+      # conntrack won't pass them. (Operational traffic is outbound UDP, fine.)
+      networking.firewall.allowedUDPPorts = [ 5353 ];
     })
 
     (lib.mkIf cfg.homeAssistant.enable {

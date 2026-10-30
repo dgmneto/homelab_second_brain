@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-10-30 — HA migration Phase 3
+Deployed `matter.enable = true` + `vendorid = 65521` + firewall 5353/udp. `/var/lib/private/matter-server` staged from casaos (re-staged after the first crashed start). matter-server active, :5580 listening, no failed units. Backup run OK (now includes private/matter-server).
+
 ## 2026-10-30 — HA migration Phase 2
 Deployed `zigbee2mqtt.enable = true` (flake.nix + home-automation.nix copied; pan_id/ext_pan_id made literals after the first start refused the `!secret` refs). `/var/lib/zigbee2mqtt` 317:317 0700 staged before the switch. Firewall +8080. No failed units. Backup run OK (mosquitto + zigbee2mqtt).
 

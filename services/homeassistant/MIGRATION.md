@@ -15,7 +15,7 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 | 0 | groundwork | **done 2026-10-30** (DHCP reserved, nightly backup to casaos live) |
 | 1 | mosquitto | **done 2026-10-30**: broker on the laptop; casaos container removed 21:42 (data kept in `/footage/services/mosquitto`) |
 | 2 | zigbee2mqtt | **done 2026-10-30**: on the laptop, network resumed, casaos container removed (data kept) |
-| 3 | matter-server | not started |
+| 3 | matter-server | **done 2026-10-30**: on the laptop, fabric kept (0 devices commissioned), HA connected |
 | 4 | home-assistant | not started |
 | 5 | decommission on casaos | not started |
 
@@ -116,9 +116,29 @@ That's what happened on the first try.)
 - **Rollback:** `systemctl stop zigbee2mqtt` on the laptop and set the toggle back; on casaos `docker compose -f …/z2mqtt/compose.yaml up -d`
   (its data dir is untouched as of the cutover; later device renames live only in the laptop's `devices.yaml`); proxy host 21 back to `192.168.14.96`.
 
-**Phase 3 — matter.** First prove mDNS/IPv6 (see findings). Stop casaos `matter-server`; keep an
-untouched dated copy of `/footage/services/matter/data`; copy it into `/var/lib/private/matter-server`;
-enable and deploy; change HA's Matter URL to `ws://192.168.11.21:5580/ws`. Rollback: from the untouched copy.
+**Phase 3 — matter (done 2026-10-30, as actually run).**
+- **There were no Matter devices**: the fabric JSON has `nodes: {}` (`last_node_id` 1, so one was paired once and
+  later removed), and HA had 0 matter devices/entities. Zero device risk; the fabric was still preserved for future devices.
+- Reachability (no device to test): Thread border router `fe80::67:28bc:f5ae:b3b6` (MAC `c4:f7:c1…`) pings at
+  ~1 ms, and `fde9:b6c5:757::/64` routes via it. **The first real commissioning is the true mDNS/Thread test.** If it
+  fails, suspect UDP 5353 inbound / the `enp2s0` pin first.
+1. Untouched copy: casaos `/footage/services/matter/data.bak-pre-move-20261030`. `compose down` matter, then
+   (own ssh) tar `data/` minus `credentials/` → laptop `/var/lib/private/matter-server` (DynamicUser; systemd
+   chowns it on start).
+2. Enable + deploy. **First start crashed**: `ValueError: Provided fabricId of 1 collides with an existing
+   FabricAdmin instance!`. The NixOS module passes `--vendorid=4939`, but the Docker image used upstream's default
+   **65521 (0xFFF1)**, and the stored admin is (65521, fabric 1). Fix: `extraArgs.vendorid = 65521`.
+   **The crashed start had rewritten `chip.json`** (checksum changed), so I wiped the dir and re-copied from
+   casaos before the good start. Good start: `Loaded 0 nodes`, `Matter Server successfully initialized`, :5580 listening.
+3. First boot's PAA fetch from GitHub hit a one-off DNS timeout ("Fetched 0 PAA root certificates from Git"), but
+   148 certs came from DCL into `/var/cache/private/matter-server/certs`, and later starts skip the fetch for 24 h. Harmless.
+4. HA: `docker stop homeassistant` (plain stop/start, **not** a recreate → no LSIO permission pass), backed up
+   `.storage/core.config_entries` (`.bak-pre-matter-move`), and jq-set the matter entry's `data.url` →
+   `ws://192.168.11.21:5580/ws`. Same entry count, ownership kept. Started again: HA down 22:23:51 → ~22:25.
+   Verified: established TCP from HA (`192.168.15.73`) to laptop :5580 and :1883; no matter/mqtt errors in HA's log.
+5. Firewall: matter phase opens 5580/tcp (module) + **5353/udp** (mDNS answers are new inbound packets).
+- **Rollback:** casaos `docker compose -f …/matter/compose.yaml up -d` (its data is as of the cutover), and put
+  the HA url back to `ws://192.168.15.25:5580/ws` with HA stopped.
 
 **Phase 4 — Home Assistant.** Fix `trusted_proxies`. `docker compose down` HA on casaos, final rsync of
 `/footage/services/homeassistant/config` → `/var/lib/hass` (chown `hass`), enable and deploy. Repoint

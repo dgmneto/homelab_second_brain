@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — HA migration Phase 3: matter-server moved to homelab-notebook
+No Matter devices were commissioned (0 nodes; HA 0 matter devices). TBR reachable (1 ms) from the laptop. casaos container
+removed (pre-move copy kept), data → `/var/lib/private/matter-server`. First start crashed on a vendor-ID mismatch
+(module 4939 vs the fabric's 0xFFF1). Fixed with `vendorid = 65521`, re-copied the data (the crash had rewritten chip.json),
+then a clean start. HA's matter URL → `ws://192.168.11.21:5580/ws` via `.storage` edit with HA stopped (~1 min down).
+Verified HA connected to the laptop :5580 and :1883. Backup now includes matter. Details: `services/homeassistant/MIGRATION.md`.
+
 ## 2026-10-30 — HA migration Phase 2: zigbee2mqtt moved to homelab-notebook; casaos mosquitto removed
 casaos mosquitto `compose down` (0 clients since Phase 1; data kept). z2m: casaos container down 21:53:30, data staged
 into `/var/lib/zigbee2mqtt` with `z2m-split.js` (SETTINGS MATCH), deployed. First start refused (pan_id/ext_pan_id

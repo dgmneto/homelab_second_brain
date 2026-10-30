@@ -2,6 +2,14 @@
 
 Python Matter Server — bridges Matter/Thread devices to Home Assistant over a websocket. HA's Matter integration drives commissioning and control through this server.
 
+> **Moved 2026-10-30 to homelab-notebook** (NixOS `services.matter-server`, `hosts/homelab-notebook/nixos/home-automation.nix`):
+> `ws://192.168.11.21:5580/ws` (HA's matter entry points here). State `/var/lib/private/matter-server` (DynamicUser),
+> PAA certs `/var/cache/private/matter-server/certs`, logs `journalctl -u matter-server`. **Must run with
+> `--vendorid=65521`** (the fabric's admin was created under 0xFFF1; the module default 4939 crashes it).
+> `--primary-interface=enp2s0`, firewall 5580/tcp + 5353/udp. **0 Matter devices commissioned** as of the move
+> (fabric kept). casaos container removed; pre-move copy `/footage/services/matter/data.bak-pre-move-20261030`.
+> Below = the old casaos setup.
+
 ## Image
 `ghcr.io/matter-js/python-matter-server:stable` (`stable` channel — moving tag, not a fixed version)
 
