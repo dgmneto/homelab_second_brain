@@ -5,6 +5,7 @@ Stdlib only. Usage:
   python app.py                      # loop forever (fetch every FETCH_EVERY s) + HTTP server
   python app.py --once [--force]     # one fetch/generate cycle, then exit (--force: ignore hash/age)
   python app.py --once --force --data fixture.json   # generate from a fixture instead of live data
+  python app.py --once --force --fresh               # new design from prompt.md only (ignore previous screen)
 """
 import argparse
 import datetime as dt
@@ -167,10 +168,12 @@ def data_hash(data):
 
 # ---------- LLM ----------
 
-def llm(data, feedback=None):
+def llm(data, feedback=None, previous=None):
+    prev = ("\n\nPrevious screen (keep its layout, update the content):\n```html\n" + previous + "\n```"
+            if previous else "")
     messages = [{"role": "system", "content": open(PROMPT_FILE).read()},
                 {"role": "user", "content": "Design the screen for this data:\n```json\n"
-                 + json.dumps(data, indent=1, ensure_ascii=False) + "\n```"}]
+                 + json.dumps(data, indent=1, ensure_ascii=False) + "\n```" + prev}]
     if feedback:
         messages += [{"role": "assistant", "content": feedback[0]},
                      {"role": "user", "content": f"That output was rejected: {feedback[1]}. "
@@ -240,7 +243,7 @@ def quiet_now():
     return a <= h < b if a <= b else (h >= a or h < b)
 
 
-def cycle(force=False, fixture=None):
+def cycle(force=False, fixture=None, fresh=False):
     data = json.load(open(fixture)) if fixture else collect()
     write_json("last_data.json", data)
     h = data_hash(data)
@@ -259,7 +262,8 @@ def cycle(force=False, fixture=None):
     feedback = None
     for attempt in (1, 2):
         try:
-            raw = llm(data, feedback)
+            previous = None if fresh or not cur or cur.get("model") == "fallback" else cur["html"]
+            raw = llm(data, feedback, previous)
         except Exception as e:
             log("llm call failed:", f"{type(e).__name__}: {e}"[:300])
             break
@@ -322,10 +326,11 @@ def main():
     p.add_argument("--once", action="store_true")
     p.add_argument("--force", action="store_true")
     p.add_argument("--data", help="fixture JSON to use instead of live fetches")
+    p.add_argument("--fresh", action="store_true", help="don't show the LLM the previous screen (after prompt changes)")
     a = p.parse_args()
     os.makedirs(DATA_DIR, exist_ok=True)
     if a.once:
-        cycle(a.force, a.data)
+        cycle(a.force, a.data, a.fresh)
         return
     srv = http.server.ThreadingHTTPServer(("0.0.0.0", 8080), Handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()

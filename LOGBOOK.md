@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — AI Board live on the TRMNL
+OpenRouter key installed (server `.env` only), prompt tuned over 4 reviewed renders (2-bit legibility,
+overflow, single-file bind-mount gotcha), device 7 playlist switched to AI Board; Morning Board kept
+as backup. Detail in `services/trmnl-ai/LOGBOOK.md`.
+
 ## 2026-10-30 — AI-generated TRMNL screen (trmnl-ai + Terminus extension 2)
 New casaos container `trmnl-ai` (172.21.0.141) fetches Open-Meteo + TfL, asks OpenRouter for the
 screen HTML, serves it to Terminus poll extension 2 "AI Board" (screen 6). Pipeline verified end to

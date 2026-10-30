@@ -1,8 +1,11 @@
 # trmnl-ai — LLM-designed TRMNL screen ("AI Board")
 
+![latest reviewed render](ai-board-preview.png)
+
 Small Python container on **casaos** that fetches weather + TfL data, asks an LLM via **OpenRouter**
 to design the whole TRMNL screen as HTML, and serves it to Terminus. Terminus renders it to PNG for
-device 7 through poll extension **2 "AI Board"**. Created 2026-10-30. The fixed-layout Liquid
+device 7 through poll extension **2 "AI Board"** (screen 6) — **on device 7's playlist since
+2026-10-30** (playlist 4, item 5). The fixed-layout Liquid
 [Morning Board](../terminus/extensions/morning_board/README.md) (extension 1) is the backup.
 
 ```
@@ -21,6 +24,7 @@ trmnl-ai (172.21.0.141, no host port)                        Terminus (casaos)
 - Re-creation source (mirror, keep in sync): [src/](src/). **Edit on the server, then copy back here**
   (or edit here and `tar c … | ssh casaos 'sudo -u dgmneto tar x -C …'`).
 - Image `python:3.13-slim-bookworm`, stdlib only (no pip), watchtower **disabled**, 256 MB limit.
+  The whole service dir is mounted at `/app` (ro) — see gotcha on single-file mounts.
 - Endpoints (internalNetwork only): `/screen.json`, `/data.json` (last fetched data), `/preview`
   (HTML wrapped in an 800×480 `.screen` with plugins.css, red outline — for browser debugging).
 
@@ -34,8 +38,10 @@ add a function + entry in `collect()` in `app.py` and mention it in `prompt.md`.
 
 ## LLM / cost
 - `OPENROUTER_MODEL` in `.env` (default `anthropic/claude-haiku-5.5`, $0.1/$0.5 per M tokens on
-  2026-10-30; `anthropic/claude-sonnet-5.5` is $2/$10). A call is ~2.5k tokens in + ~2-4k out.
-  Calls are gated: data hash change (ignores the clock/hourly temps) at most every `MIN_GAP`=20 min,
+  2026-10-30; `anthropic/claude-sonnet-5.5` is $2/$10). Measured: ~3.9k tokens in + 3.5–5k out
+  = **~$0.002–0.003 per call** on Haiku, ~6 s.
+  The previous screen's HTML is sent along ("keep its layout") so the design stays stable between
+  runs; `--fresh` omits it. Calls are gated: data hash change (ignores the clock/hourly temps) at most every `MIN_GAP`=20 min,
   forced every `MAX_AGE`=60 min, none during `QUIET_HOURS`=0-6 → ≲ 25 calls/day.
 - Every call logs `in=… out=… cost=$…` (`docker logs trmnl-ai`).
 - Key: 1Password **`Homelab/OpenRouter - TRMNL`** (field `credential`) → `.env` via `env.tpl`.
@@ -49,9 +55,10 @@ add a function + entry in `collect()` in `app.py` and mention it in `prompt.md`.
 ## Iterating on the design (user feedback loop)
 1. Add the feedback as a rule under **"User feedback"** at the bottom of `prompt.md` (on the server;
    it is re-read every call, no restart).
-2. Regenerate + rebuild now instead of waiting:
+2. Regenerate + rebuild now instead of waiting (`--fresh` after a layout change, so the model
+   doesn't just copy the previous screen):
    ```
-   ssh casaos 'docker exec trmnl-ai python /app/app.py --once --force &&
+   ssh casaos 'docker exec trmnl-ai python /app/app.py --once --force --fresh &&
      echo "Terminus::Jobs::Extensions::Screen.new.perform(2, 12)" | docker exec -i terminus bundle exec hanami console >/dev/null'
    ```
 3. Look at the PNG: `select image_data->>'id' from screen where extension_id=2` →
@@ -67,6 +74,16 @@ With no key and no previous screen → deterministic fallback (date + line statu
 unavailable — fallback").
 
 ## Gotchas
+- **Single-file bind mounts pin the inode.** The first compose mounted `./prompt.md` and `./app.py`
+  as files; replacing them (tar, `sed -i`, editors) left the container reading the OLD prompt
+  (spotted because `in=` tokens didn't change after a prompt edit). Now the dir is mounted. Check:
+  `docker exec trmnl-ai grep -c '<new rule text>' /app/prompt.md`.
+- **2-bit thresholding destroys thin/small/gray text** (first renders had broken glyphs): prompt now
+  requires black text only, ≥16 px, weight ≥600 under 24 px.
+- **The LLM cannot measure its layout.** Without a rule it overflowed right/bottom (cut-off hourly
+  strip). The prompt forces a fixed 800×480 root and explicit per-section pixel heights summing to
+  ≤456. There is no automated overflow check yet — always view the PNG after a prompt change.
+  (Possible later fix: render-check with headless Chromium and retry.)
 - **Rows collapse to content width**: the Terminus layout centers the body, and framework `layout`
   containers shrink children — every full-width row needs `width:100%` (now in the prompt).
 - Terminus Liquid does **not** HTML-escape `{{ source_1.html }}` — that is what makes this work.
@@ -76,6 +93,7 @@ unavailable — fallback").
   Terminus login needed. It has `extension_model` (2,12); keep `model_ids:[12]` on any API PATCH.
 
 ## Rollback to Morning Board
-Terminus UI → Playlists → device_7: swap the item back to screen 5 "Extension Morning Board"
-(or in console set `playlist_item` 5's `screen_id` back to 5). Stop the generator:
+The swap was done in SQL: `update playlist_item set screen_id=6 where id=5` (was 5). Roll back:
+`docker exec terminus-db psql -U terminus -d terminus -c "update playlist_item set screen_id=5, updated_at=now() where id=5"`
+(or Terminus UI → Playlists → device_7). Stop the generator:
 `sudo -u dgmneto sh -c "cd /home/dgmneto/homelab/services/trmnl-ai && docker compose stop"`.

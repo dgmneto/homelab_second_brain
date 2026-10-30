@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Device 7 playlist → AI Board
+`update playlist_item set screen_id=6 where id=5` (playlist 4 `device_7`; was screen 5 Morning
+Board). Morning Board extension/screen kept as backup. Confirmed the scheduler rebuilds extension 2
+every 10 min on its own (exchange refreshed 12:11:57, screen 6 updated 12:12:09).
+
 ## 2026-10-30 — Extension 2 "AI Board" (LLM-designed screen)
 Created poll extension 2 `ai_board` via `hanami console` (`services/trmnl-ai/src/create_extension.rb`):
 one exchange `http://trmnl-ai:8080/screen.json` every 10 min, `extension_model` → og_plus (12),

@@ -5,21 +5,31 @@ weather means for them and whether the tube (Victoria line, Seven Sisters → Ki
 
 ## Output contract (hard rules)
 - Return ONLY HTML in one ```html code block. No explanations.
-- Root element: `<div class="view view--full"> … </div>`. It is placed inside the device's
-  `.screen` wrapper, which already loads the TRMNL framework CSS (`plugins.css`) and Inter-like fonts.
-- Canvas is exactly **800 × 480 px, landscape**. Everything must fit — no scrolling, no clipped
-  text. Leave ~12 px padding on every edge. Prefer fewer, bigger things over many small ones.
+- Root element — use exactly this opening tag:
+  `<div class="view view--full" style="width:800px;height:480px;box-sizing:border-box;padding:12px 14px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between">`
+  It is placed inside the device's `.screen` wrapper, which already loads the TRMNL framework CSS.
+- Canvas is exactly **800 × 480 px, landscape**; usable area inside the padding is **772 × 456**.
+  Everything must fit — nothing may cross the right/bottom edge, no clipped text. Add up widths:
+  side-by-side columns must total ≤ 772 px including gaps and borders (use `box-sizing:border-box`
+  everywhere, `flex:1` + `min-width:0` for columns). Prefer fewer, bigger things over many small ones.
+- **Height budget (most common failure is the bottom row being cut off):** give every top-level
+  section an explicit `height:…px` with `overflow:hidden`, and make the heights + gaps sum to
+  ≤ 456 px. Budget text as lines × line-height (a 16–18 px bold line ≈ 24 px, a 24 px line ≈ 32 px)
+  and assume long text wraps — at ~330 px column width a 17 px bold line holds ~32 characters.
+  Write short text so it fits; drop low-priority details (crowding, sunrise) before shrinking type.
 - Display is **2-bit grayscale**: only `#000`, `#555`, `#aaa`, `#fff`. No other colors, no
   gradients, no shadows, no opacity. Black on white by default; inverted (white on black) blocks are
-  great for emphasis.
+  great for emphasis. **All text must be pure black (or pure white on black)** — gray text gets
+  dithered into broken pixels on the panel. Grays are only for fills, borders and icons.
 - No `<script>`, no `<img>`, no external URLs/fonts. Unicode symbols (☀ ☁ ☂ ❄ ⚠ ✓ ↑ ↓ →) and
   inline `<svg>` with simple shapes in the 4 grays are fine.
 - Use inline `style` with flexbox/grid for layout (`display:flex; justify-content:space-between`
   — the framework's `flex--between` helper does NOT work here). The page body centers its content
   and framework `layout` containers shrink children to their content: give the root and every
-  full-width row an explicit `width:100%` (or `width:776px`), `box-sizing:border-box`, and set
-  `height:480px` on the root so sections can be spaced with `justify-content:space-between`. Minimum text size 14 px; nothing
-  thinner than 2 px for lines.
+  full-width row inside the root an explicit `width:100%` and `box-sizing:border-box`.
+- **Legibility on the panel (it is thresholded to 2-bit, anti-aliasing is lost):** minimum text
+  size **16 px**; any text under 24 px must be `font-weight:600` or bolder; never use light/regular
+  weights for small text; nothing thinner than 2 px for lines.
 - Framework classes you may use for typography: `title`, `title--small`, `value`, `value--xxlarge`,
   `value--xlarge`, `value--large`, `value--small`, `label`, `label--inverted`, `description`.
   Plain inline font sizes are fine too.
@@ -46,6 +56,8 @@ weather means for them and whether the tube (Victoria line, Seven Sisters → Ki
 2. Hierarchy over decoration: one huge number (the temperature), a strong verdict, then details.
 3. Write like a friend: short, concrete, no jargon. Abbreviate TfL boilerplate.
 4. Vary nothing just for novelty — a consistent layout day to day is easier to read at a glance.
+   If a "previous screen" is given, keep its structure and only change content, emphasis, or fix
+   rule violations.
 
 ## User feedback (newest last — these override anything above)
 - (none yet)

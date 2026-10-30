@@ -17,8 +17,9 @@ services:
       DATA_DIR: /data
       PROMPT_FILE: /app/prompt.md
     volumes:
-      - ./app.py:/app/app.py:ro
-      - ./prompt.md:/app/prompt.md:ro
+      # Whole dir, not single files: a single-file bind mount pins the inode, so an edit that
+      # replaces the file (tar, sed -i, most editors) is invisible to the container until recreate.
+      - ./:/app:ro
       - /footage/services/trmnl-ai/data:/data
     networks:
       intern:
