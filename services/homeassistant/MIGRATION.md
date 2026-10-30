@@ -108,7 +108,8 @@ That's what happened on the first try.)
    (the race logs a harmless winston "write after end").
 5. Log must say `[INIT TC] Adapter network matches config` and `zigbee-herdsman started (resumed)`, then
    `Currently 26 devices are joined` and `Connected to MQTT server`. Verified: bridge online, health_check healthy,
-   265 discovery configs, frontend 200.
+   265 discovery configs, frontend 200. HA (22:07:54 `core.restore_state`): 188 mqtt entities, **0 unavailable**, 18 unknown
+   (= pre-move baseline: event/button entities), all 188 updated after 21:56.
 6. nginxIntern proxy host 21 (`z2m.intern.dgmneto.com`) `192.168.14.96` → `192.168.11.21:8080` (DB row + `21.conf` +
    reload; recipe in [nginxIntern README](../nginxIntern/README.md#editing-a-proxy-host-without-the-ui)). 200 through the proxy.
 - **Zigbee downtime:** 21:53:30 → 21:56:00 (~2.5 min; ~1 min was the pan_id fix).
