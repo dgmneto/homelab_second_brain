@@ -36,6 +36,7 @@ This is the knowledge layer.
 | [sonarr](sonarr/README.md) | casaos | docker |
 | [tailscale](tailscale/README.md) | casaos + **homelab-notebook** | casaos: native apt + systemd (not docker); notebook: NixOS module |
 | [terminus](terminus/README.md) | casaos | docker |
+| [trmnl-ai](trmnl-ai/README.md) | casaos | docker (LLM-designed TRMNL screen for terminus) |
 | [watchtower](watchtower/README.md) | casaos | docker |
 | [z2mqtt](z2mqtt/README.md) | casaos | docker |
 

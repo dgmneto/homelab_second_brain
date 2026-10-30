@@ -70,6 +70,10 @@ Terminus device **id 7**, MAC `7C:4F:AD:20:A9:6C`, firmware **1.8.17**, model `o
 `firmware_update=false`, refresh 900 s, playlist `device_7`.
 
 ### Screens
+- **AI Board** (extension id 2, screen 6) — HTML designed by an LLM in the
+  [trmnl-ai](../trmnl-ai/README.md) container; the extension just polls
+  `http://trmnl-ai:8080/screen.json` and outputs `{{ source_1.html }}`. Planned to replace Morning
+  Board on device 7's playlist once the OpenRouter key is in (see trmnl-ai LOGBOOK).
 - **Morning Board** (extension id 1) — weather + Victoria/Piccadilly/Central + Seven Sisters→King's
   Cross commute verdict. Only item on device 7's playlist. Details, sources and gotchas:
   [extensions/morning_board/README.md](extensions/morning_board/README.md).

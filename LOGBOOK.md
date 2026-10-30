@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — AI-generated TRMNL screen (trmnl-ai + Terminus extension 2)
+New casaos container `trmnl-ai` (172.21.0.141) fetches Open-Meteo + TfL, asks OpenRouter for the
+screen HTML, serves it to Terminus poll extension 2 "AI Board" (screen 6). Pipeline verified end to
+end with the fallback HTML; waiting on the user's OpenRouter key before the first LLM screen and the
+playlist swap. Detail in `services/trmnl-ai/` and terminus LOGBOOK.
+
 ## 2026-10-28 — Pi-hole ad-blocking DNS on homelab-notebook
 Native NixOS Pi-hole (see `services/pihole/`), deployed and verified from casaos (ads → 0.0.0.0 over
 tailnet + LAN, UI password enforced, weekly gravity timer). Tailscale admin-console DNS (global

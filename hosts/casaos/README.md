@@ -82,7 +82,8 @@ update fine — but re-import 1Password's current key to clear it.
 ## Service groups
 - **Media (arr stack):** prowlarr, sonarr, radarr, bazarr, qbittorrent, overseerr, plex.
 - **Home automation:** homeassistant, zigbee2mqtt (`z2mqtt`), mosquitto (MQTT broker), matter-server.
-- **Displays:** terminus (TRMNL BYOS server, :2300).
+- **Displays:** terminus (TRMNL BYOS server, :2300), trmnl-ai (LLM screen generator for it,
+  internalNetwork 172.21.0.141:8080, no host port).
 - **Infra:** nginxProd, nginxIntern, ddns, watchtower, autoheal, gluetunProtonVPN.
 
 ## Storage layout (critical for outages)

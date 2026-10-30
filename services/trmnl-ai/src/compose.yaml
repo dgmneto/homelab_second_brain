@@ -1,0 +1,40 @@
+# trmnl-ai: LLM-designed TRMNL screen. Fetches Open-Meteo + TfL, asks OpenRouter for HTML, serves it at
+# http://trmnl-ai:8080/screen.json, which the Terminus poll extension "AI Board" renders for the device.
+# Second-brain docs: services/trmnl-ai/ in dgmneto/homelab_second_brain. Secrets: .env (gitignored) from env.tpl.
+# Edit prompt.md and run `docker exec trmnl-ai python /app/app.py --once --force` - no restart needed.
+name: trmnl-ai
+
+services:
+  trmnl-ai:
+    image: python:3.13-slim-bookworm
+    container_name: trmnl-ai
+    user: "1000:1000"
+    working_dir: /app
+    command: ["python", "-u", "/app/app.py"]
+    env_file: .env
+    environment:
+      TZ: Europe/London
+      DATA_DIR: /data
+      PROMPT_FILE: /app/prompt.md
+    volumes:
+      - ./app.py:/app/app.py:ro
+      - ./prompt.md:/app/prompt.md:ro
+      - /footage/services/trmnl-ai/data:/data
+    networks:
+      intern:
+        ipv4_address: 172.21.0.141
+    restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/screen.json', timeout=5)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy: {resources: {limits: {memory: 256M, cpus: "0.5"}}}
+
+networks:
+  intern:
+    name: internalNetwork
+    external: true

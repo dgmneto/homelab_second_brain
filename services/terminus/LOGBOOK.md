@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Extension 2 "AI Board" (LLM-designed screen)
+Created poll extension 2 `ai_board` via `hanami console` (`services/trmnl-ai/src/create_extension.rb`):
+one exchange `http://trmnl-ai:8080/screen.json` every 10 min, `extension_model` → og_plus (12),
+template `<div class="{{ extension.css_classes }}">{{ source_1.html }}</div>`. Forced build
+`Screen.new.perform(2, 12)` → screen 6 `extension-ai_board`, 800×480 PNG rendered from the trmnl-ai
+fallback HTML (verified by viewing the PNG; Liquid does not escape the HTML). Playlist not changed yet.
+
 ## 2026-10-25 — Morning Board extension on device 7
 Created Terminus poll extension 1 "Morning Board" via API (login `op://Personal/Terminus`): 7 Liquid-
 templated exchanges (Open-Meteo, TfL line status live + target-day window, Journey Planner Seven
