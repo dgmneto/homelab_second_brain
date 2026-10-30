@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-30 — Migration to homelab-notebook: Phase 0
+See `MIGRATION.md`. Inventoried config entries (29 domains), custom components (hacs, espsomfy_rts,
+zoned_heating on disk; **octopus_energy and tapo_control have entries but no code**), trusted_proxies
+(needs nginxProd 192.168.14.33 added before moving), HomeKit bridge port 21064. Off-host copy of the
+2026-10-30 automatic backup at `homelab-notebook:/var/backups/ha-migration/`. No change to the running HA.
+
 ## 2026-09-22 — "All devices missing": MQTT entities unavailable; tapo_control missing
 188/188 mqtt entities unavailable (discovery wiped by mosquitto restart) → fixed via z2m restart +
 mosquitto persistence; 21:13 restore_state dump shows 0 mqtt unavailable. Separately, HACS

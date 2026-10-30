@@ -5,7 +5,9 @@ Second host. Runs [hermes](../../services/hermes/README.md) and [pihole](../../s
 so `git pull --rebase` before editing.
 
 Layout:
-- [nixos/](nixos/) — the system flake (`configuration.nix`, `hardware-configuration.nix`, `hermes.nix`, `pihole.nix`).
+- [nixos/](nixos/) — the system flake (`configuration.nix`, `hardware-configuration.nix`, `hermes.nix`, `pihole.nix`, `home-automation.nix` — HA stack staged, all toggles off; see
+  [MIGRATION.md](../../services/homeassistant/MIGRATION.md)). Inputs include `nixpkgs-unstable` (HA only) and a
+  build-only output `homelab-notebook-ha-preview` — never `switch` to it.
   **This is the deploy source** (imported from the old `notebook_home_lab` repo, history kept; that repo
   is no longer checked out on the Mac).
 - [hardware/](hardware/) — Blender scripts + printable outputs: `board/`, `childboard/`, `fan/`, and

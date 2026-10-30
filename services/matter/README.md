@@ -11,6 +11,7 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 - HA connects to `ws://192.168.15.25:5580/ws`.
 
 ## Paths
+- Container name: **`matter-server`** (not `matter`: `docker exec matter-server …`). Version 8.1.2 (2026-10-30).
 - Compose: `/home/dgmneto/homelab/services/matter/compose.yaml`
 - Data: `/footage/services/matter/data` → `/data` (Matter fabric/credentials)
 

@@ -9,18 +9,40 @@
     # Share system nixpkgs: the notebook (3.6 GB RAM) swaps to death evaluating
     # a second nixpkgs. Not the combination upstream tests; revisit with more RAM.
     hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
+    # Only for packages stable is too old for (home-assistant: casaos runs 2026.10.x).
+    # Lazily evaluated, so it costs nothing until a module uses it. RAM is 11.7 GB now.
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { nixpkgs, hermes-agent, ... }: {
-    nixosConfigurations.homelab-notebook = nixpkgs.lib.nixosSystem {
+  outputs = { nixpkgs, nixpkgs-unstable, hermes-agent, ... }:
+    let
       system = "x86_64-linux";
-      modules = [
-        hermes-agent.nixosModules.default
-        ./hardware-configuration.nix
-        ./configuration.nix
-        ./hermes.nix
-        ./pihole.nix
+      mkHost = extraModules: nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs.pkgsUnstable = nixpkgs-unstable.legacyPackages.${system};
+        modules = [
+          hermes-agent.nixosModules.default
+          ./hardware-configuration.nix
+          ./configuration.nix
+          ./hermes.nix
+          ./pihole.nix
+          ./home-automation.nix
+        ] ++ extraModules;
+      };
+    in
+    {
+      nixosConfigurations.homelab-notebook = mkHost [ ];
+      # Build-only (never switch to it): the whole home-automation stack enabled, so
+      # `nix build` pre-fetches/compiles it before each migration phase.
+      nixosConfigurations.homelab-notebook-ha-preview = mkHost [
+        {
+          homelab.homeAutomation = {
+            mosquitto.enable = true;
+            zigbee2mqtt.enable = true;
+            matter.enable = true;
+            homeAssistant.enable = true;
+          };
+        }
       ];
     };
-  };
 }

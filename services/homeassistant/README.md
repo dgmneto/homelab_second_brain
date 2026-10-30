@@ -35,4 +35,7 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
   `/config/custom_components` (dir last changed 2026-08-10 23:13, just after the disk migration) while HACS
   still lists it installed and a config entry + 109 entities remain. No HA backup has it (only 3 kept, all
   ≥ Sep 20). Fix: HACS → Tapo Control → Redownload, then restart HA.
+- **`octopus_energy` code is missing too** (found 2026-10-30): config entry present, no folder in
+  `custom_components`. The NixOS move restores it from nixpkgs.
+- **Migration to homelab-notebook in progress:** see [MIGRATION.md](MIGRATION.md).
 - Image is unpinned (`latest`); a Watchtower pull can introduce breaking HA core upgrades.

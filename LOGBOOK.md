@@ -4,6 +4,18 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-30 — HA stack → homelab-notebook: Phase 0 (groundwork, nothing switched)
+Planned moving mosquitto/z2mqtt/matter-server/homeassistant from casaos Docker to homelab-notebook
+NixOS in 5 phases; runbook + findings in `services/homeassistant/MIGRATION.md`. Verified from the laptop:
+TCP to the coordinator 192.168.11.228:6638 and all casaos endpoints; IPv6 + an apparent Thread border-router
+route (`fde9:b6c5:757::/64`). Versions: HA 2026.10.4 needs nixpkgs-unstable (26.05 has 2026.5.4); z2m 2.14.2,
+mosquitto 2.1.2, matter 8.1.2 match exactly. Added `nixos/home-automation.nix` (per-phase toggles, all off),
+`nixpkgs-unstable` flake input and a build-only `homelab-notebook-ha-preview` output; built it in
+`~claude/ha-preview` (EXIT=0, all from cache). **Not deployed**: the box's `~/nixos` is unchanged. Copied the
+newest HA backup off-host to `homelab-notebook:/var/backups/ha-migration/`. Found `octopus_energy` code also
+missing on casaos (like tapo_control); fixed the matter container name in docs (`matter-server`). Open:
+DHCP reservation and a backup destination (need the user).
+
 ## 2026-10-30 — AI Board: no tiny glyphs
 Second piece of design feedback (weather icons unreadable) applied to `prompt.md`, render verified.
 

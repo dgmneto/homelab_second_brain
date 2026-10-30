@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-10-30 — Home-automation modules staged (not deployed)
+New `nixos/home-automation.nix` (mosquitto/zigbee2mqtt/matter-server/home-assistant, each behind
+`homelab.homeAutomation.<svc>.enable`, all false), `nixpkgs-unstable` input (HA only) and build-only
+output `homelab-notebook-ha-preview`. Built as `claude` in `~/ha-preview` via `systemd-run`
+(unit `ha-preview-build`): EXIT=0, all substituted. GC root `~claude/ha-preview/result`. The only
+change once deployed with toggles off: `/etc/hosts` gains `192.168.14.82 mosquitto`. Created
+`/var/backups/ha-migration/` (root 0700) holding the latest HA backup. Box `~/nixos` untouched.
+
 ## 2026-10-28 — Pi-hole deployed (2 switches)
 Added `nixos/pihole.nix` + import in `flake.nix`; copied only those two files to `~/nixos` (box
 `hermes.nix` drift untouched; snapshot `~/nixos.bak-pre-pihole`). Firewall now also opens 53/tcp+udp
