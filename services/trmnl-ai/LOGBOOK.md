@@ -19,6 +19,7 @@ text, ≥16 px, weight ≥600 under 24 px; (2) overflowed right + bottom → fix
 dir; (4) fits, crisp. Added: previous screen HTML sent for layout stability, `--fresh` flag.
 Haiku 5.5 cost ~$0.002–0.003/call. Swapped device 7 playlist item 5 → screen 6 (AI Board) via SQL.
 Verified Terminus' own schedule rebuilt screen 6 (12:12) without a manual build.
+Device 7 confirmed on it: NPM log 12:24:06 `/api/display` then `/uploads/7948dfe2….png` = screen 6's image.
 
 ## 2026-10-30 — Created trmnl-ai (LLM-designed TRMNL screen)
 User asked for an AI-generated TRMNL screen (full HTML by the LLM, OpenRouter, replaces Morning Board,
