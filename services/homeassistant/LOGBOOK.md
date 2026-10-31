@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-31 — Bubble-Card JS restored (dashboard "Configuration error")
+`/hacsfiles/Bubble-Card/bubble-card.js` was 404 (folder lost ~2026-09-22, like tapo_control/octopus_energy). Restored HACS's recorded
+v3.1.6 from the upstream tag's `dist/` into `www/community/Bubble-Card/`. 200 locally + via proxy. Clients need a reload.
+
 ## 2026-10-31 — HA migration Phase 4 (Home Assistant → homelab-notebook)
 Moved to homelab-notebook (NixOS, 2026.10.4). Downtime 10:22:20–10:26:33. Gotchas: `.storage/http` holds trusted_proxies (YAML ignored), so I added 192.168.11.13/32; `core.network` configured_adapters eth1 → enp2s0; discovery flows needed samsungtv/homekit_controller in extraComponents. Verified against the pre-move unavailable baseline. casaos container removed; config dir kept. tapo_control still needs the HACS redownload.
 

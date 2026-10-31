@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-31 — HA dashboard "Configuration error" on every card: Bubble-Card JS missing, restored
+User's phone showed every card as "Configuration error" after the move. Cause: all 13 cards are `custom:bubble-card`, and
+`/hacsfiles/Bubble-Card/bubble-card.js` returned 404. The folder was absent on casaos too (HACS still listed v3.1.6 as installed;
+`www/community` last touched 2026-09-22), so phones had been running on cached JS. Fetched v3.1.6 `dist/bubble-card.js` from the
+GitHub tag (no release asset) into `/var/lib/hass/www/community/Bubble-Card/` (+.gz, owner hass). Now 200 locally and via
+ha.intern. No HA restart needed. Diagnostic recipe added to the homeassistant README.
+
 ## 2026-10-31 — HA migration Phase 4: Home Assistant moved to homelab-notebook (stack complete)
 Pre-staged static files, then `docker stop` HA 10:22:20 → copied DB + .storage → cutover script (internal_url,
 configured_adapters eth1→enp2s0) → deploy → HA up 10:24:54; nginxIntern host 18 → 192.168.11.21:8123. Proxy got 400 until I

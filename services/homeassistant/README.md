@@ -18,6 +18,14 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 > - Nightly backup of `/var/lib/hass` to casaos (`homelab-backup.timer`); HA's own backups land in `/var/lib/hass/backups`.
 >   The pre-move `backups/` (283M) stayed in casaos `/footage/services/homeassistant/config/backups`.
 >
+> - **Dashboard all "Configuration error" = a custom card's JS isn't served.** The default dashboard is 13×
+>   `custom:bubble-card`; resources (`.storage/lovelace_resources`) are `/hacsfiles/<repo>/<file>.js`, served by HACS from
+>   `/var/lib/hass/www/community/<repo>/`. Check: `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8123/hacsfiles/Bubble-Card/bubble-card.js`.
+>   404 → files missing although HACS lists the repo as installed (`.storage/hacs.repositories` → `version_installed`).
+>   Restore that exact version from the repo tag (Bubble-Card: `raw.githubusercontent.com/Clooos/Bubble-Card/<tag>/dist/bubble-card.js`;
+>   there's no release asset) into that dir (owner `hass`, plus a `.js.gz`), or HACS → Redownload. No restart needed;
+>   clients must reload/clear the frontend cache.
+>
 > Everything below describes the **old casaos container** (removed 2026-10-31; its config dir is kept for rollback/archive).
 
 ## Image
@@ -50,6 +58,9 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
   `docker restart z2mqtt` and enabling mosquitto persistence. Diagnose offline via
   `.storage/core.restore_state` (dumped every 15 min) joined to `.storage/core.entity_registry` by
   platform — no API token needed (script pattern in root LOGBOOK 2026-09-22).
+- **Lost in the same incident (found 2026-10-31): `www/community/Bubble-Card`** (HACS plugin v3.1.6, every dashboard
+  card). `www/community` was last modified 2026-09-22 21:19. Phones kept rendering from cache until the backend moved.
+  Restored on homelab-notebook (see top).
 - **`tapo_control` (HACS, JurajNyiri/HomeAssistant-Tapo-Control 7.1.13) folder is MISSING** from
   `/config/custom_components` (dir last changed 2026-08-10 23:13, just after the disk migration) while HACS
   still lists it installed and a config entry + 109 entities remain. No HA backup has it (only 3 kept, all
