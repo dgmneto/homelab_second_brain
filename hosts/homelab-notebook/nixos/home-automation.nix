@@ -177,6 +177,8 @@ in
           "mobile_app"
           "mqtt"
           "radio_browser"
+          "samsungtv" # discovered on the LAN (not configured); flow needs getmac
+          "homekit_controller" # discovered HomeKit devices; flow needs aiohomekit
           "shopping_list"
           "smlight"
           "sonos"
@@ -196,11 +198,14 @@ in
           aiogithubapi
           aiofiles
           websocket-client
+          # tapo_control (HACS): code missing since Aug; redownload via HACS, dep is ready here.
+          pytapo
         ];
       };
-      # 8123 UI, 21064 HomeKit bridge ("HASS Bridge"), 5353 mDNS for discovery.
-      networking.firewall.allowedTCPPorts = [ 8123 21064 ];
-      networking.firewall.allowedUDPPorts = [ 5353 ];
+      # 8123 UI, 21064 HomeKit bridge ("HASS Bridge"), 1400 Sonos event callbacks
+      # (speakers connect back to HA), 5353 mDNS + 1900 SSDP discovery (inbound multicast).
+      networking.firewall.allowedTCPPorts = [ 8123 21064 1400 ];
+      networking.firewall.allowedUDPPorts = [ 5353 1900 ];
     })
   ];
 }

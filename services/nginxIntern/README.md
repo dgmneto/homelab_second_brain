@@ -97,6 +97,9 @@ sudo docker exec nginxIntern nginx -t && sudo docker exec nginxIntern nginx -s r
 There's no `sqlite3` CLI on casaos or in the container; the knex route is the way.
 
 ## Proxy hosts that point off-casaos
+- **18 `ha.intern.dgmneto.com` → `192.168.11.21:8123`** (homelab-notebook, since 2026-10-31; was docker DNS `homeassistant`).
+  HA sees these requests from **`192.168.11.13`** (this container egresses via the docker bridge, NATed to the casaos host
+  IP), so that's what HA's `trusted_proxies` must contain. Pre-change DB copy: `data/database.sqlite.bak-pre-ha-move`.
 - **21 `z2m.intern.dgmneto.com` → `192.168.11.21:8080`** (homelab-notebook, since 2026-10-30). Pre-change DB copy:
   `data/database.sqlite.bak-pre-z2m-move`.
 

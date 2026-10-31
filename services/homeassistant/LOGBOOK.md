@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-31 — HA migration Phase 4 (Home Assistant → homelab-notebook)
+Moved to homelab-notebook (NixOS, 2026.10.4). Downtime 10:22:20–10:26:33. Gotchas: `.storage/http` holds trusted_proxies (YAML ignored), so I added 192.168.11.13/32; `core.network` configured_adapters eth1 → enp2s0; discovery flows needed samsungtv/homekit_controller in extraComponents. Verified against the pre-move unavailable baseline. casaos container removed; config dir kept. tapo_control still needs the HACS redownload.
+
 ## 2026-10-30 — HA migration Phase 3
 Matter config entry url → `ws://192.168.11.21:5580/ws` (jq edit of `.storage/core.config_entries` with the container stopped; backup `.bak-pre-matter-move`). Plain stop/start: down ~22:23:51–22:25. Connected to the laptop matter-server + mosquitto; no errors.
 

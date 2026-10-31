@@ -1,6 +1,6 @@
 # homelab-notebook — NixOS host (added 2026-10-08)
 
-Second host. Runs [hermes](../../services/hermes/README.md), [pihole](../../services/pihole/README.md) (tailnet DNS, ports 53 + 80) and, since 2026-10-30, [mosquitto](../../services/mosquitto/README.md) (1883) + [zigbee2mqtt](../../services/z2mqtt/README.md) (8080) + [matter-server](../../services/matter/README.md) (5580; HA-stack migration in progress, see [MIGRATION.md](../../services/homeassistant/MIGRATION.md)) natively (no Docker). Nightly `homelab-backup.timer` pushes HA-stack state to casaos. Hermes can SSH to
+Second host. Runs natively (no Docker): [hermes](../../services/hermes/README.md), [pihole](../../services/pihole/README.md) (tailnet DNS, 53 + 80) and, since 2026-10-30/31, the **whole home-automation stack**: [Home Assistant](../../services/homeassistant/README.md) (8123), [zigbee2mqtt](../../services/z2mqtt/README.md) (8080), [mosquitto](../../services/mosquitto/README.md) (1883), [matter-server](../../services/matter/README.md) (5580); see [MIGRATION.md](../../services/homeassistant/MIGRATION.md). Nightly `homelab-backup.timer` pushes their state to casaos over the LAN.
 [casaos](../casaos/README.md) as user `hermes` (docker group, no sudo) and **pushes to this repo**,
 so `git pull --rebase` before editing.
 

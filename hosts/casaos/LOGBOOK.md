@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-10-31 — HA migration Phase 4 (Home Assistant → homelab-notebook)
+Home-automation stack fully off casaos: `docker compose down` for mosquitto (10-30), z2mqtt (10-30), matter-server (10-30), homeassistant (10-31). Data dirs under `/footage/services/` kept; HA `configuration.yaml` got a `.bak-pre-move` copy plus the 192.168.11.13 trusted_proxies line.
+
 ## 2026-10-30 — Added `nbbackup` user + backup-prune cron (homelab-notebook backups)
 `useradd --system --home-dir /footage/backups/homelab-notebook --shell /bin/sh nbbackup` (uid 998);
 `/footage/backups{,/homelab-notebook{,/.ssh}}` 0700 nbbackup; authorized_keys = laptop key with

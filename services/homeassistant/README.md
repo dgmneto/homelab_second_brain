@@ -2,6 +2,24 @@
 
 Home Assistant — central home-automation hub. Integrates Zigbee devices (via MQTT/zigbee2mqtt) and Matter devices (via matter-server).
 
+> **Runs on homelab-notebook since 2026-10-31** (NixOS `services.home-assistant` 2026.10.4 from `nixpkgs-unstable`,
+> config in `hosts/homelab-notebook/nixos/home-automation.nix`; whole stack + history in [MIGRATION.md](MIGRATION.md)).
+> - UI `http://192.168.11.21:8123` / **`https://ha.intern.dgmneto.com`** (nginxIntern host 18 → `192.168.11.21:8123`).
+> - Config dir **`/var/lib/hass`** (user `hass`, uid 286); `configuration.yaml` is the UI-managed one (Nix `config = null`).
+>   Logs `journalctl -u home-assistant`. Restart: `sudo systemctl restart home-assistant` (~20 s; no LSIO permission pass).
+> - **`http:` settings live in `.storage/http`, not YAML** (HA migrated them; YAML `trusted_proxies` is ignored). Trusted:
+>   `192.168.11.13/32` (casaos host IP = nginxIntern NATed via the docker bridge), `192.168.14.34/32`, `172.21.0.83/32`.
+> - `.storage/core.network` `configured_adapters = ["enp2s0"]` (don't let it pick `tailscale0`).
+> - Broker `mosquitto` → `127.0.0.1` (`/etc/hosts`), Matter `ws://192.168.11.21:5580/ws`.
+> - Python deps come from Nix: a new integration (even a discovery flow) can fail with `No module named …` until its domain
+>   is in `extraComponents` (custom components: `extraPackages`). pip is skipped.
+> - **No Watchtower any more**: the version is pinned by `flake.lock`. Upgrade = `nix flake update nixpkgs-unstable` + deploy.
+> - Firewall: 8123, 21064 (HomeKit bridge), 1400 (Sonos callbacks)/tcp; 5353, 1900/udp.
+> - Nightly backup of `/var/lib/hass` to casaos (`homelab-backup.timer`); HA's own backups land in `/var/lib/hass/backups`.
+>   The pre-move `backups/` (283M) stayed in casaos `/footage/services/homeassistant/config/backups`.
+>
+> Everything below describes the **old casaos container** (removed 2026-10-31; its config dir is kept for rollback/archive).
+
 ## Image
 `lscr.io/linuxserver/homeassistant:latest` (LinuxServer.io build; **unpinned** — Watchtower updates it)
 

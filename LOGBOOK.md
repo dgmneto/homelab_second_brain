@@ -4,6 +4,14 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-31 — HA migration Phase 4: Home Assistant moved to homelab-notebook (stack complete)
+Pre-staged static files, then `docker stop` HA 10:22:20 → copied DB + .storage → cutover script (internal_url,
+configured_adapters eth1→enp2s0) → deploy → HA up 10:24:54; nginxIntern host 18 → 192.168.11.21:8123. Proxy got 400 until I
+found HA keeps `trusted_proxies` in `.storage/http` (YAML ignored) and added 192.168.11.13/32 (NAT source of nginxIntern):
+200 at 10:26:33 (~4 min user-facing downtime). Added samsungtv/homekit_controller/pytapo, then a clean boot. Unavailable-per-platform
+identical to pre-move; mqtt 0 unavailable; MQTT + Matter connected. casaos HA container removed; no HA-stack containers left there.
+Backup (148M over LAN in 3.7 s) OK. Open: HACS redownload of tapo_control; archive old casaos dirs after ~1 week.
+
 ## 2026-10-30 — HA migration Phase 3: matter-server moved to homelab-notebook
 No Matter devices were commissioned (0 nodes; HA 0 matter devices). TBR reachable (1 ms) from the laptop. casaos container
 removed (pre-move copy kept), data → `/var/lib/private/matter-server`. First start crashed on a vendor-ID mismatch

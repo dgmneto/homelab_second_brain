@@ -16,8 +16,8 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 | 1 | mosquitto | **done 2026-10-30**: broker on the laptop; casaos container removed 21:42 (data kept in `/footage/services/mosquitto`) |
 | 2 | zigbee2mqtt | **done 2026-10-30**: on the laptop, network resumed, casaos container removed (data kept) |
 | 3 | matter-server | **done 2026-10-30**: on the laptop, fabric kept (0 devices commissioned), HA connected |
-| 4 | home-assistant | not started |
-| 5 | decommission on casaos | not started |
+| 4 | home-assistant | **done 2026-10-31**: on the laptop, all integrations back, casaos container removed |
+| 5 | decommission on casaos | containers all `down` (done in each phase); left: archive `/footage/services/{homeassistant,z2mqtt,mosquitto,matter}` after ~1 week, drop the `extra_hosts` edits from the server repo's compose files |
 
 ## Phase 0 findings (verified 2026-10-30 from the laptop)
 
@@ -140,10 +140,35 @@ That's what happened on the first try.)
 - **Rollback:** casaos `docker compose -f …/matter/compose.yaml up -d` (its data is as of the cutover), and put
   the HA url back to `ws://192.168.15.25:5580/ws` with HA stopped.
 
-**Phase 4 — Home Assistant.** Fix `trusted_proxies`. `docker compose down` HA on casaos, final rsync of
-`/footage/services/homeassistant/config` → `/var/lib/hass` (chown `hass`), enable and deploy. Repoint
-nginxIntern + nginxProd upstreams `192.168.14.73:8123` → `192.168.11.21:8123`. Then fix tapo_control
-via HACS.
+**Phase 4 — Home Assistant (done 2026-10-31, as actually run).**
+Prep (HA running, no downtime):
+- Proxy source IP: nginxIntern's default route is the docker bridge (`172.21.0.1`), so its requests reach the
+  laptop **NATed as casaos' host IP `192.168.11.13`**. That's the address HA must trust (verified by the 400 log line).
+- Built the phase-4 system first. Pre-staged `custom_components www blueprints tts` (56M) to `/var/lib/hass` (uid/gid **286**).
+- Relay speed matters: tar through the agent session ran at **~0.5 MB/s**, while direct LAN (the backup job) did 148M in 3.7 s.
+  So only the DB + `.storage` (~36M gzipped) were copied inside the downtime window. Left on casaos: `backups/` (283M) and the
+  April `home-assistant_v2.db.corrupt.*` (176M); also the LSIO caches `.cache .config .local`.
+- `/root/ha-cutover.sh` on the laptop: untar stdin into `/var/lib/hass`, then jq-edit `.storage/core.config` `internal_url` →
+  `http://192.168.11.21:8123` and **`.storage/core.network` `configured_adapters` `["eth1"]` → `["enp2s0"]`** (the Docker
+  interface name doesn't exist on the laptop, so zeroconf/HomeKit would bind to nothing), then chown 286.
+Cutover: `docker stop -t 60 homeassistant` 10:22:20 → tar `.HA_VERSION .cloud .storage home-assistant_v2.db{,-wal,-shm}
+*.yaml zigbee.db` (own ssh) → script → switch → HA 200 locally at 10:24:54. nginxIntern host 18 `homeassistant:8123` →
+`192.168.11.21:8123` (DB + `18.conf` + reload). Then:
+- **Gotcha: `trusted_proxies` in `configuration.yaml` is ignored.** HA 2026.x migrated `http:` into **`.storage/http`**
+  (`yaml_migration_done: true`); the stored list still held only `192.168.14.34/32, 172.21.0.83/32`, so the proxy got **400**
+  ("X-Forwarded-For header from an untrusted proxy 192.168.11.13"). Fix: stop HA, jq-add `192.168.11.13/32` to
+  `.data.stable.trusted_proxies`, start. Proxy 200 at 10:26:33. (Edit it in the UI next time: Settings → System → Network.)
+- Discovery flows needed libraries the build lacked (`samsungtv`: getmac, `homekit_controller`: aiohomekit). Added to
+  `extraComponents`, plus `pytapo` for tapo_control. Switch → HA restart ~20 s (10:29:45); clean boot after that.
+- Startup-only blips, gone within a minute: met.no DNS errors, smlight "Connection failed", one Chromecast connect failure.
+- Verified: `unavailable` per platform identical to casaos' pre-move snapshot (mobile_app 13→12, unifiprotect 2, webostv 1;
+  **mqtt 0**); HA connected to :1883 and :5580 locally; HomeKit bridge :21064 listening; `ha.intern` 200, `/api/` 401.
+- **User-facing downtime ~4 min** (10:22:20 → 10:26:33), half of it the trusted-proxies gotcha. casaos container `down` 10:30.
+- Load with the whole stack: 0.37, 2 GB used / 9.7 GB available; HA ~495 MB RSS.
+- Still to do by hand: **HACS → Tapo Control → Redownload** (code missing since Aug), then restart HA.
+- **Rollback:** `systemctl stop home-assistant` on the laptop (and set the toggle back); casaos
+  `docker compose -f …/homeassistant/compose.yaml up -d` (its config is as of 10:22, with matter URL still pointing at the
+  laptop); proxy host 18 → `homeassistant`.
 
 **Phase 5.** Everything `down` on casaos (not just stopped), README/service-map updates, archive the
 `/footage/services/*` dirs after ~1 week.
