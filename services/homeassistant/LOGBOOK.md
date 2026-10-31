@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-10-31 — Post-migration sweep
+Healthy vs baseline. Leftovers recorded in README (better_thermostat/tapo_control code missing, dead off automation, dead YAML http
+block, stale HACS repairs). No changes made.
+
 ## 2026-10-31 — Bubble-Card JS restored (dashboard "Configuration error")
 `/hacsfiles/Bubble-Card/bubble-card.js` was 404 (folder lost ~2026-09-22, like tapo_control/octopus_energy). Restored HACS's recorded
 v3.1.6 from the upstream tag's `dist/` into `www/community/Bubble-Card/`. 200 locally + via proxy. Clients need a reload.

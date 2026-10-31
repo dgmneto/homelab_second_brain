@@ -4,6 +4,16 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-10-31 — Post-migration sweep (HA stack on homelab-notebook + casaos leftovers)
+Investigation only. Clean: no failed units; z2m 26/26 interviewed, 0 warnings; mosquitto/matter no warnings; unavailable entities =
+pre-move baseline; only custom card type (bubble-card) now served; template sensors live; nightly backup ran 03:40; NPMs have no
+hosts pointing at removed containers; casaos disks 6%/42%. Found: `better_thermostat` + `tapo_control` HACS code missing
+(the former unused); a dead, already-off automation targeting the deleted ground-floor thermostat; stale HACS "restart required"
+repairs + `http yaml_still_present_after_migration`; Octopus API timeouts every few hours (upstream, cached fallback); met.no DNS
+errors only for 3 min after boot; laptop IPv6 egress fails fast (ULA only, no impact). casaos: compose files for the 4 removed
+services still exist (only a manual `up` would revive them); server repo is 5 commits ahead, `backup.sh` pushes Sundays and its
+`git add .` would add untracked `services/hermes/` (compose only, no secrets).
+
 ## 2026-10-31 — HA dashboard "Configuration error" on every card: Bubble-Card JS missing, restored
 User's phone showed every card as "Configuration error" after the move. Cause: all 13 cards are `custom:bubble-card`, and
 `/hacsfiles/Bubble-Card/bubble-card.js` returned 404. The folder was absent on casaos too (HACS still listed v3.1.6 as installed;

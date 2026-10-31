@@ -26,6 +26,13 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   there's no release asset) into that dir (owner `hass`, plus a `.js.gz`), or HACS → Redownload. No restart needed;
 >   clients must reload/clear the frontend cache.
 >
+> - Known leftovers (sweep 2026-10-31): HACS lists **`better_thermostat` 1.7.0 installed but its code is gone and no config
+>   entry uses it**; `tapo_control` code missing (entry + 109 entities exist). Automation **"Ground Floor/Update Thermostat
+>   Temperature"** (off) targets the deleted `climate.ground_floor_thermostat_2`; the device now lives as
+>   `climate.dining_room_thermostat` and the `ground_floor_new_trv_calibrator*` automations replaced it. The YAML `http:` block
+>   is dead (Repairs: `http/yaml_still_present_after_migration`). Outbound IPv6 from the laptop fails fast (ULA only); harmless.
+>   Boot-time-only noise: met.no DNS errors for ~3 min, template "invalid sensor state: unavailable", smlight once.
+>
 > Everything below describes the **old casaos container** (removed 2026-10-31; its config dir is kept for rollback/archive).
 
 ## Image
