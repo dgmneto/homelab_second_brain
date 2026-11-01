@@ -88,8 +88,9 @@ on `lvs` reporting two in-sync legs, not on an observed degraded-mode survival.
    (`Plex Transcoder` / `EasyAudioEncoder`) hit 172 % CPU with iowait at 0 % and throttled the sync.
 
 Also: `/footage` is only ~26 G used, and most of it is **Docker's data-root** (`/footage/docker`) —
-actual service configs are just ~3.7 G. `services/backup.sh` (root cron, Sundays 05:00) despite its
-name backs up **no data**; it is a `git push` of the compose repo.
+actual service configs are just ~3.7 G. Nothing on casaos backs up
+`/footage` data off the box (the old `services/backup.sh` git-push cron was deleted 2026-11-01); the HA stack's state
+is pushed *to* casaos nightly from homelab-notebook.
 
 ## History — 2026-08-03 incident (why this rebuild happened)
 

@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-01 — Deleted casaos backup.sh + its root cron (user request)
+Root crontab saved to `/root/crontab.bak-20261101`, then removed the only line (`0 5 * * 0 … ./services/backup.sh`); diff confirms
+one line. `git rm services/backup.sh` in the server repo (29f0fef, local). Root's crontab is now empty; other jobs (cron.d,
+dgmneto/openclaw crontabs) untouched. Server repo now 7 commits ahead of origin + uncommitted prowlarr/watchtower edits + untracked
+hermes/; needs a push from the Mac. (cron.md already said "BROKEN" since 2026-08-08; I should have read it before re-diagnosing.)
+
 ## 2026-11-01 — casaos repo backup (Sunday backup.sh) broken since 2025-04; prowlarr docs corrected
 Investigation. Cron ran `backup.sh` 2026-11-01 05:00:01 and exited in 1 s with output discarded. Root cause: (1) root vs dgmneto-owned
 repo → git "dubious ownership" (reproduced); (2) GitHub rejects both casaos keys (`ssh -T` → publickey denied). Last auto-backup

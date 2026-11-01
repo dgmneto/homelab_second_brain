@@ -81,7 +81,7 @@ diff box vs repo, `systemd-run` switch). Pre-build first:
    ```
    and `sudo docker compose -f /home/dgmneto/homelab/services/<svc>/compose.yaml up -d` (**`-f`, not `cd`:
    `claude` can't enter `/home/dgmneto`**). `/etc/hosts` beats Docker DNS: `getent hosts mosquitto` in
-   the container → `192.168.11.21`. Committed in the server repo (`511e3d6`, local; `backup.sh` pushes Sundays).
+   the container → `192.168.11.21`. Committed in the server repo (`511e3d6`, local only: casaos can't push; push from the Mac).
 4. Verified: z2m `bridge/state` online + `health_check` healthy via the new broker; 76 `zigbee2mqtt/#` msgs in
    20 s; casaos broker got 0 clients after the cutover; no MQTT errors in the HA log.
 - **Downtime:** z2m ~30 s. **HA ~3m45s** (21:34:06 → 21:37:50): recreating the LinuxServer container runs a

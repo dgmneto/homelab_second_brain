@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-01 — Removed backup.sh cron + script
+Root crontab line `0 5 * * 0 cd /home/dgmneto/homelab && ./services/backup.sh` removed (backup `/root/crontab.bak-20261101`); script
+`git rm`'d (29f0fef). Root crontab now empty.
+
 ## 2026-11-01 — Retired compose stacks moved to deprecated/
 `/home/dgmneto/homelab`: `git mv services/{homeassistant,z2mqtt,mosquitto,matter} deprecated/` + `deprecated/README.md`
 (do-not-up warning), committed as dgmneto (c1633a0; pushed by Sunday backup.sh).

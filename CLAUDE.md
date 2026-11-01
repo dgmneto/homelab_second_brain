@@ -58,9 +58,8 @@ quirks of one app → `services/`.
 | `homelab-notebook` | `192.168.11.21` | NixOS 26.05, native modules | `ssh homelab-notebook` | [hosts/homelab-notebook/README.md](hosts/homelab-notebook/README.md) |
 
 Top gotchas (detail in the host READMEs):
-- **casaos' compose repo (`/home/dgmneto/homelab`) is NOT backed up automatically.** The Sunday-05:00 root cron
-  `services/backup.sh` has silently failed since 2025-04 (root vs dgmneto-owned repo → git "dubious ownership"; and
-  neither on-box GitHub key is accepted). Commit + push changes yourself, or from the Mac. See hosts/casaos/cron.md.
+- **casaos' compose repo (`/home/dgmneto/homelab`) is NOT backed up automatically** (the broken Sunday `backup.sh`
+  cron was deleted 2026-11-01). casaos has no working GitHub key: commit on the box (as dgmneto) and **push from the Mac**.
 - **casaos** is x86_64, not a Raspberry Pi. If the 1Password SSH agent is locked, bypass it:
   `ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab`. Use `dgmneto`
   (sudo needs the user's password), not `openclaw`. A service "down" is usually a **full disk** —

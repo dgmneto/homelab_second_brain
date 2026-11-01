@@ -12,44 +12,12 @@ Probe sources: `crontab -l`, `sudo crontab -l`, `/etc/crontab`, `/etc/cron.d`, `
 Keeps 14 days of `history/` for the nightly push from homelab-notebook (see
 [MIGRATION.md § Backups](../../services/homeassistant/MIGRATION.md#backups-live-since-2026-10-30)).
 
-### root crontab — weekly deployment-repo backup
-
-> **BROKEN since 2025-04 (found 2026-11-01).** Last `auto-backup` commit 2025-04-03. Two independent failures:
-> (1) cron runs it as **root** in the **dgmneto**-owned repo, so git 2.39 aborts with "detected dubious ownership" and nothing is
-> added or committed; (2) GitHub rejects **both** on-box keys (`/root/.ssh/github_ed25519` and `~dgmneto/.ssh/github_ed25519`:
-> `Permission denied (publickey)`), so nothing can be pushed either. Output goes nowhere ("No MTA installed"). On 2026-11-01:
-> 6 commits unpushed (origin/main last updated 2026-10-25, from the Mac) + live-but-uncommitted edits to prowlarr/watchtower
-> compose (since 2026-06-22) + untracked `services/hermes/`. Fix plan in the root LOGBOOK 2026-11-01 entry.
-```
-0 5 * * 0  cd /home/dgmneto/homelab && ./services/backup.sh
-```
-Sundays 05:00. Runs `/home/dgmneto/homelab/services/backup.sh`, which auto-commits and pushes the
-**deployment** compose repo (`/home/dgmneto/homelab` → `git@github.com:dgmneto/homelab.git`):
-```bash
-#!/bin/bash
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/github_ed25519
-git add .
-git commit -m 'auto-backup'
-git push -u origin main
-```
-Notes / quirks:
-- This backs up the **server's compose repo**, NOT this second-brain repo.
-- No error handling: if `git commit` finds nothing staged it exits non-zero, but the script ignores
-  it. Push uses `~/.ssh/github_ed25519` (separate from the on-disk `id_rsa`).
-- ⚠ **BROKEN — this job cannot push (verified 2026-08-08).** `~/.ssh/github_ed25519` is
-  **passphrase-protected**, so the `ssh-add` line prompts `Enter passphrase for …` and gets nothing
-  from cron; the push then fails with `git@github.com: Permission denied (publickey)`. The repo was
-  found **6 commits ahead of `origin`** as a result. Because cron discards the output, this has been
-  failing invisibly — the "auto-backup" has been backing nothing up.
-  Fixes, pick one: strip the passphrase (`ssh-keygen -p -f ~/.ssh/github_ed25519`), switch the remote
-  to a deploy token, or use a dedicated passphrase-less deploy key. Until then the compose repo must
-  be pushed by hand:
-  ```
-  ssh -t dgmneto@homelab 'cd ~/homelab && eval "$(ssh-agent -s)" && ssh-add ~/.ssh/github_ed25519 && git push origin main'
-  ```
-- Despite its name, `backup.sh` backs up **no data** — it is purely a `git push` of the compose files.
-- Commit message is always `auto-backup` — no diff detail.
+### ~~root crontab — weekly deployment-repo backup~~ (REMOVED 2026-11-01)
+`0 5 * * 0 cd /home/dgmneto/homelab && ./services/backup.sh` and the script itself were deleted at the user's request
+(root crontab backup: `/root/crontab.bak-20261101`; script removal = server-repo commit 29f0fef). It had never worked since
+2025-04: root vs dgmneto-owned repo → git "dubious ownership"; `~/.ssh/github_ed25519` passphrase-protected (noted 2026-08-08);
+and GitHub rejects both on-box keys anyway. **Root's crontab is now empty.** The compose repo `/home/dgmneto/homelab` is
+only backed up when someone commits **and pushes by hand** (from the Mac; casaos has no working GitHub key).
 
 ### openclaw user crontab — chrome-debug cleanup (band-aid, harmless)
 ```
