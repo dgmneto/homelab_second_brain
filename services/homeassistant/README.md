@@ -32,12 +32,15 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   so they stay gone unless the phone re-registers them). Unsupported entities of a **live** integration (e.g. UniFi Protect) get
 >   recreated if deleted → set `disabled_by: "user"` instead. HACS `restart_required_*` repairs do **not** clear on restart;
 >   dismiss them in Settings → Repairs.
-> - Known leftovers (sweep 2026-10-31): HACS lists **`better_thermostat` 1.7.0 installed but its code is gone and no config
->   entry uses it**; `tapo_control` code missing (entry + 109 entities exist). Automation **"Ground Floor/Update Thermostat
->   Temperature"** (off) targets the deleted `climate.ground_floor_thermostat_2`; the device now lives as
->   `climate.dining_room_thermostat` and the `ground_floor_new_trv_calibrator*` automations replaced it. The YAML `http:` block
->   is dead (Repairs: `http/yaml_still_present_after_migration`). Outbound IPv6 from the laptop fails fast (ULA only); harmless.
->   Boot-time-only noise: met.no DNS errors for ~3 min, template "invalid sensor state: unavailable", smlight once.
+> - Leftovers status (2026-11-01): `better_thermostat` removed from HACS (+ its 2 HACS entities); dead YAML `http:` block
+>   removed; Repairs cleared (stale HACS restart_required + http issues deleted, octopus notice dismissed). Automation
+>   "Ground Floor/Update Thermostat Temperature" repointed to `climate.dining_room_thermostat` / its calibration number
+>   but **kept off on purpose**: "Ground Floor/(NEW) TRV Calibrator" already calibrates that thermostat, and both on would fight.
+>   **Still open: `tapo_control`** (code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
+>   entities, used nowhere). Latest 7.2.13 pins `pytapo==3.4.30` (+python-kasa) vs Nix's 3.4.19 with pip skipped, so a restore is
+>   fragile. Built-in `tplink` integration is the alternative. RTSP (554) is closed on the camera, so a "camera account"
+>   in the Tapo app is needed for streams either way. Outbound IPv6 fails fast: see `notes/lan-ipv6.md`.
+>   `smlight` logs one "Connection failed" per boot (startup only).
 >
 > Everything below describes the **old casaos container** (removed 2026-10-31; its config dir is kept for rollback/archive).
 

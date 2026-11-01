@@ -4,3 +4,4 @@
 - [Disk health: casaos storage array](disk-health-storage-array.md) — /footage+/library on LVM RAID1 (new 4TB pair since 2026-08-08); how to check, LVM traps. Old failing disks caused 13-day hang 2026-08-03
 
 Host docs (hardware, access, storage, cron) live in `../hosts/<host>/`; services in `../services/`.
+- [LAN IPv6](lan-ipv6.md) — LAN is ULA-only (fd00::/64), no internet IPv6; v6 egress fails fast → IPv4. Fix is router/ISP (DHCPv6-PD). Keep ULA: Matter/Thread needs it

@@ -88,7 +88,8 @@ update fine — but re-import 1Password's current key to clear it.
 ## Service groups
 - **Media (arr stack):** prowlarr, sonarr, radarr, bazarr, qbittorrent, overseerr, plex.
 - **Home automation:** **moved to homelab-notebook 2026-10-30/31** (homeassistant, zigbee2mqtt, mosquitto, matter-server);
-  containers removed here, `/footage/services/{homeassistant,z2mqtt,mosquitto,matter}` kept for rollback/archive.
+  containers removed here; compose dirs moved to `/home/dgmneto/homelab/deprecated/` (README there: never `up` them);
+  `/footage/services/{homeassistant,z2mqtt,mosquitto,matter}` kept for rollback/archive.
   casaos still holds the nightly backups of them (`/footage/backups/homelab-notebook`).
 - **Displays:** terminus (TRMNL BYOS server, :2300), trmnl-ai (LLM screen generator for it,
   internalNetwork 172.21.0.141:8080, no host port).

@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-01 — Post-sweep fixes: HACS/repairs/automation cleanup, casaos stacks to deprecated/, IPv6 diagnosis
+HA stopped 15:16:13–15:16:38 (backups `*.bak-pre-fixes-20261101`): removed `better_thermostat` from hacs.repositories/hacs.data
++ its 2 HACS entities; deleted the dead `http:` YAML block; repointed the off automation to the dining-room thermostat (left
+off, as the (NEW) calibrator covers it); cleared Repairs. Verified: 0 open repairs, automation off, proxy 200. casaos server
+repo: `git mv services/{homeassistant,z2mqtt,mosquitto,matter} deprecated/` + README (c1633a0). IPv6: LAN is ULA-only (router
+advertises fd00::/64 + default route, no upstream) → new note `notes/lan-ipv6.md`. tapo_control left open (user decision).
+
 ## 2026-11-01 — HA: removed dead entities (user request)
 With HA stopped (15:11:35–15:11:49) and backups `*.bak-pre-dead-cleanup-20261101`: deleted the webOS TV integration (entry
 01JQQ6J8…, device + 2 entities), 13 dead mobile_app sensors (iPhone: activity/steps/distance/floors/pace/cadence/pressure/focus;

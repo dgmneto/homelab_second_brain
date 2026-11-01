@@ -17,7 +17,7 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
 | 2 | zigbee2mqtt | **done 2026-10-30**: on the laptop, network resumed, casaos container removed (data kept) |
 | 3 | matter-server | **done 2026-10-30**: on the laptop, fabric kept (0 devices commissioned), HA connected |
 | 4 | home-assistant | **done 2026-10-31**: on the laptop, all integrations back, casaos container removed |
-| 5 | decommission on casaos | containers all `down` (done in each phase); left: archive `/footage/services/{homeassistant,z2mqtt,mosquitto,matter}` after ~1 week, drop the `extra_hosts` edits from the server repo's compose files |
+| 5 | decommission on casaos | containers all `down` (done in each phase); compose dirs moved to `deprecated/` in the server repo (2026-11-01, commit c1633a0); left: archive `/footage/services/{homeassistant,z2mqtt,mosquitto,matter}` after ~1 week |
 
 ## Phase 0 findings (verified 2026-10-30 from the laptop)
 
