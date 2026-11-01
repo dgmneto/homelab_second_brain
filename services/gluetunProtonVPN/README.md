@@ -16,8 +16,8 @@ inbound torrent connections work.
 - qbittorrent's WebUI port **9090** is exposed inside gluetun's namespace, not on
   qbittorrent. The Nginx Proxy Manager upstream for qbittorrent therefore points
   at host `gluetun`, port `9090` (see Integrations).
-- Same pattern applies to `prowlarr` (proxied via `gluetun:9696`) — it also rides
-  the gluetun namespace.
+- `prowlarr` **no longer** rides this namespace (moved to `internalNetwork` 2026-06-22; NPM host 6 →
+  `prowlarr:9696`, verified 2026-11-01).
 
 ## Image
 
@@ -63,16 +63,14 @@ Manager (internal), which dials the `gluetun` hostname on the internal network.
 
 - **qbittorrent** — shares this namespace (`network_mode: container:`), WebUI on
   `gluetun:9090`.
-- **prowlarr** — shares this namespace, WebUI on `gluetun:9696`.
 - **Nginx Proxy Manager (nginxIntern)** proxy hosts pointing at `gluetun`:
   - `qbittorrent.intern.dgmneto.com` -> `gluetun:9090`
-  - `prowlarr.intern.dgmneto.com` -> `gluetun:9696`
   - `testvpn.intern.dgmneto.com` -> `gluetun:80`
 
 ## Quirks / runbook
 
 - `restart: always`.
-- Dependent containers (qbittorrent, prowlarr) must be restarted after gluetun
+- Dependent containers (qbittorrent) must be restarted after gluetun
   restarts if they fail to recover networking.
 - To verify the tunnel is up: `testvpn.intern.dgmneto.com` (proxies gluetun:80) or
   query the control server on port `8000` from inside the internal network.

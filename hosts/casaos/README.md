@@ -72,12 +72,12 @@ Created 2026-10-30: system user `nbbackup` (uid 998), home `/footage/backups/hom
 - **DNS:** `ddns` (cloudflare-ddns) keeps the public record current.
 
 ## Networking gotcha — VPN-routed services
-`qbittorrent` AND `prowlarr` have **no network of their own**: `network_mode: container:gluetunProtonVPN`
-routes all their traffic through the `gluetunProtonVPN` (ProtonVPN / WireGuard, port-forwarding on)
-container. If gluetun is down or restarting, both lose connectivity, and **recreating gluetun takes
-them down with it**. Their WebUI ports live in gluetun's namespace (qbittorrent 9090, prowlarr 9696)
-but are **not published to any host port** — they are reached only via `nginxIntern` proxying to
-`gluetun:<port>`. `internalNetwork` (`172.21.0.0/24`) is an external bridge shared across stacks;
+`qbittorrent` has **no network of its own**: `network_mode: container:gluetunProtonVPN` routes all its traffic
+through the `gluetunProtonVPN` (ProtonVPN / WireGuard, port-forwarding on) container. If gluetun is down or restarting
+it loses connectivity, and **recreating gluetun takes it down with it**. Its WebUI port 9090 lives in gluetun's
+namespace, **not published to any host port**; reached only via `nginxIntern` → `gluetun:9090`.
+**`prowlarr` is no longer in the VPN** (compose changed 2026-06-22, verified 2026-11-01): it's on `internalNetwork`,
+proxied `prowlarr.intern` → `prowlarr:9696`. `internalNetwork` (`172.21.0.0/24`) is an external bridge shared across stacks;
 NPM and Plex also sit on a `macvlan` (VLAN 14, `192.168.14.0/24`) with static IPs.
 
 ## apt quirk

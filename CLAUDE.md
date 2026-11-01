@@ -58,6 +58,9 @@ quirks of one app → `services/`.
 | `homelab-notebook` | `192.168.11.21` | NixOS 26.05, native modules | `ssh homelab-notebook` | [hosts/homelab-notebook/README.md](hosts/homelab-notebook/README.md) |
 
 Top gotchas (detail in the host READMEs):
+- **casaos' compose repo (`/home/dgmneto/homelab`) is NOT backed up automatically.** The Sunday-05:00 root cron
+  `services/backup.sh` has silently failed since 2025-04 (root vs dgmneto-owned repo → git "dubious ownership"; and
+  neither on-box GitHub key is accepted). Commit + push changes yourself, or from the Mac. See hosts/casaos/cron.md.
 - **casaos** is x86_64, not a Raspberry Pi. If the 1Password SSH agent is locked, bypass it:
   `ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab`. Use `dgmneto`
   (sudo needs the user's password), not `openclaw`. A service "down" is usually a **full disk** —
@@ -68,8 +71,8 @@ Top gotchas (detail in the host READMEs):
 - **Home automation (Home Assistant, zigbee2mqtt, mosquitto, matter-server) runs on homelab-notebook**, not casaos,
   since 2026-10-30/31 (NixOS modules in `hosts/homelab-notebook/nixos/home-automation.nix`); see
   [services/homeassistant/MIGRATION.md](services/homeassistant/MIGRATION.md). HA's `http:` settings are in `.storage/http`, not YAML.
-- **casaos** `qbittorrent` + `prowlarr` live in `gluetunProtonVPN`'s network namespace — recreating
-  gluetun takes them down. watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
+- **casaos** `qbittorrent` lives in `gluetunProtonVPN`'s network namespace — recreating gluetun takes it down.
+  (`prowlarr` was moved **off** the VPN onto `internalNetwork` on 2026-06-22; verified running that way 2026-11-01.) watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
 - **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),
   and the Bash sandbox can't reach the agent socket (disable sandbox for ssh/op). Its NixOS flake is
   **in this repo** at `hosts/homelab-notebook/nixos/`; `git diff` before every deploy. Hermes on it
@@ -85,7 +88,7 @@ nginx-proxy-manager hostnames that are not exposed to the public internet.
 
 - **Internal hostnames (via `nginxIntern`):** `https://<service>.intern.dgmneto.com`
   (verified: `overseerr.intern.dgmneto.com`, also `qbittorrent.intern.dgmneto.com`,
-  `prowlarr.intern.dgmneto.com`). qBittorrent/prowlarr proxy into the gluetun namespace.
+  `prowlarr.intern.dgmneto.com`). qBittorrent proxies into the gluetun namespace (`gluetun:9090`); prowlarr goes straight to `prowlarr:9696`.
 - **Public hostnames (via `nginxProd`):** e.g. Plex at `https://filmin.3e.dgmneto.com`.
 
 Full authoritative URL list + which credential governs each UI is in `ACCESS.md` (pulled from the NPM

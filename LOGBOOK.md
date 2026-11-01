@@ -4,6 +4,15 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-01 — casaos repo backup (Sunday backup.sh) broken since 2025-04; prowlarr docs corrected
+Investigation. Cron ran `backup.sh` 2026-11-01 05:00:01 and exited in 1 s with output discarded. Root cause: (1) root vs dgmneto-owned
+repo → git "dubious ownership" (reproduced); (2) GitHub rejects both casaos keys (`ssh -T` → publickey denied). Last auto-backup
+commit 2025-04-03. Unpushed: 6 commits (trmnl-ai ×4, mosquitto extra_hosts, deprecated/ move) + uncommitted live edits (prowlarr off
+the VPN onto internalNetwork since 2026-06-22; watchtower cron schedule) + untracked services/hermes/; checked, no secrets. Also found
+the docs claiming prowlarr is in gluetun's namespace were stale (running container: internalNetwork; NPM host 6 → prowlarr:9696,
+302 OK): fixed CLAUDE.md, hosts/casaos/README.md, gluetun README. Proposed fix (needs user: a GitHub deploy key): run backup as
+dgmneto with a dedicated write deploy key, set -e + log file, commit only when dirty.
+
 ## 2026-11-01 — Post-sweep fixes: HACS/repairs/automation cleanup, casaos stacks to deprecated/, IPv6 diagnosis
 HA stopped 15:16:13–15:16:38 (backups `*.bak-pre-fixes-20261101`): removed `better_thermostat` from hacs.repositories/hacs.data
 + its 2 HACS entities; deleted the dead `http:` YAML block; repointed the off automation to the dining-room thermostat (left

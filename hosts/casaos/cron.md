@@ -13,6 +13,13 @@ Keeps 14 days of `history/` for the nightly push from homelab-notebook (see
 [MIGRATION.md § Backups](../../services/homeassistant/MIGRATION.md#backups-live-since-2026-10-30)).
 
 ### root crontab — weekly deployment-repo backup
+
+> **BROKEN since 2025-04 (found 2026-11-01).** Last `auto-backup` commit 2025-04-03. Two independent failures:
+> (1) cron runs it as **root** in the **dgmneto**-owned repo, so git 2.39 aborts with "detected dubious ownership" and nothing is
+> added or committed; (2) GitHub rejects **both** on-box keys (`/root/.ssh/github_ed25519` and `~dgmneto/.ssh/github_ed25519`:
+> `Permission denied (publickey)`), so nothing can be pushed either. Output goes nowhere ("No MTA installed"). On 2026-11-01:
+> 6 commits unpushed (origin/main last updated 2026-10-25, from the Mac) + live-but-uncommitted edits to prowlarr/watchtower
+> compose (since 2026-06-22) + untracked `services/hermes/`. Fix plan in the root LOGBOOK 2026-11-01 entry.
 ```
 0 5 * * 0  cd /home/dgmneto/homelab && ./services/backup.sh
 ```
