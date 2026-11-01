@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-01 — Native IPv6 on the LAN (Zen /48 via UniFi prefix delegation)
+User enabled WAN DHCPv6 (PD /48) and set the Default network to Prefix Delegation + SLAAC in UniFi. First check (15:3x) the RA
+still carried only fd00::/64; after the LAN network change was saved, RA = `2a02:8012:882b::/64` + `fd00::/64`. Verified 17:23:
+casaos and homelab-notebook have 2a02:8012:882b:0:… addresses, curl -6 ipv6.google.com 200, ping6 ~6 ms, Octopus API reachable
+over v6; Thread route `fde9:b6c5:757::/64` intact; HA/matter/z2m/mosquitto healthy. Inbound-from-internet blocking not verified
+(cloud agent lacks IPv6). `notes/lan-ipv6.md` rewritten.
+
 ## 2026-11-01 — Deleted casaos backup.sh + its root cron (user request)
 Root crontab saved to `/root/crontab.bak-20261101`, then removed the only line (`0 5 * * 0 … ./services/backup.sh`); diff confirms
 one line. `git rm services/backup.sh` in the server repo (29f0fef, local). Root's crontab is now empty; other jobs (cron.d,

@@ -1,21 +1,31 @@
 ---
 name: lan-ipv6
-description: The home LAN has no public IPv6 (router hands out ULA fd00::/64 only but still advertises a default route); IPv6 internet connections fail instantly and fall back to IPv4. Keep ULA - Matter/Thread needs it.
+description: LAN has native IPv6 from Zen since 2026-11-01 (delegated /48 2a02:8012:882b::/48; Default LAN = 2a02:8012:882b::/64 via SLAAC) alongside the old ULA fd00::/64. Keep the ULA - Matter/Thread needs IPv6; inbound IPv6 relies on the UniFi firewall.
 metadata:
   node_type: memory
   type: reference
 ---
-# LAN IPv6: ULA only, no internet IPv6 (verified 2026-11-01)
+# LAN IPv6 (native since 2026-11-01)
 
-- Every host (casaos, homelab-notebook) has only `fd00::/64` (+ casaos' macvlan `fd00:1::`/`fd00:2::`) and the
-  Tailscale `fd7a:…` address. **No global (2xxx:) address anywhere.**
-- The router (`192.168.11.1`, MAC `78:45:58:b1:a5:7d` → Ubiquiti/UniFi OUI) sends RAs for `fd00::/64` **and** a default
-  route (`default via fe80::7a45:58ff:feb1:a57d … pref high`), but has no IPv6 upstream. So `curl -6` to anything on the
-  internet fails immediately (code 000), and apps fall back to IPv4 (happy eyeballs). Observed impact: none.
-- `fde9:b6c5:757::/64` via `fe80::67:28bc:f5ae:b3b6` (MAC `c4:f7:c1…`) is the **Thread border router's** mesh prefix. Matter
-  over Thread depends on it and on the ULA addresses, so **never "fix" IPv6 by disabling it** on hosts or the LAN.
-- Real fix is on the router/ISP (user action): if the ISP offers IPv6, enable it on the WAN (DHCPv6 with prefix delegation,
-  typically /56 or /60) and set the LAN network's IPv6 to prefix delegation + SLAAC; hosts then get global addresses
-  automatically and keep the ULA. If the ISP has no IPv6, the only tidy-up is stopping the router advertising itself as an IPv6
-  default gateway; purely cosmetic.
-- Check quickly: `ip -6 addr show scope global` (look for a non-fd address) and `curl -6 -s -o /dev/null -w '%{http_code}' https://ipv6.google.com`.
+**State (verified 2026-11-01 17:23 from both servers):**
+- ISP **Zen**: WAN link net `2a02:8011:d017:bb39::/64` ("IPv6 ND WAN"); **delegated prefix `2a02:8012:882b::/48`** ("IPv6 PD LAN",
+  shown in My Zen). UniFi WAN: DHCPv6, prefix delegation size 48.
+- UniFi network **Default** (`192.168.11.0/24`) = Prefix Delegation + SLAAC → RA now carries **`2a02:8012:882b::/64`**
+  *and* the old ULA **`fd00::/64`**, router lifetime 1800 s, RDNSS `2a02:8012:882b::1`. Router: `192.168.11.1` /
+  `fe80::7a45:58ff:feb1:a57d` (UniFi).
+- casaos and homelab-notebook each have a `2a02:8012:882b:0:…` SLAAC address (+ temporary/privacy ones on the laptop);
+  `curl -6 https://ipv6.google.com` → 200, ping6 Google DNS ~6 ms. casaos' VLAN 14/15 macvlan nets still ULA-only
+  (`fd00:1::`/`fd00:2::`; not changed).
+- Thread border router (`fe80::67:28bc:f5ae:b3b6`, MAC `c4:f7:c1…`) still advertises its mesh prefix `fde9:b6c5:757::/64`;
+  route present after the change. **Never disable IPv6 on hosts/LAN**: Matter over Thread depends on it.
+
+**Before 2026-11-01:** router advertised only `fd00::/64` plus a default route with no upstream, so IPv6 egress failed instantly
+(happy eyeballs → IPv4); WAN IPv6 simply wasn't enabled in UniFi.
+
+**Inbound exposure:** every host now has a globally routable address. Protection = UniFi's IPv6 firewall (default: block
+unsolicited inbound from the internet) + per-host firewalls (homelab-notebook: NixOS firewall covers v6; **casaos has no host
+firewall and Docker publishes ports on `[::]`**). Not yet verified from outside (the cloud agent has no IPv6). To verify, from an
+IPv6-capable network outside the LAN (e.g. phone on mobile data): connect to `[<host v6>]:22/8123/53` → must fail.
+
+Check quickly: `ip -6 addr show scope global | grep 'inet6 2'` and `curl -6 -s -o /dev/null -w '%{http_code}' https://ipv6.google.com`.
+RA dump: `sudo nix shell nixpkgs#ndisc6 -c rdisc6 -w 3000 -r 3 enp2s0` (on homelab-notebook).
