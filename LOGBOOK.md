@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-01 — HA: removed dead entities (user request)
+With HA stopped (15:11:35–15:11:49) and backups `*.bak-pre-dead-cleanup-20261101`: deleted the webOS TV integration (entry
+01JQQ6J8…, device + 2 entities), 13 dead mobile_app sensors (iPhone: activity/steps/distance/floors/pace/cadence/pressure/focus;
+iPhone 13 Pro (2): kiosk brightness/volume, camera stream), and disabled (`disabled_by: user`) the UniFi Front Garden camera's
+vehicle event + privacy switch (live integration, would be recreated). Entities 964→949, devices 61→60, entries 38→37. Verified
+after boot: nothing re-created, no new errors. HACS restart_required repairs persisted through the restart (they need dismissing).
+
 ## 2026-10-31 — Post-migration sweep (HA stack on homelab-notebook + casaos leftovers)
 Investigation only. Clean: no failed units; z2m 26/26 interviewed, 0 warnings; mosquitto/matter no warnings; unavailable entities =
 pre-move baseline; only custom card type (bubble-card) now served; template sensors live; nightly backup ran 03:40; NPMs have no

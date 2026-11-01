@@ -26,6 +26,12 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   there's no release asset) into that dir (owner `hass`, plus a `.js.gz`), or HACS → Redownload. No restart needed;
 >   clients must reload/clear the frontend cache.
 >
+> - **Removing dead entities without an API token** (done 2026-11-01): stop HA, back up `.storage/core.{config_entries,
+>   entity_registry,device_registry}`, jq-edit, start. A dead *integration* → delete its config entry + device. Dead
+>   mobile_app sensors → delete the registry entries (mobile_app keeps no separate sensor list in `.storage/mobile_app`,
+>   so they stay gone unless the phone re-registers them). Unsupported entities of a **live** integration (e.g. UniFi Protect) get
+>   recreated if deleted → set `disabled_by: "user"` instead. HACS `restart_required_*` repairs do **not** clear on restart;
+>   dismiss them in Settings → Repairs.
 > - Known leftovers (sweep 2026-10-31): HACS lists **`better_thermostat` 1.7.0 installed but its code is gone and no config
 >   entry uses it**; `tapo_control` code missing (entry + 109 entities exist). Automation **"Ground Floor/Update Thermostat
 >   Temperature"** (off) targets the deleted `climate.ground_floor_thermostat_2`; the device now lives as

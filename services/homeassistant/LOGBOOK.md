@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-01 — Dead entities removed
+webOS TV integration deleted; 13 unavailable mobile_app sensors deleted; 2 UniFi Front Garden camera entities disabled. Offline
+`.storage` edit (backups `*.bak-pre-dead-cleanup-20261101`), HA down 14 s, verified nothing came back. Method added to README.
+
 ## 2026-10-31 — Post-migration sweep
 Healthy vs baseline. Leftovers recorded in README (better_thermostat/tapo_control code missing, dead off automation, dead YAML http
 block, stale HACS repairs). No changes made.
