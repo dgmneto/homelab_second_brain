@@ -2,7 +2,8 @@
 name: lan-ipv6
 description: The home LAN has no public IPv6 (router hands out ULA fd00::/64 only but still advertises a default route); IPv6 internet connections fail instantly and fall back to IPv4. Keep ULA - Matter/Thread needs it.
 metadata:
-  type: fact
+  node_type: memory
+  type: reference
 ---
 # LAN IPv6: ULA only, no internet IPv6 (verified 2026-11-01)
 
