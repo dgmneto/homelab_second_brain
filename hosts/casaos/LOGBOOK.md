@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-02 — terminus-worker joined internalNetwork (172.21.0.142)
+Compose change in `~/homelab/services/terminus` (committed on casaos, push from Mac). See services/terminus.
+
 ## 2026-11-01 — Removed backup.sh cron + script
 Root crontab line `0 5 * * 0 cd /home/dgmneto/homelab && ./services/backup.sh` removed (backup `/root/crontab.bak-20261101`); script
 `git rm`'d (29f0fef). Root crontab now empty.

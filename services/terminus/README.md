@@ -48,7 +48,9 @@ check upstream release notes, bump `TERMINUS_VERSION` in `.env` **and** `env.tpl
 
 ### Networking
 Web container: **internalNetwork `172.21.0.140`** (static; nginxIntern → `terminus:2300`) +
-**`terminus_default`** (private bridge to db/valkey/worker). Nothing published on the host or LAN.
+**`terminus_default`** (private bridge to db/valkey/worker). **Worker: internalNetwork `172.21.0.142`**
++ `terminus_default` (since 2026-11-02) — poll extensions are fetched by the *worker*, and AI Board
+polls `http://trmnl-ai:8080`, which only resolves on internalNetwork. Nothing published on the host or LAN.
 History: briefly had macvlan `192.168.14.40` + host port 2300 (2026-10-25), removed same day once
 the device moved to the HTTPS hostname. To test the backend bypassing NPM, curl from inside:
 `docker exec terminus curl -s -o /dev/null -w '%{http_code}' http://localhost:2300/up`.
@@ -128,6 +130,17 @@ RESET (on the XIAO) only reboots; BOOT+power is flashing mode. Reflash/upgrade: 
 10. NPM access log for this host: `/footage/services/nginxIntern/data/logs/proxy-host-25_access.log`
    — shows device requests (`ESP32HTTPClient`) with status, quickest way to see if the TRMNL reached us.
    Terminus' own log only prints status codes; problem details come back in the response body.
+11. **"Screen frozen / last update is days old" while the device still polls fine** = the screen
+   isn't being rebuilt, not a device problem. The device only downloads a PNG (`/uploads/<id>.png` in
+   the NPM log) when the image id changes. Check `select id,name,updated_at from screen` and
+   `docker logs terminus-worker | grep "Enqueued jobs for extension"` — every on-playlist extension
+   should appear every 10 min. Two causes found 2026-11-02 for AI Board: (a) worker not on
+   internalNetwork → can't resolve `trmnl-ai` (test: `docker exec terminus-worker curl -s -o /dev/null
+   -w '%{http_code}' http://trmnl-ai:8080/screen.json` → 200); (b) a *running* worker had never
+   enqueued ext 2 at all although `Sidekiq.get_schedule("extension-ai_board")` existed — an extension
+   created after worker start (e.g. via `hanami console`) may need `docker compose restart worker`.
+   **Manual `Screen.new.perform` in the web container hides both** — it runs on internalNetwork; a
+   screen that only updates when you force it is NOT proof the scheduler works.
 
 ## Reflashing the kit from the Mac (no buttons needed)
 The trmnl.com/flash page needs flashing mode, which is hard to hit on this kit. Working method

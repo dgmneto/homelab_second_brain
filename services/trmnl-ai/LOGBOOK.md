@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **trmnl-ai** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-02 — Screen never reached the device after Friday
+trmnl-ai itself was fine (generating every ~20 min); Terminus' worker wasn't polling it (not
+scheduled + not on internalNetwork). Fixed in terminus — see `../terminus/LOGBOOK.md`.
+
 ## 2026-10-30 — Feedback: no tiny glyphs
 User: small weather symbols can't show on the panel. `prompt.md`: removed the "Unicode symbols are
 fine" line, added feedback rule (words instead of icons, symbols only ≥32 px, hourly row = hour +

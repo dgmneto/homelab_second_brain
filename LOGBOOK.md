@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-02 — TRMNL frozen since Fri 15:11 → terminus worker fixed
+AI Board (Terminus ext 2) had never been rebuilt by the scheduler: worker hadn't picked up the
+schedule and wasn't on internalNetwork, so it couldn't reach `trmnl-ai`. Restarted worker, added it
+to internalNetwork (172.21.0.142). Verified auto-rebuild at 14:10. Details in services/terminus.
+
 ## 2026-11-01 — Native IPv6 on the LAN (Zen /48 via UniFi prefix delegation)
 User enabled WAN DHCPv6 (PD /48) and set the Default network to Prefix Delegation + SLAAC in UniFi. First check (15:3x) the RA
 still carried only fd00::/64; after the LAN network change was saved, RA = `2a02:8012:882b::/64` + `fd00::/64`. Verified 17:23:

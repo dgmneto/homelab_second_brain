@@ -3,9 +3,21 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-02 — TRMNL stuck on Friday 15:11: AI Board was never auto-rebuilt
+Symptom: device showed "last update Fri 3pm". Device polled `/api/display` every 15 min fine (200),
+but screen 6 (`extension-ai_board`) `updated_at` = 2026-10-30 15:11 — the last *manual*
+`Screen.new.perform` from the web container. `terminus-worker` logs had never once shown
+"Enqueued jobs for extension: 2" (only ext 1), and the worker couldn't resolve `trmnl-ai` (it was only
+on `terminus_default`). So the 10-30 logbook claim "scheduler rebuilds extension 2 on its own" was
+wrong — those were manual builds. Fix: `docker compose restart worker`, then added the worker to
+internalNetwork `172.21.0.142` in `compose.yaml` and `docker compose up -d worker` (committed in the
+homelab repo on casaos, not yet pushed — push from the Mac). Verified 14:10: worker logged
+"Enqueued jobs for extension: 2", `GET http://trmnl-ai:8080/screen.json`, screen 6 updated 14:10:24.
+README gotcha 11 added.
+
 ## 2026-10-30 — Device 7 playlist → AI Board
 `update playlist_item set screen_id=6 where id=5` (playlist 4 `device_7`; was screen 5 Morning
-Board). Morning Board extension/screen kept as backup. Confirmed the scheduler rebuilds extension 2
+Board). Morning Board extension/screen kept as backup. (WRONG, corrected 2026-11-02: those were manual builds.) "Confirmed" the scheduler rebuilds extension 2
 every 10 min on its own (exchange refreshed 12:11:57, screen 6 updated 12:12:09).
 
 ## 2026-10-30 — Extension 2 "AI Board" (LLM-designed screen)

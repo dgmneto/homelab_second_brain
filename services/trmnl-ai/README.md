@@ -12,7 +12,7 @@ device 7 through poll extension **2 "AI Board"** (screen 6) — **on device 7's 
 trmnl-ai (172.21.0.141, no host port)                        Terminus (casaos)
  every 5 min: Open-Meteo + 6 TfL calls → trimmed JSON ──┐
  regen if data hash changed (≥20 min apart) or >60 min ─┤→ OpenRouter → HTML → validate
- GET :8080/screen.json  {html, generated_at, model} ◄───┴── extension 2 polls every 10 min,
+ GET :8080/screen.json  {html, generated_at, model} ◄───┴── extension 2 polls every 10 min (from terminus-worker, which must be on internalNetwork),
                                                            template = <div class="{{extension.css_classes}}">{{ source_1.html }}</div>
 ```
 
