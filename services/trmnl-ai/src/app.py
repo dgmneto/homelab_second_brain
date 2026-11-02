@@ -24,6 +24,7 @@ from zoneinfo import ZoneInfo
 TZ = ZoneInfo("Europe/London")
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
+STALE_MAX = int(os.environ.get("STALE_MAX", 6 * 3600))  # seconds a cached source may stand in for a failed fetch
 PROMPT_FILE = os.environ.get("PROMPT_FILE", os.path.join(HERE, "prompt.md"))
 MODEL = os.environ.get("OPENROUTER_MODEL", "anthropic/claude-haiku-5.5")
 API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
@@ -146,11 +147,31 @@ def collect():
         "crowding_kings_cross": lambda: crowding(KSX, target.strftime("%a")),
     }
     for name, fn in jobs.items():
+        cache = os.path.join(DATA_DIR, f"last_good_{name}.json")
         try:
             data[name] = fn()
+            try:
+                with open(cache, "w") as f:
+                    json.dump(data[name], f)
+            except OSError:
+                pass
         except Exception as e:  # one bad source must not kill the screen
-            data[name] = {"error": f"{type(e).__name__}: {e}"[:200]}
-            log("fetch failed", name, data[name]["error"])
+            err = f"{type(e).__name__}: {e}"[:200]
+            log("fetch failed", name, err)
+            # Open-Meteo/TfL 503s are common: reuse the last good result if it is < STALE_MAX old,
+            # so a blip doesn't make the LLM redesign the screen around a missing section.
+            try:
+                age = time.time() - os.path.getmtime(cache)
+                if age < STALE_MAX:
+                    with open(cache) as f:
+                        data[name] = json.load(f)
+                    if isinstance(data[name], dict):
+                        data[name]["_stale_minutes"] = int(age // 60)
+                    log("using cached", name, f"{int(age // 60)} min old")
+                    continue
+            except (OSError, ValueError):
+                pass
+            data[name] = {"error": err}
     return data
 
 
@@ -194,7 +215,8 @@ def llm(data, feedback=None, previous=None):
 
 
 def extract_html(raw):
-    m = re.search(r"```(?:html)?\s*\n(.*?)```", raw, re.S)
+    # closing fence optional: replies sometimes end without it (rendered a literal "```html" 2026-11-02)
+    m = re.search(r"```(?:html)?[ \t]*\n(.*?)(?:```|\Z)", raw, re.S)
     html = (m.group(1) if m else raw).strip()
     if "<script" in html.lower():
         return None, "contains <script>"

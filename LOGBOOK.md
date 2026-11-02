@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-02 — trmnl-ai: unclosed code fence + weather-outage resilience
+Fixed literal "```html" on the screen and the "No forecast" layout caused by Open-Meteo 503s (cache
+last good source data up to 6 h). Fresh render verified. Details in services/trmnl-ai.
+
 ## 2026-11-02 — TRMNL frozen since Fri 15:11 → terminus worker fixed
 AI Board (Terminus ext 2) had never been rebuilt by the scheduler: worker hadn't picked up the
 schedule and wasn't on internalNetwork, so it couldn't reach `trmnl-ai`. Restarted worker, added it

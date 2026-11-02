@@ -33,7 +33,10 @@ Open-Meteo (Seven Sisters 51.5829,-0.0733: now, 2 days, target-day every 2 h 06�
 now + planned window now→end of target day (victoria, piccadilly, central), Journey Planner
 940GZZLUSVS→940GZZLUKSX (tomorrow 08:30 after 22:00), StopPoint disruptions both stations, crowding
 peak bands. **Target day** = date of now+2 h (rolls to tomorrow at 22:00), same as Morning Board.
-A failing source becomes `{"error": …}` in the data; the prompt says to show "—". Adding a source =
+A failing source reuses its last good result (`/data/last_good_<source>.json`, marked
+`_stale_minutes`) if < `STALE_MAX` (6 h, env) old — Open-Meteo 503s several times a day, and a missing
+section made the model redesign the screen around it (then "keep its layout" carried the damage
+forward). Only with no fresh cache does it become `{"error": …}`; the prompt says to show "—". Adding a source =
 add a function + entry in `collect()` in `app.py` and mention it in `prompt.md`.
 
 ## LLM / cost
@@ -112,7 +115,8 @@ Test a scenario without waiting for a real strike: write a fixture (start from `
 and `docker exec trmnl-ai python /app/app.py --once --force --data /data/fixture.json`.
 
 ## Validation / failure behaviour
-Reply must contain `view--full`, no `<script`, no external `src/href`/`url(http`, ≤40 KB; on reject
+Code fences are stripped even when the closing ``` is missing (an unclosed fence once rendered a
+literal "```html" in the corner, 2026-11-02). Reply must contain `view--full`, no `<script`, no external `src/href`/`url(http`, ≤40 KB; on reject
 the model gets one retry with the reason. LLM error or double reject → previous `screen.json` kept.
 With no key and no previous screen → deterministic fallback (date + line statuses, "AI screen
 unavailable — fallback").

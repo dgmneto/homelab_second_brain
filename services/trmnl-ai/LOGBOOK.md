@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **trmnl-ai** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-02 — Fix stray "```html" + empty weather box
+First auto-built screen after the terminus fix showed a literal "```html" top-left and "No forecast
+today": the 14:31 reply had no closing fence (`extract_html` only stripped closed fences) and
+Open-Meteo was 503ing, so the model built a degraded layout that later runs kept. `app.py`: fence regex
+accepts a missing close; every source caches its last good result and reuses it for up to `STALE_MAX`
+(6 h) on fetch failure. Deployed (`cat > app.py`, `docker compose restart`), `--once --force --fresh`,
+rebuilt ext 2 → PNG viewed: full weather + hourly strip, 3 lines, commute, tomorrow. Preview updated.
+
 ## 2026-11-02 — Screen never reached the device after Friday
 trmnl-ai itself was fine (generating every ~20 min); Terminus' worker wasn't polling it (not
 scheduled + not on internalNetwork). Fixed in terminus — see `../terminus/LOGBOOK.md`.
