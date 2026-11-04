@@ -76,9 +76,18 @@ before blaming transcoding. Logs: `/footage/services/plex/config/Library/Applica
   -select_streams v:0 -show_entries stream=codec_tag_string -of csv=p=0 "<file>"`. **`hev1` = Apple's player won't start**
   (it spins on "buffering", and the timeline stays at `state=buffering time=0` forever). Plex still says "Direct play OK", because its profile
   doesn't check the tag. Needs `hvc1`/`dvh1`. Fix without re-encoding: `ffmpeg -i in.mp4 -map 0 -c copy -tag:v hvc1 out.mp4`.
-  MKVs are not affected.
+  MKVs are not affected. Runbook that worked (2026-11-04, ~14 min for 32 GB at ~40 MB/s): run in the jellyfin container
+  (has `/library/media` rw, runs as root) with `docker exec -d jellyfin sh -c 'cd "<dir>" && nice -n 10
+  /usr/lib/jellyfin-ffmpeg/ffmpeg -nostdin -y -v warning -progress /config/remux-progress.txt -i "<in>.mp4" -map 0 -c copy
+  -tag:v:0 hvc1 -f mp4 remux.hvc1.tmp > /config/remux.log 2>&1; echo EXIT=$? >> /config/remux.log'`
+  (`-tag:v:0`, not `-tag:v`: there's also an mjpeg cover "video" stream). Writing to a `.tmp` name stops Plex picking up a partial file.
+  The result drops the DV config record (plays as HDR10) and gains one chapter data stream; "codec frame size is not set"
+  warnings for EAC3 are harmless. Then `chown` to match, copy the `.pt-BR.srt` under the new basename, and
+  `GET /library/sections/2/refresh?path=<urlencoded dir>` (no token from the LAN).
+- **Multiple versions:** files in one movie folder whose names start with `Title (Year) - ` show up as versions of one item
+  ("Play Version…"). Radarr only tracks one of them; the other is an unmanaged file in the folder.
 - **Known case (2026-11-04):** every "Ben The Men" (BTM) WEB-DL MP4 is `hev1`: Spider-Man: Brand New Day + Widow's Bay
-  S01 (10 eps, 0 views since July). The Apple TV link tops out at ~94 Mbps, which is *not* the cause for a 30 Mbps file (an earlier
+  S01 (10 eps, 0 views since July). Spider-Man now has two versions (original `[DV HDR10Plus]` + remuxed `[HDR10 hvc1]`, Plex media 5070). The Apple TV link tops out at ~94 Mbps, which is *not* the cause for a 30 Mbps file (an earlier
   analysis blamed it; that was wrong). The re-reads were the player probing, not starvation.
 
 - `restart: unless-stopped`.

@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-04 — Spider-Man remuxed to hvc1, kept side by side with the original
+At the user's request: lossless `-c copy -tag:v:0 hvc1` remux in the jellyfin container (21:06–21:25, EXIT=0). Verified
+vs the original: tag hvc1, nb_frames 208511 both, duration 8700.672 s both, size −4.5 KB, DV record dropped (HDR10), +1
+chapter data stream. Saved as `… [WEBDL-2160p][HDR10 hvc1][EAC3 Atmos 5.1][h265]-BTM.mp4` (qbittorrent:arrstack 664)
++ a copied pt-BR.srt, next to the original; Plex folder refresh → ratingKey 4219 has 2 versions (media 4960 original,
+5070 hvc1). Not yet confirmed on the Apple TV. Widow's Bay (also hev1) untouched.
+
 ## 2026-11-04 — Spider-Man buffering, take 2: `hev1` codec tag, not the network
 The user pushed back on "network-bound" (94 Mbps link vs a 30 Mbps file). Re-checked: the player read ahead faster than real
 time and **never** reported anything but `state=buffering time=0` (126 timelines, 20:42–21:05, several restarts), so it

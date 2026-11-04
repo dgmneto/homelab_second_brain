@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **plex** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — Spider-Man: added hvc1 remux as a second version
+Remuxed copy (`[HDR10 hvc1]`, media 5070) next to the original (media 4960); both under ratingKey 4219. Runbook in README.
+Pending Apple TV confirmation.
+
 ## 2026-11-04 — Spider-Man buffering root cause: `hev1` tag (corrects the entry below)
 ffprobe: video codec_tag `hev1`, DV p8.1. Apple TV never left `buffering time=0`. 11 BTM MP4s affected (Spider-Man,
 Widow's Bay S01). Network (~94 Mbps) was a red herring. README runbook updated. Remux pending the user's OK.
