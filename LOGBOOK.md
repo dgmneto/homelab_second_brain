@@ -4,7 +4,15 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
-## 2026-11-04 — Spider-Man buffering on the Apple TV: network-bound direct play, not transcoding
+## 2026-11-04 — Spider-Man buffering, take 2: `hev1` codec tag, not the network
+The user pushed back on "network-bound" (94 Mbps link vs a 30 Mbps file). Re-checked: the player read ahead faster than real
+time and **never** reported anything but `state=buffering time=0` (126 timelines, 20:42–21:05, several restarts), so it
+never started at all. File is well-interleaved (ffprobe). Root cause: the video track is tagged `hev1` (ffmpeg remux by the
+BTM release group), which Apple's AVFoundation won't play in MP4. All 11 `hev1` files in the library are BTM: Spider-Man +
+Widow's Bay S01 (0 views since 07-18). Fix proposed: lossless remux `-c copy -tag:v hvc1` (1.8 TB free), or grab
+another release. Not applied yet (needs the user's OK). The runbook in services/plex was corrected.
+
+## 2026-11-04 — Spider-Man buffering on the Apple TV: network-bound direct play, not transcoding (SUPERSEDED, see above)
 Investigation (read-only). Plex logged **direct play** (no transcode) for `Spider-Man: Brand New Day` (ratingKey 4219,
 4K DV p8.1 HEVC, 29.8 Mbps MP4) on the Apple TV `192.168.11.236`. From the Plex log: 11.4 GB transferred in 16.6 min
 (≈92 Mbps, link saturated, a ~94 Mbps ceiling on every long read), but only 5.84 GB unique (49 % re-downloaded). The Apple TV

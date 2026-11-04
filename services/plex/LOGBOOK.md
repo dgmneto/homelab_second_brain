@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **plex** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — Spider-Man buffering root cause: `hev1` tag (corrects the entry below)
+ffprobe: video codec_tag `hev1`, DV p8.1. Apple TV never left `buffering time=0`. 11 BTM MP4s affected (Spider-Man,
+Widow's Bay S01). Network (~94 Mbps) was a red herring. README runbook updated. Remux pending the user's OK.
+
 ## 2026-11-04 — Investigation: Spider-Man buffering (Apple TV)
 Direct play confirmed in the log; the client link is capped at ~94 Mbps and AVPlayer re-fetched 49 % of the bytes, so the
 effective rate ≈ the 30 Mbps bitrate. Added a "Diagnosing buffering" runbook to README. No Plex change.

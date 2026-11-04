@@ -72,9 +72,14 @@ before blaming transcoding. Logs: `/footage/services/plex/config/Library/Applica
    A flat ceiling around 94 Mbps means the client has a **100 Mbps-class link** (Fast Ethernet or weak Wi-Fi).
 4. Compare with a LAN box: `curl -o /dev/null -r 0-200000000 -w '%{speed_download}' http://192.168.14.7:32400/library/parts/<partId>/<x>/file.mp4`
    (no token needed from 192.168.0.0/16). homelab-notebook got 150–190 Mbps (2026-11-04).
-- **Known case:** Apple TV (`192.168.11.236`, Plex device 30) playing a 30 Mbps 4K DV MP4 with 9 audio and 50 subtitle tracks.
-  Direct play, link pinned at ~94 Mbps, and AVPlayer re-downloaded **49 %** of the bytes (overlapping range requests,
-  a new TLS connection every few hundred KB). Effective rate ≈ the movie's bitrate, so it buffers.
+- **Check the codec tag first for MP4s on the Apple TV:** `docker exec jellyfin /usr/lib/jellyfin-ffmpeg/ffprobe -v error
+  -select_streams v:0 -show_entries stream=codec_tag_string -of csv=p=0 "<file>"`. **`hev1` = Apple's player won't start**
+  (it spins on "buffering", and the timeline stays at `state=buffering time=0` forever). Plex still says "Direct play OK", because its profile
+  doesn't check the tag. Needs `hvc1`/`dvh1`. Fix without re-encoding: `ffmpeg -i in.mp4 -map 0 -c copy -tag:v hvc1 out.mp4`.
+  MKVs are not affected.
+- **Known case (2026-11-04):** every "Ben The Men" (BTM) WEB-DL MP4 is `hev1`: Spider-Man: Brand New Day + Widow's Bay
+  S01 (10 eps, 0 views since July). The Apple TV link tops out at ~94 Mbps, which is *not* the cause for a 30 Mbps file (an earlier
+  analysis blamed it; that was wrong). The re-reads were the player probing, not starvation.
 
 - `restart: unless-stopped`.
 - macvlan means no port publishing — connect via `192.168.14.7:32400` or the
