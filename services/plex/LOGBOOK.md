@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **plex** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — Investigation: Spider-Man buffering (Apple TV)
+Direct play confirmed in the log; the client link is capped at ~94 Mbps and AVPlayer re-fetched 49 % of the bytes, so the
+effective rate ≈ the 30 Mbps bitrate. Added a "Diagnosing buffering" runbook to README. No Plex change.
+
 ## 2026-11-04 — Documented token-free LAN API access (for Hermes/Orion)
 Read-only check: Preferences `allowedNetworks=192.168.0.0/16`, so homelab-notebook gets 200 on
 `/status/sessions`, `/transcode/sessions`, `/library/sections` without a token. No Plex change. ACCESS.md updated.

@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — orion-house skill: playback-debugging lessons
+Added to `skills/media/orion-house/SKILL.md`: check the log decision first; `/status/sessions` may be 0 during Apple TV
+direct play; no software ffmpeg decode tests on casaos (its tests at 20:55–20:58 pinned the CPU during the user's stream).
+
 ## 2026-11-04 — Orion: Plex access + fixed dead skills symlink
 On homelab-notebook (backups `*.bak-20261104`): `ln -sfn /var/lib/hermes/.hermes/skills/media
 profiles/orion/skills/media` (was `-> /opt/data/skills/media`, dead since the NixOS move); added a "Plex" section

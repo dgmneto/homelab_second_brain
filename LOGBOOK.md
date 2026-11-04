@@ -4,6 +4,15 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-04 — Spider-Man buffering on the Apple TV: network-bound direct play, not transcoding
+Investigation (read-only). Plex logged **direct play** (no transcode) for `Spider-Man: Brand New Day` (ratingKey 4219,
+4K DV p8.1 HEVC, 29.8 Mbps MP4) on the Apple TV `192.168.11.236`. From the Plex log: 11.4 GB transferred in 16.6 min
+(≈92 Mbps, link saturated, a ~94 Mbps ceiling on every long read), but only 5.84 GB unique (49 % re-downloaded). The Apple TV
+link looks like 100 Mbps-class (casaos NIC is 1 Gbps; notebook → Plex over the same routed path = 150–190 Mbps).
+Orion's hypothesis (DV forcing a transcode) was wrong. Orion was also running software `ffmpeg` decode tests in the jellyfin
+container, which pinned the N3450 CPU at 0 % idle during playback. I didn't kill it (blocked; left to the user). Runbook in
+services/plex/README.md; Orion's `orion-house` skill got the lessons.
+
 ## 2026-11-04 — Hermes (Orion) can reach Plex for playback debugging
 Orion told the user it had no Plex access: it had guessed `plex.intern.dgmneto.com:32400`, which doesn't exist. Root
 causes: (1) the Plex URL wasn't written down anywhere Orion reads; (2) `profiles/orion/skills/media` was still a
