@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-04 — Confirmed: hvc1 remux of Spider-Man plays on the Apple TV
+User report. Root cause (hev1 tag) confirmed. Widow's Bay S01 still hev1 (not fixed yet).
+
 ## 2026-11-04 — Spider-Man remuxed to hvc1, kept side by side with the original
 At the user's request: lossless `-c copy -tag:v:0 hvc1` remux in the jellyfin container (21:06–21:25, EXIT=0). Verified
 vs the original: tag hvc1, nb_frames 208511 both, duration 8700.672 s both, size −4.5 KB, DV record dropped (HDR10), +1

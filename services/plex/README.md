@@ -87,7 +87,7 @@ before blaming transcoding. Logs: `/footage/services/plex/config/Library/Applica
 - **Multiple versions:** files in one movie folder whose names start with `Title (Year) - ` show up as versions of one item
   ("Play Version…"). Radarr only tracks one of them; the other is an unmanaged file in the folder.
 - **Known case (2026-11-04):** every "Ben The Men" (BTM) WEB-DL MP4 is `hev1`: Spider-Man: Brand New Day + Widow's Bay
-  S01 (10 eps, 0 views since July). Spider-Man now has two versions (original `[DV HDR10Plus]` + remuxed `[HDR10 hvc1]`, Plex media 5070). The Apple TV link tops out at ~94 Mbps, which is *not* the cause for a 30 Mbps file (an earlier
+  S01 (10 eps, 0 views since July). Spider-Man now has two versions (original `[DV HDR10Plus]` + remuxed `[HDR10 hvc1]`, Plex media 5070). **Confirmed by the user 2026-11-04: the hvc1 version plays on the Apple TV.** The Apple TV link tops out at ~94 Mbps, which is *not* the cause for a 30 Mbps file (an earlier
   analysis blamed it; that was wrong). The re-reads were the player probing, not starvation.
 
 - `restart: unless-stopped`.

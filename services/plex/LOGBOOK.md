@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **plex** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — hvc1 fix confirmed on the Apple TV
+User confirmed the `[HDR10 hvc1]` version of Spider-Man plays.
+
 ## 2026-11-04 — Spider-Man: added hvc1 remux as a second version
 Remuxed copy (`[HDR10 hvc1]`, media 5070) next to the original (media 4960); both under ratingKey 4219. Runbook in README.
 Pending Apple TV confirmation.
