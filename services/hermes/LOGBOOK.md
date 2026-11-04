@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **hermes** — what
 changed, why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — Orion: Plex access + fixed dead skills symlink
+On homelab-notebook (backups `*.bak-20261104`): `ln -sfn /var/lib/hermes/.hermes/skills/media
+profiles/orion/skills/media` (was `-> /opt/data/skills/media`, dead since the NixOS move); added a "Plex" section
+to `skills/media/orion-house/SKILL.md` (URL `http://192.168.14.7:32400`, no token, URLs not to use, key
+endpoints, Plex log command via `ssh casaos`); appended `PLEX_URL` to `profiles/orion/.env`. No gateway restart
+(it would drop all 3 bots; the skill works without the env var). Verified as hermes: API endpoints 200, log tail works.
+
 ## 2026-10-08 — SSH access to casaos + second-brain clone
 The user wanted Hermes to be able to change casaos and keep this repo current. They chose "docker + repo,
 no sudo".

@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **plex** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-04 — Documented token-free LAN API access (for Hermes/Orion)
+Read-only check: Preferences `allowedNetworks=192.168.0.0/16`, so homelab-notebook gets 200 on
+`/status/sessions`, `/transcode/sessions`, `/library/sections` without a token. No Plex change. ACCESS.md updated.
+
 ## 2026-09-22 — Investigation: reported down, found up
 Plex up 7d healthy; `/identity` 200 direct, via `filmin.3e` on LAN, and from the internet. Streamed
 at 20:24. `filmin.intern.dgmneto.com` broken (no nginxIntern proxy host, TLS unrecognized name) but is

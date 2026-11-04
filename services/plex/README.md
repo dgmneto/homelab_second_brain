@@ -49,6 +49,7 @@ transcoding. Runs on its own dedicated LAN IP via a macvlan network.
 
 ## Integrations
 
+- `hermes` (Orion profile, on homelab-notebook) — read-only API access for playback diagnosis, token-free via `allowedNetworks`; see `ACCESS.md`.
 - `overseerr` — request frontend for Plex.
 - *arr stack (`radarr`/`sonarr`/`bazarr`) populates `/library/media`.
 

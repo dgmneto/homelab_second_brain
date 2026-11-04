@@ -26,7 +26,7 @@ AI agent (NousResearch Hermes Agent) — three Telegram bots, OpenRouter as mode
 |---|---|---|
 | default | main bot | allowlist in `TELEGRAM_ALLOWED_USERS` / `config.yaml` |
 | gmail-agent | "Pijy" (for Divino) | email via `himalaya` (`HIMALAYA_CONFIG` → `profiles/gmail-agent/config/himalaya.toml`) |
-| orion | orion | Sonarr/Radarr via `https://{sonarr,radarr}.intern.dgmneto.com` |
+| orion | orion | Sonarr/Radarr via `https://{sonarr,radarr}.intern.dgmneto.com`; Plex read-only via `http://192.168.14.7:32400` (no token, see below) |
 
 Each profile has its own `profiles/<p>/.env` (own `TELEGRAM_BOT_TOKEN`, OpenRouter key). Verify health:
 `sudo grep "telegram connected" /var/lib/hermes/.hermes/logs/agent.log | tail -3` → one line per profile.
@@ -53,6 +53,12 @@ Nix pins only `model` (`openrouter` / `qwen/qwen3.8-max`) and `dashboard.public_
 is blocked in managed mode — change `hermes.nix` instead.
 
 ## Quirks
+- **Profile skill symlinks may still point at Docker-era `/opt/data/...`** (dead since the 10-08 move).
+  `profiles/orion/skills/media` did, so Orion silently lost `orion-house`/`radarr`/`sonarr` until 2026-11-04.
+  Check: `sudo find /var/lib/hermes -xtype l -path '*skills*'` → should print nothing.
+- **Orion ↔ Plex:** house skill `skills/media/orion-house/SKILL.md` (shared dir) has a Plex section; `PLEX_URL`
+  is in `profiles/orion/.env` (picked up on the next gateway restart; the skill falls back to the literal IP).
+  No token needed (Plex `allowedNetworks=192.168.0.0/16`). Plex server logs: `ssh casaos 'docker exec plex …'`.
 - **SQLite:** nixos-26.05 has SQLite 3.51.2 (WAL-reset corruption bug). `hermes.nix` builds 3.53.3 and
   injects it via `LD_LIBRARY_PATH` on both units. Check: `sudo grep libsqlite3 /proc/$(systemctl show hermes-agent -p MainPID --value)/maps`.
 - **False warning** "Stale systemd unit detected ... TimeoutStopSec=90s": Hermes queries

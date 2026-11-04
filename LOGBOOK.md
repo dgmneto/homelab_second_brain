@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-04 — Hermes (Orion) can reach Plex for playback debugging
+Orion told the user it had no Plex access: it had guessed `plex.intern.dgmneto.com:32400`, which doesn't exist. Root
+causes: (1) the Plex URL wasn't written down anywhere Orion reads; (2) `profiles/orion/skills/media` was still a
+symlink to Docker-era `/opt/data/skills/media` (dead since 10-08), so Orion had lost its house skills. Fixed both
+(details in services/hermes). Plex needs no token from the LAN (`allowedNetworks=192.168.0.0/16`). Verified as
+user hermes: status/transcode sessions, history, sections → 200; Plex logs readable via `ssh casaos docker exec`.
+
 ## 2026-11-02 — trmnl-ai: unclosed code fence + weather-outage resilience
 Fixed literal "```html" on the screen and the "No forecast" layout caused by Open-Meteo 503s (cache
 last good source data up to 6 h). Fresh render verified. Details in services/trmnl-ai.
