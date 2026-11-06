@@ -3,6 +3,15 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-06 — tado° X audit: firewall plan finalised (second review)
+Read-only. `matter-server --help` (8.1.2): no option to pin the CHIP UDP port (`--port` = TCP websocket). Unit:
+DynamicUser, empty CapabilityBoundingSet; `ip_unprivileged_port_start` 1024. Gotcha found: MainPID is the start
+wrapper, the socket owner is its child, so match `sudo ss -uapn` against the unit's cgroup PIDs. Plan now: a Stage-1
+LOG rule plus a passive /proc/net/nf_conntrack snapshot, with 4 correlation criteria (DPT, DST, tuple-expiry timing,
+symptom). Stage 2 accepts `-i enp2s0 -s fde9:b6c5:757::/64 -p udp --dport 1024:65535`, with no dependence on
+ip_local_port_range. Added `services/matter/tools/matter-fw-check.sh` (drift check); ran it read-only on the box:
+exit 0 on the real state, 3 WARNs on planted mismatches. Nothing deployed.
+
 ## 2026-11-06 — tado° X audit: firewall recommendation narrowed after review
 User pushed back on the `fc00::/7` accept rule as too broad. Read-only checks on homelab-notebook: refused packets aren't
 logged (no LOG in `nixos-fw-log-refuse`), `/proc/net/nf_conntrack` readable, ephemeral ports 32768–60999, rpfilter on.

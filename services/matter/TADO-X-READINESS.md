@@ -81,7 +81,7 @@ reused). VLAN/firewall facts are inferred from the L2 observations above.
    opened in `nixos-fw`. Device→controller traffic that arrives after the 120 s UDP conntrack entry expired (subscription
    reports from sleepy battery TRVs with long max-intervals, ICD check-ins) would be dropped as NEW and the device would
    flap "unavailable" in HA. Not provable until a device exists (drops are silent — no LOG rule). Fix = staged log-then-accept rule scoped to
-   `enp2s0` + `fde9:b6c5:757::/64` + ports 32768–60999 (below).
+   `enp2s0` + `fde9:b6c5:757::/64` + unprivileged ports, plus a drift check (below).
 2. **Stale ULA in long-running processes.** UniFi stopped advertising `fd00::/64`; matter-server still has a socket on
    `fd00::3ec2:4890:5ead:c7c3`, and HA's HomeKit bridge advertises only `fd00::` v6 addresses. Wildcard sockets keep
    things working; a restart in a maintenance window cleans it up.
@@ -108,36 +108,82 @@ multi-admin share to HA, radio coverage on each floor.
    Battery TRVs do not extend the mesh.
 
 ## Prioritised changes before installation
-1. **(Recommended, homelab-notebook — revised 2026-11-06 after review; supersedes an earlier `fc00::/7` rule, which was
-   broader than needed.)** Staged, in `hosts/homelab-notebook/nixos/home-automation.nix` (matter block), deploy per host README.
-   Box facts behind it: refused packets are **not logged** (`nixos-fw-log-refuse` → DROP, no LOG rule), so drops are
-   silent; `/proc/net/nf_conntrack` is readable with sudo (no `conntrack` binary); ephemeral range
-   `ip_local_port_range` = 32768–60999 (contains matter-server's port); rpfilter (`nixos-fw-rpfilter`) is on, so a
-   `fde9:b6c5:757::/64` source is only accepted on `enp2s0` (its route points at the Apple TV).
-   - **Stage 0 (before install):** nothing.
-   - **Stage 1 (first days with devices) — log only, no accept:**
-     ```nix
-     networking.firewall.extraCommands = ''
-       ip6tables -I nixos-fw-log-refuse -i enp2s0 -s fde9:b6c5:757::/64 -p udp \
-         -m limit --limit 6/min -j LOG --log-prefix "thread-udp-refused: "
-     '';
-     networking.firewall.extraStopCommands = ''
-       ip6tables -D nixos-fw-log-refuse -i enp2s0 -s fde9:b6c5:757::/64 -p udp \
-         -m limit --limit 6/min -j LOG --log-prefix "thread-udp-refused: " 2>/dev/null || true
-     '';
-     ```
-     Conntrack is confirmed as the cause when `journalctl -k | grep thread-udp-refused` shows packets to matter-server's
-     port (`ss -uapn | grep matter-server`) at the same time a device goes unavailable / resubscribes;
-     `sudo grep fde9 /proc/net/nf_conntrack` shows each flow's remaining timeout.
-   - **Stage 2 (only if Stage 1 shows drops):** swap the LOG rule for
-     `ip6tables -A nixos-fw -i enp2s0 -s fde9:b6c5:757::/64 -p udp --dport 32768:60999 -j nixos-fw-accept` (matching `-D`
-     in `extraStopCommands`).
-   - **Raising `net.netfilter.nf_conntrack_udp_timeout_stream` to 3600** is only a stop-gap / complement: it applies to
-     every replied UDP flow on the box (Pi-hole upstream DNS, Tailscale), and doesn't help when there is no live entry
-     (idle > 3600 s, matter-server restart → new port, conntrack flush).
-   - **Prefix drift:** the prefix only changes if Apple re-forms the Thread network (Home/Apple TV reset). Check
-     (prints something ⇒ the rule is stale):
-     `ip -6 route show dev enp2s0 proto ra | awk '$2=="via" && $1 ~ /^f[cd]/ {print $1}' | grep -vx 'fde9:b6c5:757::/64'`
+1. **(Recommended, homelab-notebook — final version after two review rounds, 2026-11-06.)** Supersedes an earlier
+   `fc00::/7` rule (too broad) and a `--dport 32768:60999` rule (tied to an OS setting). Staged, in
+   `hosts/homelab-notebook/nixos/home-automation.nix` (matter block); deploy per host README. Nothing deployed yet.
+
+   **Box facts behind it (verified 2026-11-06):**
+   - Refused packets are **not logged** (`nixos-fw-log-refuse` → DROP, no LOG rule), so drops are silent today.
+   - `/proc/net/nf_conntrack` is readable with sudo; there is no `conntrack` binary.
+   - matter-server 8.1.2 **cannot pin** its Matter UDP port: `--port` is the TCP websocket only. The CHIP operational
+     port is OS-assigned at every start (`[::]:47870` now; 39400/41266/49487/39939/59843 are its other UDP sockets).
+   - matter-server runs as `DynamicUser` with an **empty `CapabilityBoundingSet`**, and `ip_unprivileged_port_start`
+     is 1024, so it cannot bind a port below 1024 explicitly. Ports below 1024 on the box are system services (NTP
+     123, DNS 53, DHCPv6 546), which the rule keeps excluded.
+   - `ip_local_port_range` is 32768–60999 today. That is an OS setting, not a Matter guarantee, so the rule must not
+     depend on it.
+   - rpfilter (`nixos-fw-rpfilter`) is on, so a `fde9:b6c5:757::/64` source is only accepted on `enp2s0`, where its
+     route points at the Apple TV.
+   - **Identify sockets with `sudo ss -uapn`**, matching the unit's cgroup PIDs, **not** `systemctl … MainPID`. MainPID
+     (32032) is the `matter-server-start` wrapper; the socket-owning python process is its child (32043). Without
+     sudo, `ss` omits other users' process info.
+
+   **Stage 0 (before install):** nothing.
+
+   **Stage 1 (first days with devices) — log only, no accept:**
+   ```nix
+   networking.firewall.extraCommands = ''
+     ip6tables -I nixos-fw-log-refuse -i enp2s0 -s fde9:b6c5:757::/64 -p udp \
+       -m limit --limit 6/min -j LOG --log-prefix "thread-udp-refused: "
+   '';
+   networking.firewall.extraStopCommands = ''
+     ip6tables -D nixos-fw-log-refuse -i enp2s0 -s fde9:b6c5:757::/64 -p udp \
+       -m limit --limit 6/min -j LOG --log-prefix "thread-udp-refused: " 2>/dev/null || true
+   '';
+   ```
+   The LOG target already records `SRC= DST= SPT= DPT=` with a kernel timestamp. Alongside it, run a passive
+   conntrack snapshot for the observation window:
+   ```
+   sudo systemd-run --unit=ct-matter-watch -p RuntimeMaxSec=3d /bin/sh -c \
+     'while :; do date -Is; grep fde9 /proc/net/nf_conntrack; sleep 30; done >> /var/tmp/ct-matter.log'
+   ```
+   **Count a refused packet as a conntrack-expiry drop only if all of these hold:**
+   1. **DPT** is one of matter-server's UDP ports per `sudo ss -uapn` (cgroup PIDs:
+      `cat /sys/fs/cgroup$(systemctl show -p ControlGroup --value matter-server)/cgroup.procs`), **and**
+      `systemctl show matter-server -p ActiveEnterTimestamp` predates the drop. A restart changes the port; a drop
+      to an old port is a stale device session, not conntrack.
+   2. **DST** is an address `enp2s0` still holds (`ip -6 addr show dev enp2s0`, including temporaries). A drop to a
+      removed privacy address means address churn, not conntrack.
+   3. **Timing:** the drop's (SRC,SPT,DST,DPT) equals the reply-direction tuple of an entry in `ct-matter.log`. That
+      entry's timeout counted down and the entry vanished before the drop's timestamp, i.e. the gap since its last
+      refresh was ≥ `nf_conntrack_udp_timeout_stream` (120 s).
+   4. A matching symptom in the same minute: the device goes unavailable in HA, or `journalctl -u matter-server`
+      shows a resubscribe/timeout for that node.
+
+   **Stage 2 (only if Stage 1 shows drops meeting 1–4):** replace the LOG rule with an accept rule bound to the
+   interface and the advertised Thread prefix, excluding privileged ports. It does **not** depend on
+   `ip_local_port_range`. Add the matching `-D` in `extraStopCommands`:
+   ```
+   ip6tables -A nixos-fw -i enp2s0 -s fde9:b6c5:757::/64 -p udp --dport 1024:65535 -j nixos-fw-accept
+   ```
+   Extra exposure versus today: only unprivileged UDP sockets on the box (matter-server's, HA's ephemeral ones), and
+   only to Thread nodes.
+
+   **Drift detection (so the rule can't silently stop matching):** [`tools/matter-fw-check.sh`](tools/matter-fw-check.sh)
+   exits 1 with a `WARN` line if any of these hold:
+   - the advertised Thread prefix (RIO) ≠ the rule's prefix;
+   - there is no Thread route (border router down);
+   - a matter-server UDP socket (other than 5353) is below the rule's lower bound;
+   - with `CHECK_RULE=1`, the accept rule isn't loaded.
+
+   Verified 2026-11-06: exits 0 on the current state, and produces all three WARNs when given a wrong prefix, a high
+   lower bound and `CHECK_RULE=1`. Suggested wiring at Stage 2: a oneshot unit running it hourly
+   (`OnCalendar=hourly`) and 1 min after `matter-server` starts (the port is chosen then), with failures visible via
+   `systemctl --failed` / journal. Not deployed.
+
+   **Not chosen as primary:** raising `net.netfilter.nf_conntrack_udp_timeout_stream` to 3600. It applies to every
+   replied UDP flow on the box (Pi-hole upstream DNS, Tailscale), and it doesn't help when there is no live entry
+   (idle > 3600 s, matter-server restart → new port, conntrack flush). At most a complement.
 2. **(Low)** restart `matter-server` then `home-assistant` once (drops the stale `fd00::` bindings) — any quiet time
    before commissioning.
 3. **(UniFi, verify only)** Apple TV `192.168.11.236` and homelab-notebook `192.168.11.21` stay on network **Default**;
