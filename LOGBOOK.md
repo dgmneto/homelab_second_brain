@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-06 — tado° X audit: firewall recommendation narrowed after review
+User pushed back on the `fc00::/7` accept rule as too broad. Read-only checks on homelab-notebook: refused packets aren't
+logged (no LOG in `nixos-fw-log-refuse`), `/proc/net/nf_conntrack` readable, ephemeral ports 32768–60999, rpfilter on.
+New recommendation: stage a log-only rule, then (only if drops seen) accept `-i enp2s0 -s fde9:b6c5:757::/64 -p udp
+--dport 32768:60999`; conntrack timeout bump only as complement; prefix-drift check documented. Nothing deployed.
+
 ## 2026-11-06 — Audit: network readiness for tado° X (Matter-over-Thread via Apple TV)
 Read-only. Via `ssh claude@homelab-notebook` / `claude@casaos`: `ip addr/route/neigh`, NM, ip6tables, `ss`, journals,
 HA `.storage` (config entries + device registry, no datasets/secrets), passive mDNS browse with HA's python-zeroconf and

@@ -80,7 +80,8 @@ reused). VLAN/firewall facts are inferred from the L2 observations above.
 1. **NixOS firewall vs. Matter operational UDP.** The CHIP controller uses an ephemeral UDP port (`47870` now), not
    opened in `nixos-fw`. Device→controller traffic that arrives after the 120 s UDP conntrack entry expired (subscription
    reports from sleepy battery TRVs with long max-intervals, ICD check-ins) would be dropped as NEW and the device would
-   flap "unavailable" in HA. Not provable until a device exists. Fix = accept UDP from the Thread ULA range (below).
+   flap "unavailable" in HA. Not provable until a device exists (drops are silent — no LOG rule). Fix = staged log-then-accept rule scoped to
+   `enp2s0` + `fde9:b6c5:757::/64` + ports 32768–60999 (below).
 2. **Stale ULA in long-running processes.** UniFi stopped advertising `fd00::/64`; matter-server still has a socket on
    `fd00::3ec2:4890:5ead:c7c3`, and HA's HomeKit bridge advertises only `fd00::` v6 addresses. Wildcard sockets keep
    things working; a restart in a maintenance window cleans it up.
@@ -107,14 +108,36 @@ multi-admin share to HA, radio coverage on each floor.
    Battery TRVs do not extend the mesh.
 
 ## Prioritised changes before installation
-1. **(Recommended, homelab-notebook)** in `hosts/homelab-notebook/nixos/home-automation.nix`, matter block, allow
-   Matter traffic from Thread ULAs, then deploy per the host README:
-   ```nix
-   networking.firewall.extraCommands = ''
-     ip6tables -A nixos-fw -p udp -s fc00::/7 -j nixos-fw-accept
-   '';
-   ```
-   (`fc00::/7` survives Apple regenerating the mesh prefix; the current one is `fde9:b6c5:757::/64`.)
+1. **(Recommended, homelab-notebook — revised 2026-11-06 after review; supersedes an earlier `fc00::/7` rule, which was
+   broader than needed.)** Staged, in `hosts/homelab-notebook/nixos/home-automation.nix` (matter block), deploy per host README.
+   Box facts behind it: refused packets are **not logged** (`nixos-fw-log-refuse` → DROP, no LOG rule), so drops are
+   silent; `/proc/net/nf_conntrack` is readable with sudo (no `conntrack` binary); ephemeral range
+   `ip_local_port_range` = 32768–60999 (contains matter-server's port); rpfilter (`nixos-fw-rpfilter`) is on, so a
+   `fde9:b6c5:757::/64` source is only accepted on `enp2s0` (its route points at the Apple TV).
+   - **Stage 0 (before install):** nothing.
+   - **Stage 1 (first days with devices) — log only, no accept:**
+     ```nix
+     networking.firewall.extraCommands = ''
+       ip6tables -I nixos-fw-log-refuse -i enp2s0 -s fde9:b6c5:757::/64 -p udp \
+         -m limit --limit 6/min -j LOG --log-prefix "thread-udp-refused: "
+     '';
+     networking.firewall.extraStopCommands = ''
+       ip6tables -D nixos-fw-log-refuse -i enp2s0 -s fde9:b6c5:757::/64 -p udp \
+         -m limit --limit 6/min -j LOG --log-prefix "thread-udp-refused: " 2>/dev/null || true
+     '';
+     ```
+     Conntrack is confirmed as the cause when `journalctl -k | grep thread-udp-refused` shows packets to matter-server's
+     port (`ss -uapn | grep matter-server`) at the same time a device goes unavailable / resubscribes;
+     `sudo grep fde9 /proc/net/nf_conntrack` shows each flow's remaining timeout.
+   - **Stage 2 (only if Stage 1 shows drops):** swap the LOG rule for
+     `ip6tables -A nixos-fw -i enp2s0 -s fde9:b6c5:757::/64 -p udp --dport 32768:60999 -j nixos-fw-accept` (matching `-D`
+     in `extraStopCommands`).
+   - **Raising `net.netfilter.nf_conntrack_udp_timeout_stream` to 3600** is only a stop-gap / complement: it applies to
+     every replied UDP flow on the box (Pi-hole upstream DNS, Tailscale), and doesn't help when there is no live entry
+     (idle > 3600 s, matter-server restart → new port, conntrack flush).
+   - **Prefix drift:** the prefix only changes if Apple re-forms the Thread network (Home/Apple TV reset). Check
+     (prints something ⇒ the rule is stale):
+     `ip -6 route show dev enp2s0 proto ra | awk '$2=="via" && $1 ~ /^f[cd]/ {print $1}' | grep -vx 'fde9:b6c5:757::/64'`
 2. **(Low)** restart `matter-server` then `home-assistant` once (drops the stale `fd00::` bindings) — any quiet time
    before commissioning.
 3. **(UniFi, verify only)** Apple TV `192.168.11.236` and homelab-notebook `192.168.11.21` stay on network **Default**;

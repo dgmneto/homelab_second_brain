@@ -11,7 +11,7 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 > **Thread (2026-11-06):** the only Thread border router is the **Apple TV 4K gen 3 `192.168.11.236`** (Apple network
 > `MyHome1662126353`, OMR `fde9:b6c5:757::/64`); HA holds **no** Thread dataset (fine for multi-admin). CHIP operational
 > UDP port is **ephemeral** (e.g. 47870) and not opened in the NixOS firewall — see the tado° X audit
-> [TADO-X-READINESS.md](TADO-X-READINESS.md) for the recommended `fc00::/7` UDP accept rule and the reusable mDNS/RA
+> [TADO-X-READINESS.md](TADO-X-READINESS.md) for the staged (log → accept) UDP rule scoped to `enp2s0` + `fde9:b6c5:757::/64` and the reusable mDNS/RA
 > diagnostics in [tools/](tools/) (no `avahi`/`tcpdump` on the box; they run on HA's own python + zeroconf).
 > Below = the old casaos setup.
 
