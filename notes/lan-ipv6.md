@@ -1,11 +1,18 @@
 ---
 name: lan-ipv6
-description: LAN has native IPv6 from Zen since 2026-11-01 (delegated /48 2a02:8012:882b::/48; Default LAN = 2a02:8012:882b::/64 via SLAAC) alongside the old ULA fd00::/64. Keep the ULA - Matter/Thread needs IPv6; inbound IPv6 relies on the UniFi firewall.
+description: LAN has native IPv6 from Zen since 2026-11-01 (delegated /48 2a02:8012:882b::/48; Default LAN = 2a02:8012:882b::/64 via SLAAC). The old ULA fd00::/64 is NO LONGER advertised (gone by 2026-11-06). Thread BR = Apple TV 192.168.11.236, OMR route fde9:b6c5:757::/64. Never disable IPv6 - Matter/Thread needs it; inbound IPv6 relies on the UniFi firewall.
 metadata:
   node_type: memory
   type: reference
 ---
 # LAN IPv6 (native since 2026-11-01)
+
+> **Update 2026-11-06 (RA captured with `services/matter/tools/ra.py`):** UniFi's RA now carries **only**
+> `2a02:8012:882b::/64` — the ULA `fd00::/64` below is **gone** (hosts have no `fd00::` address any more; some long-running
+> processes still hold stale `fd00::` sockets/advertisements until restarted). The Thread border router
+> `fe80::67:28bc:f5ae:b3b6` / `c4:f7:c1:12:02:5f` **is the Apple TV 4K (gen 3) `192.168.11.236`** ("Living Room");
+> it sends router-lifetime-0 RAs with RIO `fde9:b6c5:757::/64`. Full Matter/Thread picture:
+> [services/matter/TADO-X-READINESS.md](../services/matter/TADO-X-READINESS.md).
 
 **State (verified 2026-11-01 17:23 from both servers):**
 - ISP **Zen**: WAN link net `2a02:8011:d017:bb39::/64` ("IPv6 ND WAN"); **delegated prefix `2a02:8012:882b::/48`** ("IPv6 PD LAN",

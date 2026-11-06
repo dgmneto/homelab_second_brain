@@ -4,6 +4,16 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-06 — Audit: network readiness for tado° X (Matter-over-Thread via Apple TV)
+Read-only. Via `ssh claude@homelab-notebook` / `claude@casaos`: `ip addr/route/neigh`, NM, ip6tables, `ss`, journals,
+HA `.storage` (config entries + device registry, no datasets/secrets), passive mDNS browse with HA's python-zeroconf and
+one Router Solicitation (`services/matter/tools/{browse,ra}.py`). Findings: sole Thread BR = Apple TV 4K gen 3
+(`AppleTV14,1`, tvOS 27.2) `192.168.11.236`, active leader/BBR, RIO `fde9:b6c5:757::/64` routed on homelab-notebook;
+HA matter/thread entries healthy, 0 Matter nodes, no HA Thread dataset; UniFi no longer advertises ULA `fd00::/64`
+(notes/lan-ipv6.md corrected); no HA/matter containers on casaos. No blockers; suspected: ephemeral CHIP UDP port not
+in NixOS firewall, single BR, stale fd00 sockets. NAT64, coverage, commissioning UNVERIFIED until a device exists.
+Report: services/matter/TADO-X-READINESS.md.
+
 ## 2026-11-04 — Confirmed: hvc1 remux of Spider-Man plays on the Apple TV
 User report. Root cause (hev1 tag) confirmed. Widow's Bay S01 still hev1 (not fixed yet).
 

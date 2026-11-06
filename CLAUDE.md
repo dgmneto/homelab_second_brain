@@ -70,6 +70,8 @@ Top gotchas (detail in the host READMEs):
 - **Home automation (Home Assistant, zigbee2mqtt, mosquitto, matter-server) runs on homelab-notebook**, not casaos,
   since 2026-10-30/31 (NixOS modules in `hosts/homelab-notebook/nixos/home-automation.nix`); see
   [services/homeassistant/MIGRATION.md](services/homeassistant/MIGRATION.md). HA's `http:` settings are in `.storage/http`, not YAML.
+  **Not Docker** any more — HA/matter-server are native services. The only Thread border router is the **Apple TV**
+  `192.168.11.236` (see [services/matter/TADO-X-READINESS.md](services/matter/TADO-X-READINESS.md)).
 - **casaos** `qbittorrent` lives in `gluetunProtonVPN`'s network namespace — recreating gluetun takes it down.
   (`prowlarr` was moved **off** the VPN onto `internalNetwork` on 2026-06-22; verified running that way 2026-11-01.) watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
 - **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),

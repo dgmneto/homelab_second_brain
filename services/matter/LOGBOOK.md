@@ -3,6 +3,16 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-06 — Audit: network readiness for tado° X (Matter-over-Thread via Apple TV)
+Read-only (no service change). Via `ssh claude@homelab-notebook` / `claude@casaos`: `ip addr/route/neigh`, NM, ip6tables, `ss`, journals,
+HA `.storage` (config entries + device registry, no datasets/secrets), passive mDNS browse with HA's python-zeroconf and
+one Router Solicitation (`services/matter/tools/{browse,ra}.py`). Findings: sole Thread BR = Apple TV 4K gen 3
+(`AppleTV14,1`, tvOS 27.2) `192.168.11.236`, active leader/BBR, RIO `fde9:b6c5:757::/64` routed on homelab-notebook;
+HA matter/thread entries healthy, 0 Matter nodes, no HA Thread dataset; UniFi no longer advertises ULA `fd00::/64`
+(notes/lan-ipv6.md corrected); no HA/matter containers on casaos. No blockers; suspected: ephemeral CHIP UDP port not
+in NixOS firewall, single BR, stale fd00 sockets. NAT64, coverage, commissioning UNVERIFIED until a device exists.
+Report: services/matter/TADO-X-READINESS.md.
+
 ## 2026-10-30 — HA migration Phase 3
 Moved to homelab-notebook (NixOS). Vendor-ID gotcha: must pass `--vendorid=65521`; the module default 4939 crashed it with a FabricAdmin collision and rewrote chip.json (re-copied). Loaded 0 nodes, HA connected. casaos container removed; `/footage/services/matter/data.bak-pre-move-20261030` kept.
 

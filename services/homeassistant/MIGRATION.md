@@ -26,7 +26,8 @@ Flake output `homelab-notebook-ha-preview` = everything enabled, **build-only** 
   `192.168.15.25:5580`, `192.168.14.73:8123`, `192.168.14.96:8080`), so .11 ↔ .14/.15 is routed.
 - **IPv6:** `enp2s0` has `fd00::/64` addresses, and the router advertises a route to
   `fde9:b6c5:757::/64` via `fe80::67:28bc:f5ae:b3b6` (MAC `c4:f7:c1:…`). That looks like a **Thread border
-  router's mesh prefix**, which is what Matter-over-Thread needs. Not yet proven with a real Matter
+  router's mesh prefix**, which is what Matter-over-Thread needs. **Resolved 2026-11-06: that BR is the Apple TV
+  `192.168.11.236`; see `../matter/TADO-X-READINESS.md`.** (The `fd00::/64` mentioned here is no longer advertised.) Not yet proven with a real Matter
   device: `avahi-browse` isn't installed. Before Phase 3 run
   `nix shell nixpkgs#avahi -c avahi-browse -rt _matter._tcp` and `ping -6` one device's address.
 - **Versions** (casaos → nixpkgs): HA **2026.10.4** (nixos-26.05 has only 2026.5.4 → HA comes from
