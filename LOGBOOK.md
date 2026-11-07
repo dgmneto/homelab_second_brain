@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
+Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
+
 ## 2026-11-07 — Rack case RJ45 hood uses the proven cover's dimensions
 Hood channel 12.5 W x 7.15 H, latch slot 7.2, copied from a third-party cover that fit perfectly. Outputs regenerated. Detail in the homelab-notebook host logbook.
 

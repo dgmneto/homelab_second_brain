@@ -34,6 +34,8 @@ Test first: pin_gauge.stl, a row of pins around the hole size to pick a snug
 PIN_D; rj45_test.stl, a small cut of the panel + hood to check plug fit;
 fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
 check the port openings against the real board (snug PIN_D pins: two pins must hold it square);
+rj45_fit_<dz>.stl, the same cut to the RJ45 alone, its hood RJ45_FIT_DZ higher/lower
+(dz raised on the frame): the one that holds the plug best sets RJ45_PLUG_FLOOR;
 fit_childboard.stl for the child board's holes.
 """
 
@@ -108,6 +110,8 @@ RJ45_LATCH_W = 7.2         # cover slot width (7.16)
 RJ45_LATCH_FACE_H = 8.4    # plug overall height 8.00; top of latch slot = the catch lip
 RJ45_POCKET_H = 11.0       # behind the lip the latch springs back up into this pocket
 RJ45_WALL = 2.0
+# rj45_fit_*.stl: the hood's height over the springs (RJ45_PLUG_FLOOR is an estimate)
+RJ45_FIT_DZ = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5]
 
 # ---------------------------------------------------------------- derived
 _xs = [x for x, _ in brd.outline_mm()]
@@ -285,25 +289,28 @@ def post_notch(px, py):
 
 
 # ---------------------------------------------------------------- RJ45 hood
-def rj45_hood_adds(coll):
+def rj45_hood_adds(coll, dz=0.0):
     w = RJ45_OPEN_W / 2 + RJ45_WALL
-    top = min(RJ45_FLOOR + RJ45_POCKET_H + RJ45_WALL, Z_TOP)   # the lid caps the latch pocket
+    top = min(RJ45_FLOOR + dz + RJ45_POCKET_H + RJ45_WALL, Z_TOP)   # the lid caps the latch pocket
     # hood: sits 0.3 above the top-side frame, hangs off the panel
     box("rj45_hood", RJ45_CX - w, RJ45_STOP_Y - RJ45_WALL, RJ45_FRAME_TOP + 0.3,
         RJ45_CX + w, Y_FRONT + 0.01, top, coll)
 
 
-def rj45_hood_cuts(coll):
+def rj45_hood_cuts(coll, dz=0.0):
+    """dz raises the ceiling, latch lip and pocket over the springs."""
     hw, lw = RJ45_OPEN_W / 2, RJ45_LATCH_W / 2
+    floor = RJ45_FLOOR + dz
+    low = min(floor, RJ45_FLOOR)      # the opening never gets a ledge above the springs
     # plug body channel, through the panel back to the nose stop
-    box("rj45_body", RJ45_CX - hw, RJ45_STOP_Y, RJ45_FLOOR,
-        RJ45_CX + hw, Y_FRONT + PANEL_T + 1, RJ45_FLOOR + RJ45_BODY_H, coll)
+    box("rj45_body", RJ45_CX - hw, RJ45_STOP_Y, low,
+        RJ45_CX + hw, Y_FRONT + PANEL_T + 1, floor + RJ45_BODY_H, coll)
     # latch slot in the panel face (its top edge is the catch lip)
-    box("rj45_latch_slot", RJ45_CX - lw, Y_FRONT - 0.01, RJ45_FLOOR,
-        RJ45_CX + lw, Y_FRONT + PANEL_T + 1, RJ45_FLOOR + RJ45_LATCH_FACE_H, coll)
+    box("rj45_latch_slot", RJ45_CX - lw, Y_FRONT - 0.01, low,
+        RJ45_CX + lw, Y_FRONT + PANEL_T + 1, floor + RJ45_LATCH_FACE_H, coll)
     # latch pocket behind the lip
-    box("rj45_latch_pocket", RJ45_CX - lw - 0.2, RJ45_STOP_Y, RJ45_FLOOR,
-        RJ45_CX + lw + 0.2, Y_FRONT, RJ45_FLOOR + RJ45_POCKET_H, coll)
+    box("rj45_latch_pocket", RJ45_CX - lw - 0.2, RJ45_STOP_Y, floor,
+        RJ45_CX + lw + 0.2, Y_FRONT, floor + RJ45_POCKET_H, coll)
 
 
 def build_rj45_coupon(tray, root):
@@ -331,7 +338,7 @@ def build_rj45_coupon(tray, root):
 
 
 # ---------------------------------------------------------------- parts
-def build_tray(root, pin_d=PIN_D):
+def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
     work = new_coll("_work", root)
     tray = box("Tray", X_OUT0, Y_OUT0, 0, X_OUT1, Y_FRONT, Z_TOP, root)
 
@@ -353,7 +360,7 @@ def build_tray(root, pin_d=PIN_D):
         cyl(f"fan_post_{i}", hx, hy, (FLOOR + FAN_Z0) / 2, FAN_POST_D, FAN_Z0 - FLOOR + 0.01, adds)
     for i, h in enumerate(CB["holes"]):
         cyl(f"cb_post_{i}", CB_X0 + h["x"], CB_Y0 + h["y"], (FLOOR + CB_Z0) / 2, CB_POST_D, CB_Z0 - FLOOR + 0.01, adds)
-    rj45_hood_adds(adds)
+    rj45_hood_adds(adds, rj45_dz)
     boolean(tray, "UNION", adds)
 
     cuts = new_coll("_cuts", work)
@@ -363,7 +370,7 @@ def build_tray(root, pin_d=PIN_D):
         ax, _, bx, _ = brd.port_rect(name)
         box(f"cut_{name}", ax - PORT_MARGIN, Y_FRONT - 1, BOARD_Z - below - PORT_MARGIN,
             bx + PORT_MARGIN, Y_FRONT + PANEL_T + 1, top + above + PORT_MARGIN, cuts)
-    rj45_hood_cuts(cuts)
+    rj45_hood_cuts(cuts, rj45_dz)
     # pockets in the panel's inner face: board north edge where it reaches in, and
     # the RJ45 jack (under the board, and its top-side frame)
     north = brd.outline_mm()[:6]
@@ -480,18 +487,19 @@ def bar(name, p, q, z0, z1, coll, w=FIT_BAR_W):
     return mesh_obj(name, bm, coll)
 
 
-def build_fit_test(tray, root):
+def build_fit_test(tray, root, name="Fit_test", ports=None, label=None):
     """Tray cut down to the front panel strip (ports + RJ45 hood) and the two north
     board mounts (H1, H2; the rest checked out in fit test 1), re-based on a light
     bar frame. Everything drops by the same amount, so board-to-panel alignment is
-    exact; only the standoffs get shorter."""
+    exact; only the standoffs get shorter. ports: keep only these ports' strip of
+    the panel (default all); label: text raised on the H1-H2 bar."""
     zb = BOARD_Z - FIT_STANDOFF - FIT_BASE_T          # bottom of the frame
     holes = {f"H{i + 1}": (x, y) for i, (x, y, _) in enumerate(brd.HOLES_MM[:2])}
-    cut_x = [x for x0x1 in brd.PORT_X.values() for x in x0x1]
+    cut_x = [x for n in (ports or brd.PORT_X) for x in brd.PORT_X[n]]
     px0, px1 = min(cut_x) - 8, max(cut_x) + 8
 
     me = tray.data.copy()
-    fit = bpy.data.objects.new("Fit_test", me)
+    fit = bpy.data.objects.new(name, me)
     root.objects.link(fit)
     work = new_coll("_work", root)
     keep_parts = new_coll("_keep_parts", work)
@@ -508,8 +516,14 @@ def build_fit_test(tray, root):
     frame = new_coll("_frame", work)
     P = {**holes,
          "P1": (holes["H1"][0], Y_FRONT + 1), "P2": (holes["H2"][0], Y_FRONT + 1), "P3": (RJ45_CX, Y_FRONT + 1)}
-    for a, b in [("H1", "H2"), ("P1", "H1"), ("P2", "H2"), ("P3", "H1"), ("P1", "P2")]:
+    links = [("H1", "H2"), ("P1", "H1"), ("P2", "H2"), ("P3", "H1"), ("P1", "P2")]
+    if ports:                                             # strip ends west of the pins: brace it to both
+        links = [("H1", "H2"), ("P3", "H1"), ("P3", "H2")]
+    for a, b in links:
         bar(f"bar_{a}_{b}", P[a], P[b], zb, zb + FIT_BASE_T, frame)
+    if label:
+        (x0, y0), (x1, y1) = holes["H1"], holes["H2"]
+        text_mesh(f"label_{name}", label, (x0 + x1) / 2, (y0 + y1) / 2 - 1.5, zb + FIT_BASE_T - 0.01, 4.0, frame)
     for n, (x, y) in holes.items():                       # pads so posts sit on solid base
         cyl(f"pad_{n}", x, y, zb + FIT_BASE_T / 2, STANDOFF_D + 3, FIT_BASE_T, frame)
     boolean(fit, "UNION", frame)
@@ -523,6 +537,36 @@ def build_fit_test(tray, root):
     bm.free()
     fit.location.z = -zb                                  # sit it on the print bed
     return fit
+
+
+def text_mesh(name, body, x, y, z0, size, coll, depth=0.6):
+    """Raised text, centred on x, its baseline at y, standing on z0."""
+    cu = bpy.data.curves.new(name, "FONT")
+    cu.body = body
+    cu.size, cu.extrude, cu.align_x = size, depth / 2, "CENTER"
+    t = bpy.data.objects.new(name, cu)
+    coll.objects.link(t)
+    t.location = (x, y, z0 + depth / 2)
+    bpy.context.view_layer.objects.active = t
+    bpy.ops.object.select_all(action="DESELECT")
+    t.select_set(True)
+    bpy.ops.object.convert(target="MESH")
+    return t
+
+
+def build_rj45_fits(root, outdir):
+    """rj45_fit_<dz>.stl: fit_test cut to the RJ45 alone, one per RJ45_FIT_DZ, the
+    hood channel raised by dz (mm, raised on the frame). The board drops on the H1/H2
+    pins, so only the hood height differs between them."""
+    for dz in RJ45_FIT_DZ:
+        work = new_coll("_work_tray", root)
+        tray = build_tray(work, rj45_dz=dz)
+        tag = f"{dz:+.1f}"
+        fit = build_fit_test(tray, root, f"RJ45_fit_{tag}", ports=["rj45"], label=tag)
+        export_stl(fit, os.path.join(outdir, f"rj45_fit_{tag}.stl"))
+        fit.hide_render = True
+        bpy.data.objects.remove(tray)
+        bpy.data.collections.remove(work)
 
 
 def build_childboard_fit(root):
@@ -556,16 +600,7 @@ def build_pin_gauge(root):
         x = i * pitch
         cyl(f"collar_{i}", x, 2, FIT_BASE_T + collar_h / 2 - 0.01, collar_d, collar_h + 0.02, add)
         pin(f"pin_{i}", x, 2, FIT_BASE_T + collar_h - 0.01, d, brd.PCB_T + PIN_ABOVE + 0.01, add)
-        cu = bpy.data.curves.new(f"label_{i}", "FONT")
-        cu.body = f"{d:.2f}"
-        cu.size, cu.extrude, cu.align_x = 2.8, 0.3, "CENTER"
-        t = bpy.data.objects.new(f"label_{i}", cu)
-        add.objects.link(t)
-        t.location = (x, -base_w / 2 + 1.2, FIT_BASE_T + 0.29)
-        bpy.context.view_layer.objects.active = t
-        bpy.ops.object.select_all(action="DESELECT")
-        t.select_set(True)
-        bpy.ops.object.convert(target="MESH")
+        text_mesh(f"label_{i}", f"{d:.2f}", x, -base_w / 2 + 1.2, FIT_BASE_T - 0.01, 2.8, add)
     boolean(gauge, "UNION", add)
     bpy.data.collections.remove(work)
     return gauge
@@ -618,6 +653,7 @@ def main(outdir):
     gauge = build_pin_gauge(case)
     export_stl(gauge, os.path.join(outdir, "pin_gauge.stl"))
     gauge.hide_render = True
+    build_rj45_fits(case, outdir)
     coupon = build_rj45_coupon(tray, case)
     export_stl(coupon, os.path.join(outdir, "rj45_test.stl"))
     coupon.hide_render = True
