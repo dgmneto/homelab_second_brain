@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-07 — Rack case: RJ45 hood sized from the proven cover
+The user printed a third-party drop-jaw RJ45 cover (`~/Downloads/rj45-cover.3mf`, PrusaSlicer 2023) and it fit the real board and plug perfectly. Its inside dimensions are now the hood channel in `hardware/case/build_case.py`: width 12.5, springs to ceiling 7.15, latch slot 7.2 (were the unconfirmed estimates 12.7 / 7.4 / 7.4). Wall (2.0), lip and latch pocket unchanged. Rebuilt with Blender 5.1.2; tray.stl, rj45_test.stl, fit_test.stl and renders regenerated. Verified by sectioning rj45_test.stl: channel 12.50 x 7.15, slot 7.20. Not printed yet.
+
 ## 2026-10-31 — HA migration Phase 4 (Home Assistant → homelab-notebook)
 Deployed `homeAssistant.enable = true` (HA 2026.10.4 from nixpkgs-unstable), then a second switch adding samsungtv/homekit_controller/pytapo. `/var/lib/hass` staged from casaos (uid 286); `/root/ha-cutover.sh` does the host-specific `.storage` edits. Firewall +8123/21064/1400 tcp, +1900 udp. Load 0.37, 9.7 GB available with the full stack. No failed units.
 

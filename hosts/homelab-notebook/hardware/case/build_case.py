@@ -97,11 +97,14 @@ PORT_MARGIN = 1.0
 PORT_RECESS = 1.0
 EDGE_CLEAR = 0.5           # board edge / RJ45 jack -> pocket walls
 
-# ---------------------------------------------------------------- RJ45 hood (estimates; tune with rj45_test.stl)
-# First print (11.9 / 6.8 / 6.6) was too tight for the plug to go in at all.
-RJ45_OPEN_W = 12.7         # plug width 11.68 (8P8C standard) + 0.5 per side
-RJ45_BODY_H = 7.4          # plug insertion-area height 6.60 + 0.8
-RJ45_LATCH_W = 7.4         # slot for the plug's latch
+# ---------------------------------------------------------------- RJ45 hood
+# First print (11.9 / 6.8 / 6.6) was too tight for the plug to go in at all; the
+# 12.7 / 7.4 / 7.4 estimates after it were never confirmed. Channel and slot now
+# copy a third-party drop-jaw cover (rj45-cover.stl, 1 mm walls) that fit the real
+# board and plug perfectly (2026-11-07).
+RJ45_OPEN_W = 12.5         # cover inner width (plug 11.68)
+RJ45_BODY_H = 7.15         # cover inner height, springs -> ceiling (plug 6.60)
+RJ45_LATCH_W = 7.2         # cover slot width (7.16)
 RJ45_LATCH_FACE_H = 8.4    # plug overall height 8.00; top of latch slot = the catch lip
 RJ45_POCKET_H = 11.0       # behind the lip the latch springs back up into this pocket
 RJ45_WALL = 2.0

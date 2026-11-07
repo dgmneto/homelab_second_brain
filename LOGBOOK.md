@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-07 — Rack case RJ45 hood uses the proven cover's dimensions
+Hood channel 12.5 W x 7.15 H, latch slot 7.2, copied from a third-party cover that fit perfectly. Outputs regenerated. Detail in the homelab-notebook host logbook.
+
 ## 2026-11-06 — tado° X audit: firewall plan finalised (second review)
 Read-only. `matter-server --help` (8.1.2): no option to pin the CHIP UDP port (`--port` = TCP websocket). Unit:
 DynamicUser, empty CapabilityBoundingSet; `ip_unprivileged_port_start` 1024. Gotcha found: MainPID is the start
