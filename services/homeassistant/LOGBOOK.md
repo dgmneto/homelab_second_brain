@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-09 — Ground Floor thermostat dashboard icon not showing
+The "Ground Floor" bubble-card separator's sub-button (`climate.living_room_living_room_thermostat`, Matter tado X) picked its
+icon from `attributes.hvac_action`, which this entity never reports (recorder: only current_temperature/temperature/
+friendly_name) → `setAttribute("icon", undefined)` → blank. Stopped HA, backed up `.storage/lovelace.lovelace` →
+`lovelace.lovelace.bak-pre-icon-20261109`, rewrote the styles JS to fall back to state/temperature-derived action and added a
+static `icon: mdi:radiator` + `show_icon: true` on the sub-button, started HA. Verified: service active, `/` 200, no errors,
+new config on disk. Not visually verified (no browser/token from the cloud session) — clients may need a frontend reload.
+
 ## 2026-11-01 — Leftover fixes
 better_thermostat removed from HACS; dead YAML http block removed; Repairs cleared; ground-floor automation repointed and kept
 off. tapo_control analysed (one C225 camera, version pin mismatch with Nix pytapo), left for the user's decision.

@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-09 — HA: Ground Floor thermostat dashboard icon fixed
+Matter thermostat has no `hvac_action`; bubble-card icon script now derives it and has a static fallback. Detail in
+`services/homeassistant/LOGBOOK.md`.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 
