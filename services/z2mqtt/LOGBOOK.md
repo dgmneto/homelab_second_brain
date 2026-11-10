@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Rejoined TRVs blocked; Entry Hall switch lost its parent
+3 force-removed AVATTO TRVs (batteries still in) rejoined 07:10–19:23 as `0xa4c…`. Removed again with `block: true`;
+blocklist also added to the Nix z2m settings (the module regenerates configuration.yaml) and deployed, verified present after
+restart. `Entry Hall/Ligths` (ZBMINIL2, end device) last seen 17:24, `Delivery failed` at 20:49. The mesh is down to 2 routers after
+the Shelly/Bosch removal (both physically gone since 11-09). Needs a power-cycle on site.
+
 ## 2026-11-10 — Removed the 6 heating devices replaced by tado° X
 Via MQTT `bridge/request/device/remove` (force) as the zigbee2mqtt user: Little Room, Guest Bedroom and Loft Bedroom TRV
 Valves, Hall/Thermostat, Dining Room/Thermostat → all `ok`. Office/TRV Valve "does not exist" (had already left the network),

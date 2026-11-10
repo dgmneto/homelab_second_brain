@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-10 — Deploy: octopus_energy off Nix, pydantic added, z2m blocklist
+home-automation.nix: `customComponents = [ ]` (octopus_energy now HACS-managed), `pydantic` in HA `extraPackages`, z2m
+`settings.blocklist` for 3 retired AVATTO TRVs. Box copy diffed (only hermes.nix drift, untouched); backup
+`~dgmneto/nixos/home-automation.nix.bak-pre-octopus-hacs-20261110`. Switch via systemd-run: OK in 1m12s. Then copied the Nix 19.2.1
+octopus tree into `custom_components/octopus_energy` as a writable dir, and restarted HA so HACS can update it.
+
 ## 2026-11-07 — Rack case: six RJ45 height-variant fit pieces
 `hardware/case/build_case.py` now also exports `out/rj45_fit_<dz>.stl` for dz = -0.5, -0.3, -0.1, +0.1, +0.3, +0.5 mm (`RJ45_FIT_DZ`). Each is fit_test cut to the RJ45 alone: the panel strip around the jack plus the H1/H2 pins (the two northmost board holes) on a triangle frame, so the board locates itself and nobody has to hold it in place. Only the hood height over the springs differs: ceiling, latch lip and pocket move by dz. The bottom of the opening stays at the springs, so a raised variant has no ledge at the entry. The dz value is raised on the H1-H2 bar. The springs height (`RJ45_PLUG_FLOOR`) is an estimate, and the winning variant corrects it. `text_mesh` helper shared with the pin gauge. Verified by sectioning: the ceiling steps 0.2 mm per variant and the opening bottom is fixed. All six are manifold, each 94.5 x 28.1 x 24 mm. fit_test.stl has the same 6 non-manifold edges it had before this change. Not printed yet.
 

@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — octopus_energy handed to HACS
+The HACS update failed with Errno 13 because octopus_energy was a Nix-store symlink (read-only). Removed it from Nix
+customComponents and added pydantic to extraPackages (deployed). Installed a writable copy of 19.2.1, restarted HA. The
+user updates to 19.3.0 from HACS.
+
 ## 2026-11-10 — "Invalid config: onvif, tapo_control" notification explained
 Read-only. tapo_control 7.2.13 was re-downloaded via HACS on 11-09 15:24; since the next boot (15:32) setup fails because
 `onvif` can't import (no onvif-zeep-async in the Nix build). Shows after every restart; unrelated to the tado work. README updated.
