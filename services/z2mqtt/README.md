@@ -1,6 +1,8 @@
 # z2mqtt (zigbee2mqtt)
 
 Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. 26 devices (lights, TRV valves, air sensors, switches, thermostats, blinds).
+**2026-11-09:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) are being replaced by
+tado° X over Matter; see [../matter/README.md](../matter/README.md#zigbee-devices-these-replace-z2m-still-paired-as-of-2026-11-10). Still paired as of 2026-11-10.
 
 > **Moved 2026-10-30 to homelab-notebook** (NixOS `services.zigbee2mqtt`, `hosts/homelab-notebook/nixos/home-automation.nix`).
 > Data `/var/lib/zigbee2mqtt` (uid 317): `configuration.yaml` is **regenerated from Nix on every start**, so

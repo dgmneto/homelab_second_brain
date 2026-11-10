@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Identified heating devices replaced by tado° X
+Read-only. 4 AVATTO TRVs still online; Shelly `Hall/Thermostat` last seen 11-09 17:47, Bosch `Dining Room/Thermostat` last
+seen 11-09 15:00. HA's Ground Floor calibrator makes z2m log a failed publish to the Bosch every 5 min. No change made.
+
 ## 2026-10-30 — HA migration Phase 2
 Moved to homelab-notebook (NixOS). casaos container removed 21:53:30; data split into devices/groups/secret.yaml; network resumed on the laptop at ~21:56 with all 26 devices. pan_id/ext_pan_id must be literals (no `!secret` support). UI proxy (nginxIntern host 21) repointed.
 

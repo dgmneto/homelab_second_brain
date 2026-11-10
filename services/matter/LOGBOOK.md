@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Matched the tado° X devices to the Zigbee devices they replace
+Read-only. 4 AVATTO TRVs ↔ 4 tado TRVs by area (old ones still online); Shelly Hall relay ↔ Hall Thermostat;
+Bosch Dining Room thermostat ↔ Living Room Thermostat (inferred from timing). Listed HA automations still bound to the old
+devices. Table in README.
+
 ## 2026-11-10 — Check of the new tado° X devices in HA
 Read-only. 6 nodes commissioned 2026-11-09 15:25–23:36 (2 Smart Thermostat X, 4 Smart Radiator Thermostat X; node IDs
 2,3,7,8,9,10; 4–6 failed: NOC-exists / timeouts). At 00:30 all 6 `available`, all HA entities reporting. Node 10 (Loft

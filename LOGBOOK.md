@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-10 — Found the Zigbee heating devices the tado° X replace
+4 AVATTO TRVs (still online), Shelly hall relay and Bosch dining-room thermostat (both offline since 11-09), plus 8 HA
+automations still bound to them. Read-only; detail in services/matter README.
+
 ## 2026-11-10 — tado° X devices via Matter: HA entity check
 6 tado° X devices (2 thermostats, 4 TRVs) commissioned to HA on 11-09, all online. Loft TRV still on fw 1.0 and briefly
 flapped; one stale humidity entity; messy entity IDs. Detail in services/matter LOGBOOK/README.

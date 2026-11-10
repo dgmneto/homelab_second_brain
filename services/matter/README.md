@@ -44,6 +44,25 @@ are disabled by the integration.
   23:44 and 23:59 on 11-09, CASE timeouts (controller-initiated, so **not** the inbound-conntrack firewall case in
   TADO-X-READINESS), recovered by 00:02. Quiet since. Coverage / pending firmware; watch it.
 
+### Zigbee devices these replace (z2m, still paired as of 2026-11-10)
+Matched by area plus timing; HA has made **no** change to them yet.
+| New (Matter node) | Old z2m device (friendly name, IEEE) | Old status 2026-11-10 00:35 |
+|---|---|---|
+| Office TRV (9) | `Office/TRV Valve` AVATTO TS0601 `0xa4c138c24997bf89` | still reporting (battery) |
+| Small Room TRV (8) | `Little Room/TRV Valve` AVATTO TS0601 `0xa4c138568aeec433` | still reporting |
+| Guest Room TRV (7) | `Guest Bedroom/TRV Valve` AVATTO TS0601 `0xa4c138cc9ea0e43d` | still reporting |
+| Loft Bedroom TRV (10) | `Loft Bedroom/TRV Valve` AVATTO TS0601 `0xa4c13868ef0d6c52` | still reporting (LQI 84) |
+| Hall Thermostat (3) | `Hall/Thermostat` Shelly 1 Mini Gen 4 relay `0x7c2c67fffe73e89c` (`switch.hall_thermostat`) | last seen 11-09 17:47 → presumably removed |
+| Living Room Thermostat (2) | `Dining Room/Thermostat` Bosch Room thermostat II 230V `0x001e5e0902ba15d2` (*inferred*: other area, but last seen 11-09 15:00, node 2 commissioned 15:25) | gone |
+
+HA leftovers that still point at them: automations `Office/Update TRV Valve Offset`, `Little Room/…`, `Guest Bedroom/Update
+TRV Offset` (on, still writing calibration to the old AVATTOs), `Loft Bedroom/(NEW) TRV Calibrator` (blueprint),
+`Loft Bedroom/Update TRV Valve Offset` (off), `Ground Floor/(NEW) TRV Calibrator` (on, every 5 min →
+**z2m logs a failed `local_temperature_calibration` publish to `Dining Room/Thermostat` every 5 min**),
+`Ground Floor/Update Thermostat Temperature` (off), `Enable Thermostat` (trigger on the Shelly, no actions), and the
+template `number.number_of_trv_valves_demanding_heat` (on the Shelly's device). The tado devices have no calibration
+entity over Matter; tado does that itself.
+
 ## casaos setup (historical)
 
 ## Image

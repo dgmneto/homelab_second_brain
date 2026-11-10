@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Stale heating automations after tado° X install
+Read-only. 8 automations + 1 template still target the replaced Zigbee TRVs/thermostats (list in
+../matter/README.md). Ground Floor calibrator fails every 5 min against the vanished Bosch thermostat. Nothing changed.
+
 ## 2026-11-01 — Leftover fixes
 better_thermostat removed from HACS; dead YAML http block removed; Repairs cleared; ground-floor automation repointed and kept
 off. tapo_control analysed (one C225 camera, version pin mismatch with Nix pytapo), left for the user's decision.
