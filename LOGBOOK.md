@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-10 — Tapo camera working in HA again
+tapo_control stays in HACS. Nix now supplies onvif + pytapo 3.4.30 + python-kasa; deployed and verified (camera entities live).
+
 ## 2026-11-10 — Hall light diagnosis, TRV rejoin blocked, octopus_energy to HACS
 Entry hall switch lost its Zigbee route (mesh down to 2 routers after the thermostat swap): power-cycle needed. 3 old TRVs
 rejoined → removed + blocklisted (Nix too). octopus_energy moved from Nix to HACS (+pydantic), deployed. Detail in the

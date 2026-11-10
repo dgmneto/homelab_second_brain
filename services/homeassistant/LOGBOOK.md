@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — tapo_control fixed via Nix-supplied deps
+Added `onvif`/`ffmpeg`/`stream` to extraComponents, plus `python-kasa` and pytapo overridden to 3.4.30 (from PyPI sdist) in
+extraPackages. Deployed 21:04. HA: no "Setup failed"; Living Room Pet Camera back (68/77 entities with state, camera
+`idle`). The "Invalid config: onvif, tapo_control" notice should no longer appear.
+
 ## 2026-11-10 — octopus_energy handed to HACS
 The HACS update failed with Errno 13 because octopus_energy was a Nix-store symlink (read-only). Removed it from Nix
 customComponents and added pydantic to extraPackages (deployed). Installed a writable copy of 19.2.1, restarted HA. The

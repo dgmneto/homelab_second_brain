@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-10 — Deploy: tapo_control dependencies
+home-automation.nix: extraComponents +onvif/ffmpeg/stream; extraPackages: pytapo override 3.4.30, python-kasa. Box copy
+diffed first (only these changes); backup `home-automation.nix.bak-pre-tapo-20261110`. Switch OK at 21:04; HA verified.
+
 ## 2026-11-10 — Deploy: octopus_energy off Nix, pydantic added, z2m blocklist
 home-automation.nix: `customComponents = [ ]` (octopus_energy now HACS-managed), `pydantic` in HA `extraPackages`, z2m
 `settings.blocklist` for 3 retired AVATTO TRVs. Box copy diffed (only hermes.nix drift, untouched); backup
