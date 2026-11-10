@@ -46,6 +46,12 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   **Don't re-add `climate`** unless a non-Matter climate device appears; then include that entity only.
 >   Sensors (temp/humidity/battery) were never bridged: `sensor` was never in the filter (verified in `.storage/homekit.<entry>.aids`, which keeps
 >   every accessory ID ever allocated, stale ones included: harmless).
+> - **Custom components = HACS, not Nix (2026-11-10).** All of them (`hacs`, `octopus_energy`, `tapo_control`,
+>   `espsomfy_rts`, `zoned_heating`) are plain dirs in `/var/lib/hass/custom_components`, updated from HACS. Nix only supplies
+>   their Python requirements in `extraPackages` (HA can't pip-install), e.g. `pydantic` for octopus_energy. **Gotcha:** a
+>   Nix `customComponents` entry is a symlink into the read-only store, so HACS shows an update it can't apply
+>   (`Errno 13 … /tmp/hacs_backup/<name>`). That's why octopus_energy was moved off it. When a HACS update adds a
+>   requirement, the integration fails to load: add it to `extraPackages` and deploy.
 > - **Editing the dashboard without a token:** same stop/back up/edit/start as below, on `.storage/lovelace.lovelace`
 >   (`data.config.views[].sections[].cards[]`). Edit with HA's own python (`sudo readlink /proc/<HA MainPID>/exe`;
 >   the box has no `python3`/`jq` on PATH) and `chown hass:hass` afterwards.
@@ -103,6 +109,6 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
   still lists it installed and a config entry + 109 entities remain. No HA backup has it (only 3 kept, all
   ≥ Sep 20). Fix: HACS → Tapo Control → Redownload, then restart HA.
 - **`octopus_energy` code is missing too** (found 2026-10-30): config entry present, no folder in
-  `custom_components`. The NixOS move restores it from nixpkgs.
+  `custom_components`. The NixOS move restored it from nixpkgs. **Since 2026-11-10 it is HACS-managed again** (see top).
 - **Migration to homelab-notebook in progress:** see [MIGRATION.md](MIGRATION.md).
 - Image is unpinned (`latest`); a Watchtower pull can introduce breaking HA core upgrades.

@@ -129,6 +129,9 @@ in
           homeassistant.enabled = true;
           devices = "devices.yaml";
           groups = "groups.yaml";
+          # Retired AVATTO TRVs (replaced by tado X, 2026-11-10). Force-removed but still had batteries,
+          # so they rejoined; z2m's own `block` writes here, and the module would wipe it on restart.
+          blocklist = [ "0xa4c138568aeec433" "0xa4c138cc9ea0e43d" "0xa4c13868ef0d6c52" ];
         };
       };
       networking.firewall.allowedTCPPorts = [ 8080 ];
@@ -187,17 +190,17 @@ in
           "webostv"
           "zha"
         ];
-        customComponents = with pkgsUnstable.home-assistant-custom-components; [
-          # Config entry exists on casaos but its code folder went missing; this restores it.
-          octopus_energy
-        ];
-        # hacs, espsomfy_rts and zoned_heating stay as plain dirs in
+        # octopus_energy moved to HACS 2026-11-10: the Nix copy was a read-only store symlink, so
+        # HACS updates failed (Errno 13 on its /tmp backup). Its only requirement, pydantic, is below.
+        customComponents = [ ];
+        # hacs, espsomfy_rts, zoned_heating, octopus_energy and tapo_control stay as plain dirs in
         # /var/lib/hass/custom_components (copied from casaos; the module only prunes
         # symlinks). Nix HA can't pip-install, so provide their requirements here.
         extraPackages = ps: with ps; [
           aiogithubapi
           aiofiles
           websocket-client
+          pydantic # octopus_energy (HACS)
           # tapo_control (HACS): code missing since Aug; redownload via HACS, dep is ready here.
           pytapo
         ];

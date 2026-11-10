@@ -4,6 +4,16 @@ Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume the
 **2026-11-10:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) were **removed** (replaced by
 tado° X over Matter; see [../matter/README.md](../matter/README.md)). Backups: `/var/lib/zigbee2mqtt/{database.db,devices.yaml}.bak-pre-tado-20261110`.
 
+**Force-remove ≠ gone (2026-11-10):** `force: true` only deletes z2m's record. A device that is still powered keeps the
+network key and **rejoins** (3 of the AVATTO TRVs came back as bare `0xa4c…` at 07:10–19:23 the next day). Pull the batteries/power first, or remove
+with `"block": true`. **z2m writes the block to `configuration.yaml`, which the NixOS module regenerates on every start**,
+so a block must also go into `settings.blocklist` in `home-automation.nix` (done for those 3).
+
+**Mesh has only 2 routers left (2026-11-10):** `Living Room/Lights` (C202) and `Loft Bedroom/Switch` (C-ZB-RD1P-DIM), plus the
+coordinator. The tado swap took out 2 mains routers: the Shelly `Hall/Thermostat` and the Bosch `Dining Room/Thermostat`. All
+the SONOFF ZBMINIL2 no-neutral light switches are **end devices**, so they need a router parent. `Entry Hall/Ligths` went silent
+after 17:24 on 11-10, and later commands got `Delivery failed`. Fix: power-cycle it (breaker); a mains Zigbee router (smart plug) in the hall makes it durable.
+
 **Removing a device without the frontend (verified 2026-11-10):** publish over MQTT as z2m's own user, reading the password
 from `/var/lib/zigbee2mqtt/secret.yaml` on the box (never print it). `mosquitto_pub`/`_sub` are not on PATH: use
 `/nix/store/*-mosquitto-2.*/bin/` (e.g. `ls -d /nix/store/*-mosquitto-2.1.2`). Request: topic
