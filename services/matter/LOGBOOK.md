@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Old Zigbee heating removed; dashboard uses the tado entities
+The z2m devices these replaced were removed, and the HA heating automations deleted. The Home dashboard now shows the 6 tado
+climate entities. See the homeassistant and z2mqtt logbooks.
+
 ## 2026-11-10 — Matched the tado° X devices to the Zigbee devices they replace
 Read-only. 4 AVATTO TRVs ↔ 4 tado TRVs by area (old ones still online); Shelly Hall relay ↔ Hall Thermostat;
 Bosch Dining Room thermostat ↔ Living Room Thermostat (inferred from timing). Listed HA automations still bound to the old

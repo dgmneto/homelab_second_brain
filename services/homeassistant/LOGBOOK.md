@@ -3,6 +3,15 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Heating automations removed, dashboard switched to tado° X
+User: tado runs heating now. With HA stopped (backups `*.bak-pre-tado-cleanup-20261110`): removed 8 automations from
+automations.yaml + registry (Ground Floor, Guest Bedroom, Office, Little Room and Loft offset/calibrator automations,
+Enable Thermostat); deleted config entries `zoned_heating` and the template "Number of TRV valves demanding heat"; purged
+the orphan Hall/Thermostat device + its select entity. Lovelace: old TRV/thermostat entities → the 6 tado climate entities,
+and icon JS now derives heating/idle (no hvac_action over Matter). HA restarted. Verified: no old entities, devices or
+dashboard refs; 6 automations left; all tado climates reporting; no new errors (only the known onvif/tapo ones).
+Not checked in a browser.
+
 ## 2026-11-10 — Stale heating automations after tado° X install
 Read-only. 8 automations + 1 template still target the replaced Zigbee TRVs/thermostats (list in
 ../matter/README.md). Ground Floor calibrator fails every 5 min against the vanished Bosch thermostat. Nothing changed.

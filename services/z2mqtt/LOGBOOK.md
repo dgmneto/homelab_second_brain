@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Removed the 6 heating devices replaced by tado° X
+Via MQTT `bridge/request/device/remove` (force) as the zigbee2mqtt user: Little Room, Guest Bedroom and Loft Bedroom TRV
+Valves, Hall/Thermostat, Dining Room/Thermostat → all `ok`. Office/TRV Valve "does not exist" (had already left the network),
+so its 19 retained discovery topics were cleared by hand and its devices.yaml entry deleted (z2m stopped/started). Backups
+`database.db`/`devices.yaml` `.bak-pre-tado-20261110`. z2m active, no errors after restart.
+
 ## 2026-11-10 — Identified heating devices replaced by tado° X
 Read-only. 4 AVATTO TRVs still online; Shelly `Hall/Thermostat` last seen 11-09 17:47, Bosch `Dining Room/Thermostat` last
 seen 11-09 15:00. HA's Ground Floor calibrator makes z2m log a failed publish to the Bosch every 5 min. No change made.

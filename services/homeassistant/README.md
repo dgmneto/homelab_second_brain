@@ -32,9 +32,20 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   so they stay gone unless the phone re-registers them). Unsupported entities of a **live** integration (e.g. UniFi Protect) get
 >   recreated if deleted → set `disabled_by: "user"` instead. HACS `restart_required_*` repairs do **not** clear on restart;
 >   dismiss them in Settings → Repairs.
+> - **Heating = tado° X over Matter since 2026-11-10** (devices: [../matter/README.md](../matter/README.md#commissioned-devices-server-truth-2026-11-10)).
+>   tado runs schedules, calibration and boiler demand itself, so **HA has no heating automations any more**: the
+>   8 calibrator/offset automations, the `zoned_heating` config entry (old boiler logic: 4 AVATTO TRVs → Shelly hall relay)
+>   and the "Number of TRV valves demanding heat" template helper were deleted 2026-11-10 (backups `*.bak-pre-tado-cleanup-20261110`).
+>   `zoned_heating`'s code is still in `custom_components/` (unused). Dashboard "Home" view: room cards' radiator icons
+>   and the First Floor separator's fire icon use the tado `climate.*` entities, and work out heating/idle in JS
+>   (tado over Matter has **no `hvac_action`**: below the setpoint = heating). Air Sensors history graph uses
+>   `climate.living_room_living_room_thermostat`.
+> - **Editing the dashboard without a token:** same stop/back up/edit/start as below, on `.storage/lovelace.lovelace`
+>   (`data.config.views[].sections[].cards[]`). Edit with HA's own python (`sudo readlink /proc/<HA MainPID>/exe`;
+>   the box has no `python3`/`jq` on PATH) and `chown hass:hass` afterwards.
 > - Leftovers status (2026-11-01): `better_thermostat` removed from HACS (+ its 2 HACS entities); dead YAML `http:` block
->   removed; Repairs cleared (stale HACS restart_required + http issues deleted, octopus notice dismissed). Automation
->   "Ground Floor/Update Thermostat Temperature" repointed to `climate.dining_room_thermostat` / its calibration number
+>   removed; Repairs cleared (stale HACS restart_required + http issues deleted, octopus notice dismissed). (Superseded 2026-11-10: all
+>   heating automations deleted.) Automation "Ground Floor/Update Thermostat Temperature" repointed to `climate.dining_room_thermostat` / its calibration number
 >   but **kept off on purpose**: "Ground Floor/(NEW) TRV Calibrator" already calibrates that thermostat, and both on would fight.
 >   **Still open: `tapo_control`** (code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
 >   entities, used nowhere). Latest 7.2.13 pins `pytapo==3.4.30` (+python-kasa) vs Nix's 3.4.19 with pip skipped, so a restore is

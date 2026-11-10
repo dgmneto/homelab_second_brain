@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-10 — Retired the Zigbee heating; tado° X on the dashboard
+Removed 6 old heating devices from z2m (MQTT remove request), and from HA 8 heating automations, `zoned_heating` and a template
+helper (HA stopped; backups taken). The Home dashboard now uses the tado climate entities. Verified post-restart. Detail in the
+homeassistant/z2mqtt logbooks.
+
 ## 2026-11-10 — Found the Zigbee heating devices the tado° X replace
 4 AVATTO TRVs (still online), Shelly hall relay and Bosch dining-room thermostat (both offline since 11-09), plus 8 HA
 automations still bound to them. Read-only; detail in services/matter README.

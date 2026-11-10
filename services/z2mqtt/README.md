@@ -1,8 +1,18 @@
 # z2mqtt (zigbee2mqtt)
 
 Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. 26 devices (lights, TRV valves, air sensors, switches, thermostats, blinds).
-**2026-11-09:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) are being replaced by
-tado° X over Matter; see [../matter/README.md](../matter/README.md#zigbee-devices-these-replace-z2m-still-paired-as-of-2026-11-10). Still paired as of 2026-11-10.
+**2026-11-10:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) were **removed** (replaced by
+tado° X over Matter; see [../matter/README.md](../matter/README.md)). Backups: `/var/lib/zigbee2mqtt/{database.db,devices.yaml}.bak-pre-tado-20261110`.
+
+**Removing a device without the frontend (verified 2026-11-10):** publish over MQTT as z2m's own user, reading the password
+from `/var/lib/zigbee2mqtt/secret.yaml` on the box (never print it). `mosquitto_pub`/`_sub` are not on PATH: use
+`/nix/store/*-mosquitto-2.*/bin/` (e.g. `ls -d /nix/store/*-mosquitto-2.1.2`). Request: topic
+`zigbee2mqtt/bridge/request/device/remove`, payload `{"id":"<friendly name>","force":true}`. Use `force` for offline or sleepy battery
+devices. Read the result on `zigbee2mqtt/bridge/response/device/remove`. z2m clears the device's retained `homeassistant/…/config`
+topics, and HA drops the entities. **Gotcha:** a device that left the network on its own (e.g. a factory reset) is not in
+`database.db`, so remove returns "does not exist", but its `devices.yaml` name and retained discovery topics remain. Clear those by
+hand: publish an empty retained message (`-r -n`) to each `homeassistant/+/<ieee>/+/config`, stop z2m, delete the 2 lines from
+`devices.yaml`, start z2m.
 
 > **Moved 2026-10-30 to homelab-notebook** (NixOS `services.zigbee2mqtt`, `hosts/homelab-notebook/nixos/home-automation.nix`).
 > Data `/var/lib/zigbee2mqtt` (uid 317): `configuration.yaml` is **regenerated from Nix on every start**, so
