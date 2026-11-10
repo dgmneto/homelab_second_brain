@@ -59,11 +59,12 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   removed; Repairs cleared (stale HACS restart_required + http issues deleted, octopus notice dismissed). (Superseded 2026-11-10: all
 >   heating automations deleted.) Automation "Ground Floor/Update Thermostat Temperature" repointed to `climate.dining_room_thermostat` / its calibration number
 >   but **kept off on purpose**: "Ground Floor/(NEW) TRV Calibrator" already calibrates that thermostat, and both on would fight.
->   **Still open: `tapo_control`.** Its code (7.2.13) was **re-downloaded via HACS 2026-11-09 15:24**, and since then every boot
->   raises the "Invalid config: onvif, tapo_control" notification: it depends on the `onvif` integration, whose library
->   (`onvif-zeep-async`) isn't in the Nix HA build (pip is skipped). Harmless to everything else; the camera just isn't in HA.
->   Fix = add `"onvif"` to `extraComponents` in home-automation.nix and deploy, but the `pytapo==3.4.30` pin vs Nix's 3.4.19 may
->   still break it. (Was: code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
+>   **`tapo_control` (HACS 7.2.13), deps added 2026-11-10 (deploy in progress, unverified):** Nix now supplies what it needs. That's `onvif`/`ffmpeg`/`stream` in
+>   `extraComponents` (the missing `onvif` library caused the "Invalid config: onvif, tapo_control" notice at every
+>   boot), plus `python-kasa` and an override of **pytapo to 3.4.30** (nixpkgs has 3.4.19) in `extraPackages`.
+>   **When HACS updates tapo_control, compare manifest.json `requirements`' pytapo pin with the override in
+>   home-automation.nix**: bump the version and hash (`sha256-` + base64 of PyPI's sdist sha256) if the pin changed.
+>   (Was: code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
 >   entities, used nowhere). Latest 7.2.13 pins `pytapo==3.4.30` (+python-kasa) vs Nix's 3.4.19 with pip skipped, so a restore is
 >   fragile. Built-in `tplink` integration is the alternative. RTSP (554) is closed on the camera, so a "camera account"
 >   in the Tapo app is needed for streams either way. Outbound IPv6 fails fast: see `notes/lan-ipv6.md`.

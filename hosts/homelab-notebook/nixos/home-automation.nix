@@ -189,6 +189,11 @@ in
           "unifiprotect"
           "webostv"
           "zha"
+          # tapo_control (HACS) declares these as manifest dependencies; onvif's library
+          # (onvif-zeep-async) was missing, so the integration failed at every boot.
+          "onvif"
+          "ffmpeg"
+          "stream"
         ];
         # octopus_energy moved to HACS 2026-11-10: the Nix copy was a read-only store symlink, so
         # HACS updates failed (Errno 13 on its /tmp backup). Its only requirement, pydantic, is below.
@@ -201,8 +206,18 @@ in
           aiofiles
           websocket-client
           pydantic # octopus_energy (HACS)
-          # tapo_control (HACS): code missing since Aug; redownload via HACS, dep is ready here.
-          pytapo
+          # tapo_control (HACS) 7.2.13 pins pytapo==3.4.30; nixpkgs has 3.4.19 (same deps, so only
+          # version + hash change). Bump here when HACS bumps the pin: manifest.json "requirements".
+          (pytapo.overridePythonAttrs (_: rec {
+            version = "3.4.30";
+            src = pkgs.fetchPypi {
+              pname = "pytapo";
+              inherit version;
+              hash = "sha256-Eo/3k5rGE80GEnVug0+VydRP0z4mfq0Ueedw5hathCE=";
+            };
+            doCheck = false;
+          }))
+          python-kasa # tapo_control: "python-kasa[speedups]>=0.10.2"
         ];
       };
       # 8123 UI, 21064 HomeKit bridge ("HASS Bridge"), 1400 Sonos event callbacks
