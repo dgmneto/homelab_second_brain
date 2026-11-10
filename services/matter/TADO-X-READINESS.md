@@ -5,6 +5,9 @@ infrastructure only — says nothing about heating wiring, boiler or valve compa
 Nothing was changed, restarted, installed or commissioned. No Thread credentials (PSKc, network key, active dataset,
 XPAN ID) were read or recorded; the mDNS dump redacts `xp/at/pt/id`.
 
+**Update 2026-11-10:** 6 tado° X devices are now commissioned and online in HA — see the device table in
+[README.md](README.md#commissioned-devices-server-truth-2026-11-10). Firewall Stage 1 still not deployed.
+
 Re-run the evidence any time with the two scripts in [tools/](tools/) (see "How to re-check" at the bottom).
 
 ## Inventory as found (vs. what the task brief assumed)

@@ -6,15 +6,45 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 > `ws://192.168.11.21:5580/ws` (HA's matter entry points here). State `/var/lib/private/matter-server` (DynamicUser),
 > PAA certs `/var/cache/private/matter-server/certs`, logs `journalctl -u matter-server`. **Must run with
 > `--vendorid=65521`** (the fabric's admin was created under 0xFFF1; the module default 4939 crashes it).
-> `--primary-interface=enp2s0`, firewall 5580/tcp + 5353/udp. **0 Matter devices commissioned** as of the move
-> (fabric kept). casaos container removed; pre-move copy `/footage/services/matter/data.bak-pre-move-20261030`.
+> `--primary-interface=enp2s0`, firewall 5580/tcp + 5353/udp. 0 devices at the move (fabric kept); **6 tado° X nodes since 2026-11-09**, see "Commissioned devices" below. casaos container removed; pre-move copy `/footage/services/matter/data.bak-pre-move-20261030`.
 > **Thread (2026-11-06):** the only Thread border router is the **Apple TV 4K gen 3 `192.168.11.236`** (Apple network
 > `MyHome1662126353`, OMR `fde9:b6c5:757::/64`); HA holds **no** Thread dataset (fine for multi-admin). CHIP operational
 > UDP port is **ephemeral** (e.g. 47870) and not opened in the NixOS firewall — see the tado° X audit
 > [TADO-X-READINESS.md](TADO-X-READINESS.md) for the staged (log → accept) UDP rule scoped to `enp2s0` + `fde9:b6c5:757::/64` and the reusable mDNS/RA
 > diagnostics + firewall drift check in [tools/](tools/). **Gotcha:** `systemctl show -p MainPID matter-server` is the
 > start-script wrapper; the socket owner is its child: use the unit's cgroup PIDs with `sudo ss -uapn` (no `avahi`/`tcpdump` on the box; they run on HA's own python + zeroconf).
-> Below = the old casaos setup.
+> Below the device table = the old casaos setup.
+
+## Commissioned devices (server truth 2026-11-10)
+All tado° X, Matter-over-Thread via the Apple TV BR, commissioned 2026-11-09 by multi-admin share (tado app → HA).
+Re-dump any time with [`tools/nodes.py`](tools/nodes.py) (matter-server websocket, read-only).
+
+| Node | HA device (area) | Model | fw | climate entity |
+|---|---|---|---|---|
+| 2 | Living Room Thermostat (Living room) | Smart Thermostat X | 1.4.289 | `climate.living_room_living_room_thermostat` |
+| 3 | Hall Thermostat (Entry hall) | Smart Thermostat X | 1.4.289 | `climate.smart_thermostat_x` |
+| 7 | Guest Room TRV (Guest room) | Smart Radiator Thermostat X | 1.4.289 | `climate.smart_radiator_thermostat_x` |
+| 8 | Small Room TRV (Little room) | Smart Radiator Thermostat X | 1.4.289 | `climate.little_room_small_room_trv` |
+| 9 | Office TRV (Office) | Smart Radiator Thermostat X | 1.4.289 | `climate.smart_radiator_thermostat_x_2` |
+| 10 | Loft Bedroom TRV (Loft bedroom) | Smart Radiator Thermostat X | **1.0** | `climate.loft_bedroom_loft_bedroom_trv` |
+
+Node IDs 4–6 were burned by failed attempts (4: `0x7E` "NOC for a fabric that already exists" = device already on
+HA's fabric; 5/6: timeouts). Per device HA gets: `climate` (heat-only Thermostat cluster 513, `heat`/`off`), temperature,
+humidity, a **binary** battery sensor (BatChargeLevel only, no %), 1–2 identify buttons; reboot count/uptime/boot reason
+are disabled by the integration.
+**Gotchas:**
+- **Fresh TRVs arrive on fw 1.0 (swNum 64) and tado updates them to 1.4.289 itself** (not via Matter OTA: no OTA
+  requestor cluster). The 1.0 layout differs: humidity on endpoint 1, no PowerSource (no battery entity), no serial,
+  no ICD cluster. After the update HA adds the new entities but **leaves the ep-1 humidity sensor frozen at its last
+  value** (`sensor.little_room_small_room_trv_humidity` stuck since 23:21 on 11-09, while `..._humidity_2` is live).
+  Delete it in HA. Node 10 will do the same after it updates.
+- Entity IDs are inconsistent (some generic `smart_radiator_thermostat_x_2`, some with a doubled area prefix). Rename in
+  HA (Settings → Entities) before writing automations.
+- Flapping seen only on node 10 (Loft, farthest from the Apple TV, still on fw 1.0): 2× "Marked node as unavailable"
+  23:44 and 23:59 on 11-09, CASE timeouts (controller-initiated, so **not** the inbound-conntrack firewall case in
+  TADO-X-READINESS), recovered by 00:02. Quiet since. Coverage / pending firmware; watch it.
+
+## casaos setup (historical)
 
 ## Image
 `ghcr.io/matter-js/python-matter-server:stable` (`stable` channel — moving tag, not a fixed version)

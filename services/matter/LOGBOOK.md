@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Check of the new tado° X devices in HA
+Read-only. 6 nodes commissioned 2026-11-09 15:25–23:36 (2 Smart Thermostat X, 4 Smart Radiator Thermostat X; node IDs
+2,3,7,8,9,10; 4–6 failed: NOC-exists / timeouts). At 00:30 all 6 `available`, all HA entities reporting. Node 10 (Loft
+TRV) still fw 1.0 (others 1.4.289), flapped twice 23:44/23:59 (CASE timeouts) then stable from 00:02. Node 8 shows the
+fw 1.0 → 1.4.289 transition leaves a frozen ep-1 humidity entity in HA. Sources: `journalctl -u matter-server`, ws
+`get_nodes`, HA `.storage` registries + recorder DB (read-only sqlite). Added `tools/nodes.py`; README device table.
+
 ## 2026-11-06 — tado° X audit: firewall plan finalised (second review)
 Read-only. `matter-server --help` (8.1.2): no option to pin the CHIP UDP port (`--port` = TCP websocket). Unit:
 DynamicUser, empty CapabilityBoundingSet; `ip_unprivileged_port_start` 1024. Gotcha found: MainPID is the start

@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-10 — tado° X devices via Matter: HA entity check
+6 tado° X devices (2 thermostats, 4 TRVs) commissioned to HA on 11-09, all online. Loft TRV still on fw 1.0 and briefly
+flapped; one stale humidity entity; messy entity IDs. Detail in services/matter LOGBOOK/README.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 
