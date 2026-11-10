@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — "Invalid config: onvif, tapo_control" notification explained
+Read-only. tapo_control 7.2.13 was re-downloaded via HACS on 11-09 15:24; since the next boot (15:32) setup fails because
+`onvif` can't import (no onvif-zeep-async in the Nix build). Shows after every restart; unrelated to the tado work. README updated.
+
 ## 2026-11-10 — HomeKit Bridge: stop exporting climate (tado duplicates)
 User saw every tado TRV/thermostat twice in Apple Home: once native (Matter), once via HASS Bridge, which included the
 whole `climate` domain. The only climate entities are the 6 tado ones. With HA stopped: removed `climate` from the homekit
