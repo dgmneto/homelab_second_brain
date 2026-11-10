@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — HomeKit Bridge: stop exporting climate (tado duplicates)
+User saw every tado TRV/thermostat twice in Apple Home: once native (Matter), once via HASS Bridge, which included the
+whole `climate` domain. The only climate entities are the 6 tado ones. With HA stopped: removed `climate` from the homekit
+entry's `options.filter.include_domains` (now cover, light; backup `core.config_entries.bak-pre-homekit-climate-20261110`),
+then restarted HA.
+
 ## 2026-11-10 — Heating automations removed, dashboard switched to tado° X
 User: tado runs heating now. With HA stopped (backups `*.bak-pre-tado-cleanup-20261110`): removed 8 automations from
 automations.yaml + registry (Ground Floor, Guest Bedroom, Office, Little Room and Loft offset/calibrator automations,

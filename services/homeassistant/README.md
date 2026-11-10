@@ -40,6 +40,10 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   and the First Floor separator's fire icon use the tado `climate.*` entities, and work out heating/idle in JS
 >   (tado over Matter has **no `hvac_action`**: below the setpoint = heating). Air Sensors history graph uses
 >   `climate.living_room_living_room_thermostat`.
+> - **HomeKit Bridge ("HASS Bridge", port 21064) exports only `light` + `cover`** (filter in the homekit config entry's
+>   `options.filter`; a few lights excluded by entity). `climate` was removed 2026-11-10: the tado° X devices are
+>   natively in Apple Home (that's where they were commissioned), so bridging them showed every TRV/thermostat twice.
+>   **Don't re-add `climate`** unless a non-Matter climate device appears; then include that entity only.
 > - **Editing the dashboard without a token:** same stop/back up/edit/start as below, on `.storage/lovelace.lovelace`
 >   (`data.config.views[].sections[].cards[]`). Edit with HA's own python (`sudo readlink /proc/<HA MainPID>/exe`;
 >   the box has no `python3`/`jq` on PATH) and `chown hass:hass` afterwards.

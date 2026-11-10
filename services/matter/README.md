@@ -38,6 +38,8 @@ are disabled by the integration.
   no ICD cluster. After the update HA adds the new entities but **leaves the ep-1 humidity sensor frozen at its last
   value** (`sensor.little_room_small_room_trv_humidity` stuck since 23:21 on 11-09, while `..._humidity_2` is live).
   Delete it in HA. Node 10 will do the same after it updates.
+- **Don't bridge them back to Apple Home**: they are already native there. HA's HomeKit Bridge no longer exports
+  `climate` (2026-11-10) because that showed every device twice.
 - Entity IDs are inconsistent (some generic `smart_radiator_thermostat_x_2`, some with a doubled area prefix). Rename in
   HA (Settings → Entities) before writing automations; the Home dashboard references the current IDs, and renaming
   through the UI updates them.
