@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-11 — tado outage narrowed to the UniFi RA change
+User: all devices online in the tado app and Apple Home, so Thread is fine. HA's path fails because the Apple TV no longer answers on
+or routes back to `2a02:8012:882b::/64`, after the UniFi started sending RAs from its GUA. Asked the user to restart the UniFi gateway
+and check for an overnight update / IPv6 settings. No change on the box.
+
 ## 2026-11-11 — Investigation: all tado nodes unavailable since 06:27
 Read-only, except one temporary on-link route on homelab-notebook, removed right after (it was already there via RA). All 6 nodes
 `avail=False` since 06:27–06:29; matter-server retries CASE every 60 s and times out. The Apple BR is up (`sb` 0fb1, leader),

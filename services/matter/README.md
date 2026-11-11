@@ -45,8 +45,10 @@ are disabled by the integration.
      (replies to our pings are ESTABLISHED and accepted).
   4. `tools/ra.py`. On 11-11 the UniFi (MAC `78:45:58:b1:a5:7d`) sent its RA from **`2a02:8012:882b::1`, not link-local**
      (on 11-06 it was `fe80::7a45:58ff:feb1:a57d`; that neighbour is now FAILED). RFC 4861 hosts drop the router part, so
-     **no IPv6 default route on any Linux box**; NetworkManager still installs the on-link /64. Root cause not proven: it is
-     either this UniFi change or the Apple TV BR itself. Next steps (user, on site): check whether the devices are online in the
+     **no IPv6 default route on any Linux box**; NetworkManager still installs the on-link /64. **User confirmed 11-11: devices online in the tado app and Apple Home**, so the Thread mesh/BR is fine. The break is
+     the LAN↔BR IP path: the Apple TV doesn't answer on its GUA either, i.e. it no longer treats `2a02:8012:882b::/64` as on-link
+     (it also ignores the GUA-sourced RA), so it drops replies to HA's GUA. Root cause = the UniFi RA change (Apple Home/tado
+     cloud don't need LAN IPv6, so they keep working). Next steps (user, on site): check whether the devices are online in the
      **tado app / Apple Home** (yes → IP path; no → Thread/BR), restart the Apple TV, and check the UniFi for an overnight
      update and its IPv6 settings on the Default network. matter-server retries every 60 s and recovers by itself.
   - Gotcha: `ip -6 route | grep -E "fde9|default"` hides the on-link `2a02:…/64` route. Use plain `ip -6 route`.
