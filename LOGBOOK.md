@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-11 — What the new UniFi "Matter" tab is
+Investigation only. It came with Network 11.0.99 (overnight auto-update): Thread/Matter monitoring that pairs into devices as an
+extra fabric; not a controller or BR. Not configured (no settings keys, v2 matter/thread endpoints 404). Recommended leaving it off
+(fabric slots). Documented in services/unifi/README.md.
+
 ## 2026-11-11 — Node 8: online on Thread, SRP registration missing
 User: Small Room TRV responds in Apple Home (setpoint change triggered heating). Direct DNS-SD lookup of
 `BFABFD88F60E01A6-0000000000000008._matter._tcp` from homelab-notebook → no answer (node 2 resolves fine). So the device is on

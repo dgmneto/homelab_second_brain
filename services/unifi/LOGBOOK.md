@@ -2,6 +2,11 @@
 
 Reverse-chronological. Newest entry on top.
 
+## 2026-11-11 — What the new UniFi "Matter" tab is
+Investigation only. It came with Network 11.0.99 (overnight auto-update): Thread/Matter monitoring that pairs into devices as an
+extra fabric; not a controller or BR. Not configured (no settings keys, v2 matter/thread endpoints 404). Recommended leaving it off
+(fabric slots). Documented in services/unifi/README.md.
+
 ## 2026-11-11 — UDR restart fixed the RA; 5/6 tado nodes back
 User restarted the UDR ~12:51 UTC. Polled `tools/ra.py` from homelab-notebook: offline 12:52–12:53, at 12:53:54 RA from
 `fe80::7a45:58ff:feb1:a57d` again; v6 default route back, `curl -6 ipv6.google.com` 200. Nodes 3/7/9/10 resubscribed by

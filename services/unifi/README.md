@@ -52,6 +52,14 @@ LAN GUAs → every tado/Matter node unavailable in HA from 06:27. Network IPv6 s
 [services/matter/README.md](../matter/README.md). Event history: POST `v2/api/site/default/system-log/all` with
 `{"timestampFrom":<ms>,"timestampTo":<ms>,"pageSize":200,"pageNumber":0}` (the legacy `stat/event` returns 404 on Network 11).
 
+### Settings → Matter (new in Network 11, appeared 2026-11-11)
+Arrived with the same auto-update. Monitoring/visibility only (battery, firmware, signal, Thread topology); it detects
+existing Thread border routers (our Apple TV) and devices are added with a pairing code from their current controller,
+i.e. **UniFi joins each device as one more Matter fabric/admin**. Not a controller, not a border router (UDR has no Thread
+radio). Not enabled here (no Matter keys in `rest/setting`; `v2/api/site/default/{matter,thread}` → 404 on 11.0.99). The
+tado devices already use 3–4 fabrics each (HA, Apple, tado, +1), so adding UniFi spends a scarce fabric slot for read-only info —
+left off on purpose. Needs mDNS + IPv6 on the BR's network (both on for Default).
+
 ## Networks
 
 | Network | VLAN | Subnet | IPv6 |
