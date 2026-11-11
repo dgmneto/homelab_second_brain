@@ -68,7 +68,11 @@ are disabled by the integration.
     the same Thread host name/address. Fabrics seen 2026-11-11: `BFABFD88F60E01A6` = HA, plus `2352D62C1A7D8359`,
     `356911195B19D07B`, `95FF102CF4A68F57` (Apple Home / tado / one more; node 10 lacks `95FF…`). Group by host name to count
     physical devices. At 13:10 only **5 Thread hosts** existed: node 8 (Small Room TRV) had **no record on any fabric**, i.e.
-    not just missing from HA but not reachable via the BR at all, even though Apple Home / tado still listed it.
+    not just missing from HA. **But the user confirmed it responds in Apple Home (setpoint change triggered heating)**: Apple's
+    controller and the tado cloud reach a Thread device without its SRP/DNS-SD records; **only HA (matter-server, on the LAN)
+    needs them**. So "works in Apple Home / tado, unavailable in HA, no `_matter._tcp` record" = the device's SRP registration
+    with the BR is gone (a direct lookup of `BFABFD88F60E01A6-<node>` returns nothing). Fix: reseat its batteries (forces
+    a Thread rejoin + SRP re-register; pairings survive), then `restart matter-server` if it hit the 30-min give-up.
   - Gotcha: `ip -6 route | grep -E "fde9|default"` hides the on-link `2a02:…/64` route. Use plain `ip -6 route`.
 - **Fresh TRVs arrive on fw 1.0 (swNum 64) and tado updates them to 1.4.289 itself** (not via Matter OTA: no OTA
   requestor cluster). The 1.0 layout differs: humidity on endpoint 1, no PowerSource (no battery entity), no serial,

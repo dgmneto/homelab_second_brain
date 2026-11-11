@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-11 — Node 8: online on Thread, SRP registration missing
+User: Small Room TRV responds in Apple Home (setpoint change triggered heating). Direct DNS-SD lookup of
+`BFABFD88F60E01A6-0000000000000008._matter._tcp` from homelab-notebook → no answer (node 2 resolves fine). So the device is on
+the mesh but has no SRP/DNS-SD registration at the Apple TV; Apple Home/tado don't need it, matter-server does. Advised a
+battery reseat. Read-only.
+
 ## 2026-11-11 — Small Room TRV (node 8): not advertised on any fabric
 User: it shows in tado and Apple Home. mDNS browse (tools/browse.py) at ~13:10: 21 `_matter._tcp` records, grouped by Thread
 host = 5 devices, each on HA fabric `BFABFD88…` plus 2–3 other fabrics (Apple/tado). Node 8 has no record on **any** fabric,
