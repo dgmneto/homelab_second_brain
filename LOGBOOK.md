@@ -4,6 +4,17 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-11 — UniFi controller checked via API (closes tado X audit UniFi items)
+Read-only. `UNIFI_API_KEY` is a Site Manager key: `api.ui.com/v1/{hosts,sites,devices}` → 200; local `https://192.168.11.1`
+→ 403 from the agent proxy (private IP). Full Network-app reads work through the cloud connector
+`api.ui.com/v1/connector/consoles/<id>/proxy/network/...`; wrapped in `services/unifi/tools/unifi.sh` (redacts secrets —
+`rest/setting` returns the device SSH password in clear; raw dumps deleted). Findings: Apple TV `.236` (Tv unit Flex Mini
+port 5) and homelab-notebook `.21` (Office U6 IW port 4) wired on **Default**; both SSIDs on Default, no client
+isolation, IGMP snooping off, mDNS reflector on; Default IPv6 = PD + SLAAC; firewall = 82 predefined zone policies only,
+External→Internal blocked v4+v6. **Root cause of the ~94 Mbps Apple TV ceiling: Tv unit uplink (Main Switch port 1)
+negotiates at 100 Mbps** (0 errors) — likely a 2-pair cable. TADO-X-READINESS UniFi row now PASS; new services/unifi
+README; lan-ipv6 note, Plex runbook, CLAUDE.md updated. Nothing changed on the network.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 

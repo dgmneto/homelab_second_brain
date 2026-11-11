@@ -74,6 +74,9 @@ Top gotchas (detail in the host READMEs):
   `192.168.11.236` (see [services/matter/TADO-X-READINESS.md](services/matter/TADO-X-READINESS.md)).
 - **casaos** `qbittorrent` lives in `gluetunProtonVPN`'s network namespace — recreating gluetun takes it down.
   (`prowlarr` was moved **off** the VPN onto `internalNetwork` on 2026-06-22; verified running that way 2026-11-01.) watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
+- **UniFi (UDR `192.168.11.1`)**: cloud sessions have `UNIFI_API_KEY` (Site Manager key). The local API is blocked by
+  the agent proxy (private IP) — go through the cloud connector with `services/unifi/tools/unifi.sh <path>` (redacts
+  secrets; `rest/setting` returns the device SSH password in clear). See [services/unifi](services/unifi/README.md).
 - **homelab-notebook**: key exists only in 1Password — if it's locked you are locked out (no fallback),
   and the Bash sandbox can't reach the agent socket (disable sandbox for ssh/op). Its NixOS flake is
   **in this repo** at `hosts/homelab-notebook/nixos/`; `git diff` before every deploy. Hermes on it

@@ -70,6 +70,8 @@ before blaming transcoding. Logs: `/footage/services/plex/config/Library/Applica
      | awk '{b[$1]+=$3} END{for(k in b) printf "%s %.0f Mbps\n",k,b[k]*8/60e6}' | sort
    ```
    A flat ceiling around 94 Mbps means the client has a **100 Mbps-class link** (Fast Ethernet or weak Wi-Fi).
+   For the living-room Apple TV this is known: the **Tv unit Flex Mini uplink runs at 100 Mbps** (check per-port speeds
+   with [services/unifi/tools/unifi.sh](../unifi/README.md) `api/s/default/stat/device`).
 4. Compare with a LAN box: `curl -o /dev/null -r 0-200000000 -w '%{speed_download}' http://192.168.14.7:32400/library/parts/<partId>/<x>/file.mp4`
    (no token needed from 192.168.0.0/16). homelab-notebook got 150–190 Mbps (2026-11-04).
 - **Check the codec tag first for MP4s on the Apple TV:** `docker exec jellyfin /usr/lib/jellyfin-ffmpeg/ffprobe -v error
