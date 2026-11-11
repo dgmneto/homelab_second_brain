@@ -51,6 +51,11 @@ are disabled by the integration.
      cloud don't need LAN IPv6, so they keep working). Next steps (user, on site): check whether the devices are online in the
      **tado app / Apple Home** (yes → IP path; no → Thread/BR), restart the Apple TV, and check the UniFi for an overnight
      update and its IPv6 settings on the Default network. matter-server retries every 60 s and recovers by itself.
+  - **Cause found 2026-11-11 (UniFi API):** overnight UDR auto-update, firmware 5.1.35 → 6.0.17 (04:03 UTC) + Network
+    10.6.109 → 11.0.99 (04:17 UTC); since then the RA is GUA-sourced. Check with
+    `services/unifi/tools/unifi.sh` + the `system-log/all` POST in [services/unifi](../unifi/README.md); confirm with `tools/ra.py`.
+    Fix = get the UDR sending RAs from link-local again (restart; else toggle IPv6 on Default; else report/rollback). Recovery check:
+    `tools/ra.py` shows `RA from fe80::7a45:58ff:feb1:a57d`, then `tools/nodes.py` all `avail=True` within a few minutes.
   - Gotcha: `ip -6 route | grep -E "fde9|default"` hides the on-link `2a02:…/64` route. Use plain `ip -6 route`.
 - **Fresh TRVs arrive on fw 1.0 (swNum 64) and tado updates them to 1.4.289 itself** (not via Matter OTA: no OTA
   requestor cluster). The 1.0 layout differs: humidity on endpoint 1, no PowerSource (no battery entity), no serial,

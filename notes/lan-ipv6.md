@@ -43,4 +43,8 @@ RA dump: `sudo nix shell nixpkgs#ndisc6 -c rdisc6 -w 3000 -r 3 enp2s0` (on homel
 **from `2a02:8012:882b::1`**, not from its link-local `fe80::7a45:58ff:feb1:a57d` (that address no longer answers ND). Hosts must
 ignore the router part, so homelab-notebook and casaos have **no IPv6 default route** (the on-link /64 is still installed).
 Seen together with all tado/Thread devices becoming unreachable at 06:27. Fix is on the UniFi; see services/matter/README.md.
+**Trigger found (UniFi system log, via `services/unifi/tools/unifi.sh`):** overnight auto-update — UDR firmware **5.1.35 → 6.0.17**
+at 04:02:59 UTC, UniFi Network **10.6.109 → 11.0.99** at 04:17:23 UTC. No IPv6 config change: Default is still PD + SLAAC, RA on,
+priority high, preferred lifetime 14400. Still broken at 12:45 (RA from `2a02:8012:882b::1`, valid 54884 s). No public bug report
+found yet. Auto-update is on (daily 03:00, apps included).
 

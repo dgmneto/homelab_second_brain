@@ -44,6 +44,14 @@ between Main Switch port 1 and the Tv unit has only 2 working pairs. Fix: re-ter
 `unifi.sh api/s/default/stat/device | jq '.data[]|select(.name=="Tv unit").uplink.speed'` → 1000. Ports 2–4 at 100
 may just be 100 Mbps devices.
 
+### Known issue: RAs sourced from the GUA after the 2026-11-11 auto-update (breaks Matter/Thread)
+Overnight auto-update (daily 03:00, apps included): firmware **5.1.35 → 6.0.17** (04:02:59 UTC), Network **10.6.109 → 11.0.99**
+(04:17:23 UTC). Since then the RA on Default comes from `2a02:8012:882b::1`, not `fe80::7a45:58ff:feb1:a57d` (which stopped
+answering ND). RFC 4861 hosts ignore it → no IPv6 default route on LAN hosts, and the Apple TV (Thread BR) can't route back to
+LAN GUAs → every tado/Matter node unavailable in HA from 06:27. Network IPv6 settings are unchanged. Runbook:
+[services/matter/README.md](../matter/README.md). Event history: POST `v2/api/site/default/system-log/all` with
+`{"timestampFrom":<ms>,"timestampTo":<ms>,"pageSize":200,"pageNumber":0}` (the legacy `stat/event` returns 404 on Network 11).
+
 ## Networks
 
 | Network | VLAN | Subnet | IPv6 |
