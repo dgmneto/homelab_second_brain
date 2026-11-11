@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-11 — Small Room TRV (node 8): not advertised on any fabric
+User: it shows in tado and Apple Home. mDNS browse (tools/browse.py) at ~13:10: 21 `_matter._tcp` records, grouped by Thread
+host = 5 devices, each on HA fabric `BFABFD88…` plus 2–3 other fabrics (Apple/tado). Node 8 has no record on **any** fabric,
+so it is not registered with the Apple TV BR at all; Apple Home/tado likely show a cached tile. Asked the user to test it
+(change setpoint → reacts / "No Response"), then reseat batteries to force a Thread rejoin. Read-only.
+
 ## 2026-11-11 — UDR restart fixed the RA; 5/6 tado nodes back
 User restarted the UDR ~12:51 UTC. Polled `tools/ra.py` from homelab-notebook: offline 12:52–12:53, at 12:53:54 RA from
 `fe80::7a45:58ff:feb1:a57d` again; v6 default route back, `curl -6 ipv6.google.com` 200. Nodes 3/7/9/10 resubscribed by

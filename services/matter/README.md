@@ -64,6 +64,11 @@ are disabled by the integration.
   - **matter-server only sets up nodes it sees on mDNS** (`<Node:N> Discovered on mDNS` → `Setting-up node`). A node with no
     `_matter._tcp` record (node 8 on 11-11) gets no log lines at all; that's a device/Thread-side problem (battery, dropped off
     the mesh, SRP not re-registered): wake/check it in the tado app; it gets set up automatically once it advertises again.
+  - **Reading the `_matter._tcp` list:** each device publishes one record *per fabric* (`<compressed fabric id>-<node id>`), all on
+    the same Thread host name/address. Fabrics seen 2026-11-11: `BFABFD88F60E01A6` = HA, plus `2352D62C1A7D8359`,
+    `356911195B19D07B`, `95FF102CF4A68F57` (Apple Home / tado / one more; node 10 lacks `95FF…`). Group by host name to count
+    physical devices. At 13:10 only **5 Thread hosts** existed: node 8 (Small Room TRV) had **no record on any fabric**, i.e.
+    not just missing from HA but not reachable via the BR at all, even though Apple Home / tado still listed it.
   - Gotcha: `ip -6 route | grep -E "fde9|default"` hides the on-link `2a02:…/64` route. Use plain `ip -6 route`.
 - **Fresh TRVs arrive on fw 1.0 (swNum 64) and tado updates them to 1.4.289 itself** (not via Matter OTA: no OTA
   requestor cluster). The 1.0 layout differs: humidity on endpoint 1, no PowerSource (no battery entity), no serial,
