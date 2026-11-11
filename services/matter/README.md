@@ -56,6 +56,14 @@ are disabled by the integration.
     `services/unifi/tools/unifi.sh` + the `system-log/all` POST in [services/unifi](../unifi/README.md); confirm with `tools/ra.py`.
     Fix = get the UDR sending RAs from link-local again (restart; else toggle IPv6 on Default; else report/rollback). Recovery check:
     `tools/ra.py` shows `RA from fe80::7a45:58ff:feb1:a57d`, then `tools/nodes.py` all `avail=True` within a few minutes.
+  - **Resolved 2026-11-11 12:53 UTC by restarting the UDR**: RA back from `fe80::7a45:58ff:feb1:a57d`, v6 default route back,
+    nodes 3/7/9/10 recovered by themselves within a minute.
+  - **Gotcha — matter-server gives up after 30 min:** `<Node:N> Node setup not completed after 30 minutes, giving up.` After
+    that it never retries that node, even once the path is fixed (node 2 stayed down). Fix: `sudo systemctl restart matter-server`
+    (all nodes drop ~1 min, then resubscribe). Do this as the last step of any long outage.
+  - **matter-server only sets up nodes it sees on mDNS** (`<Node:N> Discovered on mDNS` → `Setting-up node`). A node with no
+    `_matter._tcp` record (node 8 on 11-11) gets no log lines at all; that's a device/Thread-side problem (battery, dropped off
+    the mesh, SRP not re-registered): wake/check it in the tado app; it gets set up automatically once it advertises again.
   - Gotcha: `ip -6 route | grep -E "fde9|default"` hides the on-link `2a02:…/64` route. Use plain `ip -6 route`.
 - **Fresh TRVs arrive on fw 1.0 (swNum 64) and tado updates them to 1.4.289 itself** (not via Matter OTA: no OTA
   requestor cluster). The 1.0 layout differs: humidity on endpoint 1, no PowerSource (no battery entity), no serial,

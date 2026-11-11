@@ -46,5 +46,6 @@ Seen together with all tado/Thread devices becoming unreachable at 06:27. Fix is
 **Trigger found (UniFi system log, via `services/unifi/tools/unifi.sh`):** overnight auto-update — UDR firmware **5.1.35 → 6.0.17**
 at 04:02:59 UTC, UniFi Network **10.6.109 → 11.0.99** at 04:17:23 UTC. No IPv6 config change: Default is still PD + SLAAC, RA on,
 priority high, preferred lifetime 14400. Still broken at 12:45 (RA from `2a02:8012:882b::1`, valid 54884 s). No public bug report
-found yet. Auto-update is on (daily 03:00, apps included).
+found yet. Auto-update is on (daily 03:00, apps included). **Fixed by a UDR restart at 12:51 UTC**: RA from `fe80::7a45:58ff:feb1:a57d` again,
+v6 default route + `curl -6 ipv6.google.com` 200 on homelab-notebook at 12:54.
 

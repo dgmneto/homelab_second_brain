@@ -4,6 +4,14 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-11 — UDR restart fixed the RA; 5/6 tado nodes back
+User restarted the UDR ~12:51 UTC. Polled `tools/ra.py` from homelab-notebook: offline 12:52–12:53, at 12:53:54 RA from
+`fe80::7a45:58ff:feb1:a57d` again; v6 default route back, `curl -6 ipv6.google.com` 200. Nodes 3/7/9/10 resubscribed by
+12:53:52 on their own. Node 2 had hit matter-server's "giving up after 30 minutes" (11:17) and never retried →
+`sudo systemctl restart matter-server` on homelab-notebook at 12:59; node 2 back 13:00. **Node 8 (Small Room TRV) still
+down**: no `_matter._tcp` record on mDNS since the morning, so matter-server never tries it; device/Thread side, needs a
+check in the tado app. Runbook gotchas added to services/matter/README.md.
+
 ## 2026-11-11 — tado outage: trigger = overnight UDR auto-update (UniFi API)
 Read-only, via `UNIFI_API_KEY` + the Site Manager connector. UniFi system log: UDR firmware 5.1.35 → 6.0.17 at 04:02:59 UTC
 and UniFi Network 10.6.109 → 11.0.99 at 04:17:23 UTC (auto-update daily 03:00). Default IPv6 settings unchanged (PD, SLAAC,
