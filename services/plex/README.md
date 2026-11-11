@@ -96,6 +96,6 @@ before blaming transcoding. Logs: `/footage/services/plex/config/Library/Applica
 - If HW transcoding stops working, check `/dev/dri` still passes through and the
   container user is in the `render`/`video` groups.
 - NEVER write the Plex claim token or auth tokens into version control.
-- A host-side `systemd --user` service, **plex-qbittorrent-watchdog**, polls Plex
-  `/status/sessions` every 5s and pauses qBittorrent while anything is streaming. See
+- The host-side **plex-qbittorrent-watchdog** (paused qBittorrent while Plex streamed) was
+  **decommissioned 2026-11-11** — streams and downloads now compete freely. See
   `../plex-qbittorrent-watchdog/README.md`.

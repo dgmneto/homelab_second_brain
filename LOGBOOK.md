@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-11 — Killed plex-qbittorrent-watchdog
+User asked to kill it ("isn't working properly"). It had been stuck since 10:50 thinking Plex was
+streaming, holding 7 torrents stopped. Stopped + disabled the `dgmneto` user unit on casaos, resumed
+the torrents it held (4 resumed, 3 already gone), and marked it decommissioned across
+services/plex, qbittorrent, watchdog, casaos cron.md, notes. Detail in
+`services/plex-qbittorrent-watchdog/LOGBOOK.md`.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 

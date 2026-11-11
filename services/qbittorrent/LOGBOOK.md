@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **qbittorrent** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-11 — Plex watchdog removed; held torrents resumed
+plex-qbittorrent-watchdog decommissioned (stuck pausing). Resumed the 7 hashes it held: Euphoria
+S01–S03 back to `downloading`, The Furious `stalledUP`; 3 hashes no longer present. Torrents are no
+longer paused during Plex playback.
+
 ## 2026-06-10 — New consumer: arr-stale-cleaner reads qBit last_activity
 New host job [arr-stale-cleaner](../arr-maintenance/README.md) (every 6h) reads qBit
 `GET /api/v2/torrents/info` via `docker exec qbittorrent curl http://localhost:9090/...`.

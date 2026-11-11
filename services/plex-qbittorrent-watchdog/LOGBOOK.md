@@ -2,6 +2,16 @@
 
 Reverse-chronological. Newest entry on top. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-11 — Decommissioned (stopped + disabled)
+User: "kill the qbittorrent watchdog, it isn't working properly". Found it active (PID 878 since
+2026-09-15) but stuck: since 10:50 its state was `plex_streaming: true` with 7 `managed_hashes`,
+journal showed only "Paused …" lines (no resume) for ~8h. Ran as claude via
+`sudo -u dgmneto XDG_RUNTIME_DIR=/run/user/1002 systemctl --user disable --now plex-qbittorrent-watchdog.service`
+→ `inactive`, unit symlink + `default.target.wants` link removed. Then resumed the 7 held hashes with
+the watchdog's own `qbt_api_post(…start…)`: 4 back to `downloading`/`stalledUP` (Euphoria S01–S03,
+The Furious), 3 no longer exist in qBittorrent. Code left in place in the deployment repo
+(nothing to commit there — the installed unit was an out-of-repo symlink).
+
 ## 2026-06-10 — Enabled linger
 Ran `loginctl enable-linger dgmneto` on the server (no sudo needed — polkit allows own-user). Now
 `Linger=yes`, marker `/var/lib/systemd/linger/dgmneto` present, watchdog still `active`. Service now

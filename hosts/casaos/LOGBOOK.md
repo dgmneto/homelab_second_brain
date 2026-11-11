@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-11 — Removed dgmneto user unit plex-qbittorrent-watchdog
+`systemctl --user disable --now` (run as claude via `sudo -u dgmneto XDG_RUNTIME_DIR=/run/user/1002`).
+Unit now absent from dgmneto's user manager. Linger for dgmneto left on (harmless).
+
 ## 2026-11-02 — terminus-worker joined internalNetwork (172.21.0.142)
 Compose change in `~/homelab/services/terminus` (committed on casaos, push from Mac). See services/terminus.
 

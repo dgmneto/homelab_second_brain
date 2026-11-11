@@ -33,9 +33,8 @@ See `../../services/homeassistant/LOGBOOK.md` and the `homelab-footage-chrome-le
 [../../services/arr-maintenance/README.md](../../services/arr-maintenance/README.md) for schedule and runbook.
 
 ## Not cron, but commonly mistaken for it
-- **plex-qbittorrent-watchdog** — pauses qBittorrent while Plex streams. It is a long-running
-  `systemd --user` service for `dgmneto`, **not** a cron job, so it appears in neither crontabs nor
-  system `systemctl`. Check with `systemctl --user status plex-qbittorrent-watchdog`. See
+- **plex-qbittorrent-watchdog** — **decommissioned 2026-11-11** (stopped + disabled; unit no longer
+  installed). Was a `systemd --user` service for `dgmneto`, never a cron job. See
   `../../services/plex-qbittorrent-watchdog/README.md`.
 
 ## Stock Debian / vendor jobs (not homelab-specific, listed for completeness)

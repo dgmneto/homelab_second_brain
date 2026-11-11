@@ -1,5 +1,16 @@
 # plex-qbittorrent-watchdog
 
+> **⛔ DECOMMISSIONED 2026-11-11** — stopped + disabled at the user's request ("isn't working
+> properly"). Nothing pauses qBittorrent during Plex playback any more. The code still sits in the
+> deployment repo (`/home/dgmneto/homelab/services/plex-qbittorrent-watchdog/`) but the unit is
+> **not installed**: `systemctl --user disable` removed the `~/.config/systemd/user/` symlink, so
+> `systemctl --user status` now says "could not be found" — that is expected, not a bug.
+> **Failure seen:** from 10:50 on 2026-11-11 it believed Plex was streaming non-stop (no "Resumed"
+> for ~8h, repeated "Paused" lines) and held 7 torrents stopped; its plex-session detection
+> (`plex_has_active_streams`) apparently kept seeing a stale/idle session as active.
+> Everything below is historical. To revive: fix detection first, then
+> `systemctl --user link <repo>/plex-qbittorrent-watchdog.service && systemctl --user enable --now …`.
+
 Pauses qBittorrent transfers while anyone is streaming on Plex, then resumes **only** the torrents it
 paused once Plex goes idle. Keeps streams from competing with downloads for bandwidth/disk.
 
@@ -31,7 +42,10 @@ remembered it as a cron job; it isn't.)
 `QBITTORRENT_PASSWORD=<set>`, `POLL_INTERVAL_SECONDS=5`, `STATE_FILE`. The unit overrides with
 `--poll-interval 5 --state-file %t/plex-qbittorrent-watchdog/state.json`.
 
-## Manage / debug
+## Manage / debug (historical — unit no longer installed)
+From a cloud session (`ssh casaos` as `claude`) target dgmneto's user manager with
+`sudo -u dgmneto XDG_RUNTIME_DIR=/run/user/$(id -u dgmneto) systemctl --user …`; the code dir is
+`dgmneto`-only (0700-ish), so `cd`/`grep` it via `sudo`.
 ```
 systemctl --user status plex-qbittorrent-watchdog.service
 journalctl --user -u plex-qbittorrent-watchdog.service -f
@@ -39,7 +53,7 @@ python3 ~/homelab/services/plex-qbittorrent-watchdog/watchdog.py --once   # sing
 ```
 
 ## Quirks / runbook
-- **Status (2026-06-10):** enabled + active, running since 2026-04-29 (~1mo, ~20h CPU). Healthy.
+- **Status (2026-11-11): decommissioned** (see top). Previously (2026-06-10): enabled + active, running since 2026-04-29 (~1mo, ~20h CPU). Healthy.
 - **Linger enabled (2026-06-10):** `loginctl enable-linger dgmneto` was run (marker
   `/var/lib/systemd/linger/dgmneto`), so the user manager — and this service — now survives dgmneto
   logging out. Previously `Linger=no` and it only stayed up because a session was always open.

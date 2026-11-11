@@ -16,7 +16,7 @@ Operating rules for every task:
   (wrong path, wrong hostname, wrong auth, a tool that overflowed, a command that doesn't exist here),
   write the correction down where the *next* agent will hit it first, so they never make that guess.
   The qBittorrent runbook (`read_page` overflows → use a screenshot; all-stopped-at-0B = watchtower
-  restart, not the watchdog) is the model: record the gotcha AND the shortcut.
+  restart) is the model: record the gotcha AND the shortcut.
 - **Move/rename/restructure freely** when the current layout caused the confusion. Put facts where an
   agent would look for them, add cross-links, split or merge files. Don't preserve a bad structure out
   of caution — improving navigability is part of the job.
@@ -121,8 +121,8 @@ Known `Homelab` items (2026-10-28): `Plex - Claim`, `Cloudflare - DDNS`, `Proton
 `Service Account Auth Token: Homelab`, `Terminus`, and LOGINs `qbittorrent`, `Prowlarr`, `Sonarr`,
 `Radarr`, `Plex`, `nginx`, `NGINX Prod`. **Not everything is in Homelab**: Tailscale lives in
 `Personal/Tailscale` (auth keys as fields, e.g. `op://Personal/Tailscale/CasaOs Auth Key`), Terminus
-login in `Personal/Terminus`. (The `qbittorrent` item now exists, so the leaked literal password in
-`services/plex-qbittorrent-watchdog/README.md` can be moved to an `op://` reference.) Search all vaults when a title isn't found:
+login in `Personal/Terminus`. (The qBittorrent password leaked as a literal in the deployment repo's
+now-decommissioned `plex-qbittorrent-watchdog/watchdog.py` — still worth rotating.) Search all vaults when a title isn't found:
 `op item list --format json | jq -r '.[] | select(.title|test("<name>";"i")) | "\(.vault.name)\t\(.title)"'`.
 
 Rules:

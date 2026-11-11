@@ -18,8 +18,8 @@ visible instantly): `https://qbittorrent.intern.dgmneto.com`, no login (NPM-only
 overflows the 50k limit there — use a `computer` screenshot. Bottom status bar: **green globe** =
 VPN/peers OK, blue speed-limiter = no throttle, "Free space" = disk OK.
 
-Two other pause causes: the **plex-qbittorrent-watchdog** (stops *active* torrents during Plex
-playback — won't touch never-started 0 B torrents), and config auto-pause (Tools → Options →
+Other pause cause: config auto-pause (the **plex-qbittorrent-watchdog** used to stop active
+torrents during Plex playback but was decommissioned 2026-11-11) (Tools → Options →
 Downloads, currently OFF). Full decision-table runbook lives in
 [../services/qbittorrent/README.md](../services/qbittorrent/README.md).
 
