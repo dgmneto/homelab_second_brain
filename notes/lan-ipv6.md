@@ -31,7 +31,8 @@ metadata:
 
 **Inbound exposure:** every host now has a globally routable address. Protection = UniFi's IPv6 firewall (default: block
 unsolicited inbound from the internet) + per-host firewalls (homelab-notebook: NixOS firewall covers v6; **casaos has no host
-firewall and Docker publishes ports on `[::]`**). Not yet verified from outside (the cloud agent has no IPv6). To verify, from an
+firewall and Docker publishes ports on `[::]`**). **Config verified 2026-11-11** via the UniFi API: only predefined zone policies, External→Internal = block (IPv4 *and*
+IPv6), no custom allow rules ([services/unifi](../services/unifi/README.md)). Not yet verified from outside (the cloud agent has no IPv6). To verify, from an
 IPv6-capable network outside the LAN (e.g. phone on mobile data): connect to `[<host v6>]:22/8123/53` → must fail.
 
 Check quickly: `ip -6 addr show scope global | grep 'inet6 2'` and `curl -6 -s -o /dev/null -w '%{http_code}' https://ipv6.google.com`.

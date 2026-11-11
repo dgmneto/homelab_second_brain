@@ -56,8 +56,12 @@ Re-run the evidence any time with the two scripts in [tools/](tools/) (see "How 
 `components.matter|thread` warnings/errors in the journal since HA start (2026-11-01 15:16).
 **Firewall (NixOS iptables, default drop):** inbound UDP 5353, TCP 5580, all ICMPv6 except redirect (137/139)
 accepted; conntrack RELATED/ESTABLISHED accepted; `nf_conntrack_udp_timeout(_stream)` = 30/120 s.
-**UniFi:** controller not queried (no API credential for the agent; the HA `unifiprotect` login was deliberately not
-reused). VLAN/firewall facts are inferred from the L2 observations above.
+**UniFi (verified 2026-11-11 via the Site Manager API, `services/unifi/tools/unifi.sh`):** Apple TV (`Living-Room`,
+`c4:f7:c1:12:02:5f`, Tv unit Flex Mini port 5) and homelab-notebook (Office U6 IW port 4) are both wired clients on network
+**Default** (untagged). Both SSIDs (`Amora’s`, `Amora’s IoT`) are on Default with client isolation off, multicast
+enhancement off, no ACL device isolation. IGMP snooping off; mDNS reflector on. Default IPv6 = PD + SLAAC, RA on.
+Firewall: only predefined zone policies (Internal↔Internal allowed; External→Internal blocked v4+v6). Details:
+[services/unifi](../unifi/README.md).
 
 ## Readiness matrix
 
@@ -71,7 +75,7 @@ reused). VLAN/firewall facts are inferred from the L2 observations above.
 | Docker IPv6 connectivity | **N/A → PASS** | No Docker in the Matter path; matter-server is in the host netns with GUA + link-local on `enp2s0`. | None. Do **not** move it back into Docker/macvlan. |
 | Local IPv6 routing | **PASS** (route) / **UNVERIFIED** (end-to-end) | `fde9:b6c5:757::/64 via fe80::67:28bc:f5ae:b3b6 dev enp2s0`; BR reachable 1.2 ms. No Thread node exists yet to ping. | After install: `ping -6` a tado device's `fde9:b6c5:757:…` address from homelab-notebook. |
 | mDNS/DNS-SD discovery | **PASS** | From matter-server's interface: Apple meshcop/TREL/SRP + own `_matter._tcp` visible; UDP 5353 open. `_matterc._udp`/`_matter._tcp` of Thread devices untestable until one exists. | None now. |
-| UniFi VLAN/firewall configuration | **PASS** (inferred, same L2) / **UNVERIFIED** (controller) | BR, HA, router all on Default `192.168.11.0/24`; link-local + multicast work between them. No inter-VLAN hop in the Matter path. | In UniFi: keep the Apple TV and homelab-notebook on **Default**; don't enable *Client Device Isolation* / *Block LAN↔WLAN multicast* on the iPhone's SSID; keep IPv6 SLAAC/RA on Default. |
+| UniFi VLAN/firewall configuration | **PASS** (verified in controller 2026-11-11) | Apple TV + homelab-notebook wired on **Default**; both SSIDs on Default, `l2_isolation=false`, no ACL isolation, IGMP snooping off, mDNS reflector on; Default IPv6 = PD + SLAAC, RA on; no custom firewall policies. | Keep it that way. Optional: DHCP reservation for the Apple TV (currently dynamic). |
 | Apple Home / HA coexistence | **READY (network)** / **UNVERIFIED** (commissioning) | HA has no Thread dataset — fine for multi-admin (HA joins Apple's fabric over IP via the BR; no credentials needed). | Commission in Apple Home/tado app first, then share to HA (pairing code). Credential sync only if you ever commission Thread devices *directly* from HA. |
 | Thread radio coverage | **UNVERIFIED** | One BR, one location; IP tests cannot measure 802.15.4 coverage across three floors. | Post-install coverage test (below); add a 2nd Apple BR (HomePod mini) or tado Wireless Receiver X if a floor is weak. |
 
@@ -90,8 +94,9 @@ reused). VLAN/firewall facts are inferred from the L2 observations above.
    things working; a restart in a maintenance window cleans it up.
 3. **Single border router.** The Apple TV is the only BR; if it is unplugged/rebooting, all Thread devices lose IP
    reachability from HA and the tado cloud.
-4. (Side hint, not Matter-critical) the Plex investigation saw a hard ~94 Mbps ceiling to this Apple TV — looks like a
-   100 Mbps Ethernet link (cable/switch port). Worth a cable check; it does not affect Thread.
+4. (Not Matter-critical) **confirmed 2026-11-11:** the ~94 Mbps ceiling to the Apple TV is the **Tv unit Flex Mini's
+   uplink (Main Switch port 1) negotiating at 100 Mbps** — the Apple TV's own port is 1 G. Re-terminate/replace that
+   cable. Does not affect Thread.
 
 **Cannot be confirmed until a tado device is installed:** NAT64/cloud path (tado app online), SRP registration of the
 device, `_matterc._udp` / `_matter._tcp` discovery of a Thread node from HA, end-to-end IPv6 to `fde9:b6c5:757::/64`,
@@ -189,9 +194,9 @@ multi-admin share to HA, radio coverage on each floor.
    (idle > 3600 s, matter-server restart → new port, conntrack flush). At most a complement.
 2. **(Low)** restart `matter-server` then `home-assistant` once (drops the stale `fd00::` bindings) — any quiet time
    before commissioning.
-3. **(UniFi, verify only)** Apple TV `192.168.11.236` and homelab-notebook `192.168.11.21` stay on network **Default**;
-   iPhone's SSID: Client Device Isolation off, LAN↔WLAN multicast not blocked; IPv6 on Default stays SLAAC with
-   prefix delegation. Optionally add a DHCP reservation for the Apple TV.
+3. **(UniFi — verified OK 2026-11-11)** Apple TV and homelab-notebook on **Default**; SSIDs without client isolation;
+   IPv6 on Default = SLAAC + PD. Remaining optional: DHCP reservation for the Apple TV (`c4:f7:c1:12:02:5f`, now
+   dynamic `.236`), and fix the 100 Mbps Tv unit uplink cable.
 4. **(Optional)** confirm A2843 on the Apple TV's About screen; make sure it's signed into the same Home as the iPhone
    and is the Home Hub (Home app → Home Settings → Home Hubs & Bridges → "Connected").
 5. **(Do not)** sync Thread credentials into HA, add an OTBR/SkyConnect, or reflash the SLZB-06M to Thread — none
