@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-11 — Investigation: all tado nodes unavailable since 06:27
+Read-only, except one temporary on-link route on homelab-notebook, removed right after (it was already there via RA). All 6 nodes
+`avail=False` since 06:27–06:29; matter-server retries CASE every 60 s and times out. The Apple BR is up (`sb` 0fb1, leader),
+and 5/6 nodes' `_matter._tcp` records resolve to `fde9:b6c5:757::…` (node 8 not advertised), but pings to them are 100 % lost
+from homelab-notebook and casaos. The Apple TV's link-local answers in 1 ms. The UniFi now sends its RA from its GUA
+`2a02:8012:882b::1` (link-local gone), so there's no IPv6 default route LAN-wide. Root cause is either that or the Apple TV BR.
+Needs on-site checks (tado app, Apple TV restart, UniFi). Runbook added to README.
+
 ## 2026-11-10 — Old Zigbee heating removed; dashboard uses the tado entities
 The z2m devices these replaced were removed, and the HA heating automations deleted. The Home dashboard now shows the 6 tado
 climate entities. See the homeassistant and z2mqtt logbooks.

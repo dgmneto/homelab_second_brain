@@ -36,3 +36,10 @@ IPv6-capable network outside the LAN (e.g. phone on mobile data): connect to `[<
 
 Check quickly: `ip -6 addr show scope global | grep 'inet6 2'` and `curl -6 -s -o /dev/null -w '%{http_code}' https://ipv6.google.com`.
 RA dump: `sudo nix shell nixpkgs#ndisc6 -c rdisc6 -w 3000 -r 3 enp2s0` (on homelab-notebook).
+
+## 2026-11-11 — UniFi RA now sourced from a GUA (broken)
+`tools/ra.py` (services/matter/tools): the UniFi (`78:45:58:b1:a5:7d`) advertises `2a02:8012:882b::/64`, router lifetime 1800 s,
+**from `2a02:8012:882b::1`**, not from its link-local `fe80::7a45:58ff:feb1:a57d` (that address no longer answers ND). Hosts must
+ignore the router part, so homelab-notebook and casaos have **no IPv6 default route** (the on-link /64 is still installed).
+Seen together with all tado/Thread devices becoming unreachable at 06:27. Fix is on the UniFi; see services/matter/README.md.
+

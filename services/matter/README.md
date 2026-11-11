@@ -33,6 +33,23 @@ HA's fabric; 5/6: timeouts). Per device HA gets: `climate` (heat-only Thermostat
 humidity, a **binary** battery sensor (BatChargeLevel only, no %), 1–2 identify buttons; reboot count/uptime/boot reason
 are disabled by the integration.
 **Gotchas:**
+- **"All tado unavailable at once" runbook (incident 2026-11-11 06:27–06:29).** All 6 nodes dropped within 2 min and
+  stayed down with `CASESession timed out`. Check in this order (all read-only, from a cloud session):
+  1. `tools/nodes.py` → every `avail=False` means a shared path, not one device.
+  2. `tools/browse.py` (run it with **matter-server's** env: `{ sed -n 3p <.matter-server-wrapped>; cat browse.py; }`. HA's
+     python no longer has zeroconf on its path after the 11-10 deploy). Apple `_meshcop` with `sb=…fb1` = BR up. The devices'
+     `BFABFD88F60E01A6-…` `_matter._tcp` records are visible even while down: the SRP lease is cached by the BR, so
+     **seeing the record ≠ reachable**.
+  3. `ping -6 fde9:b6c5:757:0:<iid>` for those addresses. 100 % loss from homelab-notebook **and casaos** while
+     `ping -6 fe80::67:28bc:f5ae:b3b6%enp2s0` works = traffic dies at/behind the Apple TV, not in HA or the NixOS firewall
+     (replies to our pings are ESTABLISHED and accepted).
+  4. `tools/ra.py`. On 11-11 the UniFi (MAC `78:45:58:b1:a5:7d`) sent its RA from **`2a02:8012:882b::1`, not link-local**
+     (on 11-06 it was `fe80::7a45:58ff:feb1:a57d`; that neighbour is now FAILED). RFC 4861 hosts drop the router part, so
+     **no IPv6 default route on any Linux box**; NetworkManager still installs the on-link /64. Root cause not proven: it is
+     either this UniFi change or the Apple TV BR itself. Next steps (user, on site): check whether the devices are online in the
+     **tado app / Apple Home** (yes → IP path; no → Thread/BR), restart the Apple TV, and check the UniFi for an overnight
+     update and its IPv6 settings on the Default network. matter-server retries every 60 s and recovers by itself.
+  - Gotcha: `ip -6 route | grep -E "fde9|default"` hides the on-link `2a02:…/64` route. Use plain `ip -6 route`.
 - **Fresh TRVs arrive on fw 1.0 (swNum 64) and tado updates them to 1.4.289 itself** (not via Matter OTA: no OTA
   requestor cluster). The 1.0 layout differs: humidity on endpoint 1, no PowerSource (no battery entity), no serial,
   no ICD cluster. After the update HA adds the new entities but **leaves the ep-1 humidity sensor frozen at its last

@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-11 — tado devices all unavailable: Thread path down
+matter-server/HA fine; the Thread devices can't be reached through the Apple TV from any LAN host since 06:27. The UniFi now
+sends IPv6 RAs from a non-link-local address (hosts lose their v6 default route). Waiting on user checks. Detail in services/matter.
+
 ## 2026-11-10 — Tapo camera working in HA again
 tapo_control stays in HACS. Nix now supplies onvif + pytapo 3.4.30 + python-kasa; deployed and verified (camera entities live).
 
