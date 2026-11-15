@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — Rack case: rear support brackets
+Left/right L brackets for the Lab Rax rack's rear posts; the case rests on their ledges. Detail in the homelab-notebook host logbook.
+
 ## 2026-11-15 — Rack case fit check against the Lab Rax 5U rack
 Checked the case against the printable Lab Rax 10" 5U rack STLs: it fits between the posts (222 vs 220 mm) and reaches about to the rear posts. Rear support must be a separate bracket, not case ears. Detail in the homelab-notebook host logbook.
 

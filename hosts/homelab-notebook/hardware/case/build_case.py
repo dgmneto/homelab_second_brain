@@ -29,7 +29,9 @@ Layout:
     down on the springs, a nose stop, and a lip the plug's own spring latch
     snaps behind. Press the latch (on top) to release, like any RJ45 jack.
 
-Parts to print: tray (floor + walls + front panel with rack ears) and lid.
+Parts to print: tray (floor + walls + front panel with rack ears) and lid; for the
+Lab Rax printable rack, rear_bracket_left/right.stl (ledges on the rear posts the
+case rests on).
 Test first: pin_gauge.stl, a row of pins around the hole size to pick a snug
 PIN_D; rj45_test.stl, a small cut of the panel + hood to check plug fit;
 fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
@@ -120,6 +122,25 @@ CABLE_HOLE_EAST = 17.1     # hole centre west of the SE post
 # ~25 mm, nut ~16 mm across corners (estimates until the part is measured).
 BUTTON_HOLE_D = 12.3
 BUTTON_NUT_D, BUTTON_DEPTH = 17.0, 25.0
+# ---------------------------------------------------------------- rear support brackets
+# For the printable "Lab Rax" 10" rack (its 5U Vertical Post STL): each post is an L,
+# a 30 x 6 mm flange with the rail holes (7.6 mm, 22.86 mm from the post's outer
+# side, the usual 6.35 / 22.225 / 38.1 per U) and a 7 mm side web; a 7 x 5 mm lip
+# stands off the flange next to the web. Front flange -> rear flange ~235.5 mm, so
+# the case ends about level with the rear posts. A bracket bolts to the front face of
+# each rear post's flange (M6 + nut behind) and gives the case floor a ledge to rest
+# on, so the front ears only locate it. Bracket coordinates: X from the post's outer
+# side inward, Y forward from the rear flange's inner face, Z from the case's U bottom.
+RACK_POST_W = 30.0          # post inner edge, from its outer side
+RACK_HOLE_X = 22.86
+RACK_LIP_X = 14.0           # lip next to the web ends here
+BRK_X0 = RACK_LIP_X + 0.5
+BRK_PLATE_T, BRK_PLATE_TOP = 5.0, 30.0
+BRK_LEDGE_T, BRK_LEDGE_D = 4.0, 30.0
+BRK_LEDGE_X1 = RACK_POST_W + 20.0   # case side is 1 mm in from the post; ~19 mm under its floor
+BRK_GAP = 0.1               # ledge top -> case bottom
+BRK_GUSSET_T = 2.0
+BRK_HOLE_D = 6.6            # M6 clearance
 # rj45_fit_*.stl: the hood's height over the springs (RJ45_PLUG_FLOOR is an estimate)
 RJ45_FIT_DZ = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5]
 
@@ -571,6 +592,40 @@ def build_rj45_fits(root, outdir):
         bpy.data.collections.remove(work)
 
 
+def build_rear_bracket(root, name):
+    """L bracket for a rear rack post (left side; mirror for the right), lying on
+    its outer face so the L is in the layer plane."""
+    work = new_coll("_work", root)
+    zt = (U - PANEL_H) / 2 - BRK_GAP                       # ledge top, from the U bottom
+    piece = box(name, BRK_X0, 0, zt - BRK_LEDGE_T, BRK_LEDGE_X1, BRK_LEDGE_D, zt, root)
+    add = new_coll("_add", work)
+    box("plate", BRK_X0, 0, zt - BRK_LEDGE_T, RACK_POST_W, BRK_PLATE_T, BRK_PLATE_TOP, add)
+    bm = bmesh.new()                                       # gusset, at the lip side: clear of the bolt heads
+    y0, z0, y1, z1 = BRK_PLATE_T - 0.01, zt - 0.01, BRK_LEDGE_D - 2, BRK_PLATE_TOP - 4
+    vs = [bm.verts.new((x, y, z)) for x in (BRK_X0 - 0.01, BRK_X0 + BRK_GUSSET_T) for y, z in ((y0, z0), (y1, z0), (y0, z1))]
+    for f in ((0, 2, 1), (3, 4, 5), (0, 1, 4, 3), (1, 2, 5, 4), (2, 0, 3, 5)):
+        bm.faces.new([vs[i] for i in f])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    mesh_obj("gusset", bm, add)
+    boolean(piece, "UNION", add)
+    cuts = new_coll("_cuts", work)
+    for hz in EAR_HOLE_Z[:1] + (22.225,):
+        cyl(f"hole_{hz}", RACK_HOLE_X, BRK_PLATE_T / 2, hz, BRK_HOLE_D, BRK_PLATE_T + 2, cuts, axis="Y")
+    boolean(piece, "DIFFERENCE", cuts)
+    bpy.data.collections.remove(work)
+    piece.data.transform(Matrix.Translation((-BRK_X0, 0, 0)))
+    piece.data.transform(Matrix.Rotation(-math.pi / 2, 4, "Y"))   # outer face (X = BRK_X0) on the bed
+    return piece
+
+
+def mirrored(obj, name, root):
+    o = bpy.data.objects.new(name, obj.data.copy())
+    root.objects.link(o)
+    o.data.transform(Matrix.Scale(-1, 4, (1, 0, 0)))
+    o.data.flip_normals()
+    return o
+
+
 def build_pin_gauge(root):
     """Row of board-mount pins, GAUGE_PINS diameters, each on a collar the board
     rests on, with its size raised on the base. Press a board hole over each:
@@ -631,6 +686,11 @@ def main(outdir):
     fit = build_fit_test(tray, case)
     export_stl(fit, os.path.join(outdir, "fit_test.stl"))
     fit.hide_render = True
+    brk = build_rear_bracket(case, "Rear_bracket_left")
+    export_stl(brk, os.path.join(outdir, "rear_bracket_left.stl"))
+    brk_r = mirrored(brk, "Rear_bracket_right", case)
+    export_stl(brk_r, os.path.join(outdir, "rear_bracket_right.stl"))
+    brk.hide_render = brk_r.hide_render = True
     gauge = build_pin_gauge(case)
     export_stl(gauge, os.path.join(outdir, "pin_gauge.stl"))
     gauge.hide_render = True
