@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — homelab-notebook unreachable (investigation)
+homelab-notebook is down: Tailscale shows it offline (last seen ~4h ago), and on the LAN casaos gets no ARP reply for 192.168.11.21. Home automation (HA, z2m, mosquitto, matter) is down with it. Detail in the homelab-notebook host logbook.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 

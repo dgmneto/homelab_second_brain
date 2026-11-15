@@ -17,7 +17,7 @@ Layout:
 
 ## Hardware
 
-`192.168.11.21` (DHCP — reserve it on the router), Acer Aspire A315-34, Celeron N4020 (2 cores),
+`192.168.11.21` (DHCP — reserve it on the router; **NIC MAC: TODO, not recorded yet**. Add it from `ip link` so a moved lease can be found in casaos' `ip neigh`. When the box is unreachable, check from casaos: `ping 192.168.11.21` + `ip neigh show 192.168.11.21`. FAILED there means the box itself is off the LAN, not a Tailscale problem), Acer Aspire A315-34, Celeron N4020 (2 cores),
 4 GB soldered RAM + SO-DIMM slot now populated (**11.7 GB total** per `free -m`, 2026-10-28; slot max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
 `HL-BOOT`/`HL-SWAP`/`HL-ROOT`). NixOS 26.05, **no Docker** — services are native NixOS modules.
 

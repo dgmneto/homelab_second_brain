@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-15 — Unreachable: off Tailscale and off the LAN (investigation)
+Checked from a cloud session. `tailscale status` showed the node offline, last seen ~4h earlier. `tailscale ping` and `ssh claude@homelab-notebook` both timed out. From casaos (`ssh claude@casaos`): `ping 192.168.11.21` gave Destination Host Unreachable, `ip neigh` showed FAILED (no ARP reply), and ports 22/8123 had no route. A ping sweep of 192.168.11.0/24 followed by a port 22/8123/1883 probe found no host that looks like it moved to a new DHCP address. Port 22 was open on .51/.71/.223/.244, but those are dropbear or Ubiquiti devices, not NixOS OpenSSH. Conclusion: the box is powered off, suspended, crashed, or off the network (no link). It needs physical attention. No change made.
+Gotcha recorded: the NIC MAC is not in this repo, so a moved DHCP lease can't be identified from casaos' ARP table. Add it to the README next time the box is up (`ip link`).
+
 ## 2026-11-07 — Rack case: six RJ45 height-variant fit pieces
 `hardware/case/build_case.py` now also exports `out/rj45_fit_<dz>.stl` for dz = -0.5, -0.3, -0.1, +0.1, +0.3, +0.5 mm (`RJ45_FIT_DZ`). Each is fit_test cut to the RJ45 alone: the panel strip around the jack plus the H1/H2 pins (the two northmost board holes) on a triangle frame, so the board locates itself and nobody has to hold it in place. Only the hood height over the springs differs: ceiling, latch lip and pocket move by dz. The bottom of the opening stays at the springs, so a raised variant has no ledge at the entry. The dz value is raised on the H1-H2 bar. The springs height (`RJ45_PLUG_FLOOR`) is an estimate, and the winning variant corrects it. `text_mesh` helper shared with the pin gauge. Verified by sectioning: the ceiling steps 0.2 mm per variant and the opening bottom is fixed. All six are manifold, each 94.5 x 28.1 x 24 mm. fit_test.stl has the same 6 non-manifold edges it had before this change. Not printed yet.
 
