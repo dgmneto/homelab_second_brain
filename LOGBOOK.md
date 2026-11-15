@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — homelab-notebook flapping: hard reboots, back for ~1 min, down again
+It came back around 21:42 after an abrupt crash at 21:29, with all home-automation services active, then dropped off the LAN again within a minute. It looks like repeated power loss or crashes. Detail in the homelab-notebook host logbook.
+
 ## 2026-11-15 — homelab-notebook unreachable (investigation)
 homelab-notebook is down: Tailscale shows it offline (last seen ~4h ago), and on the LAN casaos gets no ARP reply for 192.168.11.21. Home automation (HA, z2m, mosquitto, matter) is down with it. Detail in the homelab-notebook host logbook.
 
