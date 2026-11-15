@@ -110,6 +110,9 @@ RJ45_LATCH_W = 7.2         # cover slot width (7.16)
 RJ45_LATCH_FACE_H = 8.4    # plug overall height 8.00; top of latch slot = the catch lip
 RJ45_POCKET_H = 11.0       # behind the lip the latch springs back up into this pocket
 RJ45_WALL = 2.0
+# Rear-wall pass-through for an Ethernet cable to a USB Ethernet adapter inside (not
+# modelled; it plugs into the child board). Fits a plug with its boot.
+CABLE_HOLE_W, CABLE_HOLE_H = 16.0, 14.0
 # rj45_fit_*.stl: the hood's height over the springs (RJ45_PLUG_FLOOR is an estimate)
 RJ45_FIT_DZ = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5]
 
@@ -412,6 +415,11 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
         CB_X0 + u["x"][1] + 0.5, Y_IN0 + 1, CB_Z0 + u["z"][1] + 0.5, cuts)
     a = CB["parts"]["audio"]
     cyl("cb_audio_cut", CB_X0 + sum(a["x"]) / 2, (Y_OUT0 + Y_IN0) / 2, CB_Z0 + sum(a["z"]) / 2, 6.5, WALL + 2, cuts, axis="Y")
+    # Ethernet cable pass-through: rear wall, midway between the child board and the SE post
+    hx = (CB_X0 + CB["length_x"] + X_IN1 - POST) / 2
+    hz = (FLOOR + Z_TOP) / 2
+    box("cable_hole", hx - CABLE_HOLE_W / 2, Y_OUT0 - 1, hz - CABLE_HOLE_H / 2,
+        hx + CABLE_HOLE_W / 2, Y_IN0 + 1, hz + CABLE_HOLE_H / 2, cuts)
     # fan posts: pilot holes
     for i, (hx, hy) in enumerate(FAN_HOLES):
         cyl(f"fan_pilot_{i}", hx, hy, FAN_Z0, FAN_PILOT, 16, cuts)
@@ -677,6 +685,8 @@ def main(outdir):
                 f"Z {FAN_Z0:.1f}-{FAN_Z0 + FAN['thickness']:.1f}; gap to tab {NOTCH_X - FAN_X0 - FAN['width_x']:.1f}\n")
         mx0, _, mx1, my1 = brd.rect_mm(*MB_RIBBON_PX)
         m = CB["parts"]["mb_conn"]
+        cx = (CB_X0 + CB["length_x"] + X_IN1 - POST) / 2
+        f.write(f"rear Ethernet cable hole: {CABLE_HOLE_W} x {CABLE_HOLE_H} mm, center X {cx:.1f} Z {(FLOOR + Z_TOP) / 2:.1f}\n")
         f.write(f"child board: X {CB_X0:.1f}-{CB_X0 + CB['length_x']:.1f}, Y {CB_Y0 + CB['depth_y'][0]:.1f}-"
                 f"{CB_Y0 + CB['depth_y'][1]:.1f}, PCB Z {CB_Z0:.1f}; MB_CONN X {CB_X0 + m['x'][0]:.1f}-"
                 f"{CB_X0 + m['x'][1]:.1f} Y {CB_Y0 + m['y'][0]:.1f}-{CB_Y0 + m['y'][1]:.1f} Z {CB_Z0 + m['z'][1]:.1f}; "

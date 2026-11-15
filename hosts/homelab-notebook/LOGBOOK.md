@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-15 — Rack case: rear Ethernet cable hole
+The drop-jaw RJ45 was too hard to fit, so the user is switching to a USB 3.0 gigabit Ethernet adapter (UGREEN, USB-A) plugged into the child board's USB-A and fixed loose inside the case. The adapter is deliberately not modelled. `build_case.py` now cuts a 16 x 14 mm cable pass-through in the rear wall (`CABLE_HOLE_W/H`), centred between the child board's east end and the SE lid post (X 175.9-191.9, Z 15.1-29.1). It fits an RJ45 plug with its boot. The front-panel drop-jaw hood is still in the model, pending a decision. Verified by sectioning tray.stl and in the closed_rear_west render. Not printed yet. Open item: the power button sits on the keyboard (28-pin FFC to the board), which won't be in the case.
+
 ## 2026-11-07 — Rack case: six RJ45 height-variant fit pieces
 `hardware/case/build_case.py` now also exports `out/rj45_fit_<dz>.stl` for dz = -0.5, -0.3, -0.1, +0.1, +0.3, +0.5 mm (`RJ45_FIT_DZ`). Each is fit_test cut to the RJ45 alone: the panel strip around the jack plus the H1/H2 pins (the two northmost board holes) on a triangle frame, so the board locates itself and nobody has to hold it in place. Only the hood height over the springs differs: ceiling, latch lip and pocket move by dz. The bottom of the opening stays at the springs, so a raised variant has no ledge at the entry. The dz value is raised on the H1-H2 bar. The springs height (`RJ45_PLUG_FLOOR`) is an estimate, and the winning variant corrects it. `text_mesh` helper shared with the pin gauge. Verified by sectioning: the ceiling steps 0.2 mm per variant and the opening bottom is fixed. All six are manifold, each 94.5 x 28.1 x 24 mm. fit_test.stl has the same 6 non-manifold edges it had before this change. Not printed yet.
 
