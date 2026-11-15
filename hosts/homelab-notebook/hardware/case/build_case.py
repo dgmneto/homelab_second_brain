@@ -113,6 +113,11 @@ RJ45_WALL = 2.0
 # Rear-wall pass-through for an Ethernet cable to a USB Ethernet adapter inside (not
 # modelled; it plugs into the child board). Fits a plug with its boot.
 CABLE_HOLE_W, CABLE_HOLE_H = 16.0, 14.0
+# Power button: 12 mm momentary (self-reset, 1NO) metal push button through the front
+# panel, wired to the keyboard FFC's power pins via a breakout. Body behind the panel
+# ~25 mm, nut ~16 mm across corners (estimates until the part is measured).
+BUTTON_HOLE_D = 12.3
+BUTTON_NUT_D, BUTTON_DEPTH = 17.0, 25.0
 # rj45_fit_*.stl: the hood's height over the springs (RJ45_PLUG_FLOOR is an estimate)
 RJ45_FIT_DZ = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5]
 
@@ -120,6 +125,7 @@ RJ45_FIT_DZ = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5]
 _xs = [x for x, _ in brd.outline_mm()]
 _ys = [y for _, y in brd.outline_mm()]
 BOARD_NORTH = max(_ys)
+BOARD_EAST = max(_xs)
 NOTCH_X = brd.px2mm(780, 1150)[0]   # tab west edge
 NOTCH_Y = brd.px2mm(780, 1126)[1]   # wide section south edge
 
@@ -149,6 +155,7 @@ RJ45_CX = brd.rj45_center_x()
 RJ45_FLOOR = BOARD_Z - brd.RJ45_PLUG_FLOOR              # plug's contact face, on the springs
 RJ45_FRAME_TOP = BOARD_Z + brd.PCB_T + brd.RJ45_TOP_H   # top-side frame around the cutout
 RJ45_STOP_Y = brd.rj45_frame_rect()[1]                 # nose stop = back wall of the frame
+BUTTON_X = (BOARD_EAST + X_IN1 - POST) / 2
 _cpu = next(r for n, r, _, _ in brd.PARTS if n == "cpu_heatplate")
 CPU_RECT = brd.rect_mm(*_cpu)
 TALLEST = max([p[3] for p in brd.PORTS] + [p[2] for p in brd.PARTS])
@@ -160,6 +167,9 @@ assert FAN_Y0 >= Y_IN0 + 0.3, "fan hits the rear wall"
 assert FAN_Y0 + FAN["depth_y"] <= NOTCH_Y - 0.3, "fan hits the board's south edge"
 assert min(_xs) >= X_IN0 + 1.0, "board hits the west wall"
 assert RJ45_FLOOR + RJ45_POCKET_H <= Z_TOP - 0.5, "RJ45 latch pocket hits the lid"
+assert BUTTON_X - BUTTON_NUT_D / 2 >= BOARD_EAST + 3, "power button nut hits the board"
+assert BUTTON_X + BUTTON_NUT_D / 2 <= X_IN1 - POST - 3, "power button nut hits the NE post"
+assert PANEL_H / 2 + BUTTON_NUT_D / 2 <= Z_TOP - 1, "power button nut hits the lid"
 
 # ---------------------------------------------------------------- I/O child board (childboard/out/childboard.json)
 # Rear wall, under the motherboard's tab, east of the fan: its ribbon (MB_CONN) can
@@ -384,6 +394,8 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
     jx0, jx1 = brd.PORT_X["rj45"]
     box("rj45_jack_pocket", jx0 - EDGE_CLEAR, Y_FRONT - 1, BOARD_Z - brd.RJ45_JACK_BELOW - EDGE_CLEAR,
         jx1 + EDGE_CLEAR, brd.rj45_front_y() + EDGE_CLEAR, RJ45_FRAME_TOP + 0.3, cuts)
+    # power button: east of the board, midway to the NE post, panel mid-height
+    cyl("button_hole", BUTTON_X, Y_FRONT + PANEL_T / 2, PANEL_H / 2, BUTTON_HOLE_D, PANEL_T + 2, cuts, axis="Y")
     # rack ear slots
     z_off = (U - PANEL_H) / 2
     for sx in (-1, 1):
@@ -686,6 +698,7 @@ def main(outdir):
         mx0, _, mx1, my1 = brd.rect_mm(*MB_RIBBON_PX)
         m = CB["parts"]["mb_conn"]
         cx = (CB_X0 + CB["length_x"] + X_IN1 - POST) / 2
+        f.write(f"power button hole: {BUTTON_HOLE_D} mm, front panel, center X {BUTTON_X:.1f} Z {PANEL_H / 2:.1f}\n")
         f.write(f"rear Ethernet cable hole: {CABLE_HOLE_W} x {CABLE_HOLE_H} mm, center X {cx:.1f} Z {(FLOOR + Z_TOP) / 2:.1f}\n")
         f.write(f"child board: X {CB_X0:.1f}-{CB_X0 + CB['length_x']:.1f}, Y {CB_Y0 + CB['depth_y'][0]:.1f}-"
                 f"{CB_Y0 + CB['depth_y'][1]:.1f}, PCB Z {CB_Z0:.1f}; MB_CONN X {CB_X0 + m['x'][0]:.1f}-"

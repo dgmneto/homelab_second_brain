@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-15 — Rack case: power button hole
+The power button lives on the keyboard (28-pin, 1.0 mm FFC to the board), which won't be in the case. Plan: a 28-pin 1.0 mm same-side FFC from the board to a breakout (the user only found 30-pin ones; push the cable to one end and find the pads with continuity), and a 12 mm self-reset 1NO metal push button soldered across the two power pins. The pins are not identified yet. `build_case.py` cuts a 12.3 mm hole (`BUTTON_HOLE_D`) in the front panel at mid-height. It sits midway between the board's east edge (X 115.2) and the NE lid post (X 158.1, Z 21.8). Asserts keep an estimated 17 mm nut clear of the board, the post and the lid. Verified by sectioning tray.stl (hole X 151.95-164.25) and in the closed_front render. Not printed yet.
+
 ## 2026-11-15 — Rack case: rear Ethernet cable hole
 The drop-jaw RJ45 was too hard to fit, so the user is switching to a USB 3.0 gigabit Ethernet adapter (UGREEN, USB-A) plugged into the child board's USB-A and fixed loose inside the case. The adapter is deliberately not modelled. `build_case.py` now cuts a 16 x 14 mm cable pass-through in the rear wall (`CABLE_HOLE_W/H`), centred between the child board's east end and the SE lid post (X 175.9-191.9, Z 15.1-29.1). It fits an RJ45 plug with its boot. The front-panel drop-jaw hood is still in the model, pending a decision. Verified by sectioning tray.stl and in the closed_rear_west render. Not printed yet. Open item: the power button sits on the keyboard (28-pin FFC to the board), which won't be in the case.
 
