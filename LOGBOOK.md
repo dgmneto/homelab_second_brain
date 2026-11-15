@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — Rack case: child board mounts removed
+The child board now lies loose in the case: posts, rear openings and fit_childboard.stl removed. Detail in the homelab-notebook host logbook.
+
 ## 2026-11-15 — Rack case: power button hole
 12.3 mm hole in the front panel for a 12 mm momentary button wired to the keyboard FFC's power pins. Detail in the homelab-notebook host logbook.
 

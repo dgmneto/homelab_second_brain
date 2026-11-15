@@ -16,7 +16,8 @@ Source of truth:
 Coordinates (mm): X along the board (photo left -> right), Y = 0 at the I/O
 edge (photo bottom, jacks stick out to -Y), Z = 0 at the PCB bottom.
 Outline below is in deskewed IMG_2198 crop pixels (y down).
-Writes childboard/out/childboard.json for case/build_case.py.
+Writes childboard/out/childboard.json (no longer used by case/build_case.py: the child
+board lies loose in the case since 2026-11-15).
 """
 
 import json

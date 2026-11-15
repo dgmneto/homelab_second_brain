@@ -36,7 +36,8 @@ fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
 check the port openings against the real board (snug PIN_D pins: two pins must hold it square);
 rj45_fit_<dz>.stl, the same cut to the RJ45 alone, its hood RJ45_FIT_DZ higher/lower
 (dz raised on the frame): the one that holds the plug best sets RJ45_PLUG_FLOOR;
-fit_childboard.stl for the child board's holes.
+The I/O child board (USB-A, audio) is not mounted: it lies loose inside, fixed by
+hand, with a USB Ethernet adapter on it (cable through the rear wall).
 """
 
 import json
@@ -111,8 +112,9 @@ RJ45_LATCH_FACE_H = 8.4    # plug overall height 8.00; top of latch slot = the c
 RJ45_POCKET_H = 11.0       # behind the lip the latch springs back up into this pocket
 RJ45_WALL = 2.0
 # Rear-wall pass-through for an Ethernet cable to a USB Ethernet adapter inside (not
-# modelled; it plugs into the child board). Fits a plug with its boot.
+# modelled; it plugs into the loose child board). Fits a plug with its boot.
 CABLE_HOLE_W, CABLE_HOLE_H = 16.0, 14.0
+CABLE_HOLE_EAST = 17.1     # hole centre west of the SE post
 # Power button: 12 mm momentary (self-reset, 1NO) metal push button through the front
 # panel, wired to the keyboard FFC's power pins via a breakout. Body behind the panel
 # ~25 mm, nut ~16 mm across corners (estimates until the part is measured).
@@ -171,16 +173,7 @@ assert BUTTON_X - BUTTON_NUT_D / 2 >= BOARD_EAST + 3, "power button nut hits the
 assert BUTTON_X + BUTTON_NUT_D / 2 <= X_IN1 - POST - 3, "power button nut hits the NE post"
 assert PANEL_H / 2 + BUTTON_NUT_D / 2 <= Z_TOP - 1, "power button nut hits the lid"
 
-# ---------------------------------------------------------------- I/O child board (childboard/out/childboard.json)
-# Rear wall, under the motherboard's tab, east of the fan: its ribbon (MB_CONN) can
-# reach the motherboard's south-edge connector. Jacks (USB-A, audio) face the rear.
-CB = json.load(open(os.path.join(HERE, "..", "childboard", "out", "childboard.json")))
-CB_X0 = NOTCH_X + 1.0                                 # clear of the fan
-CB_Y0 = Y_IN0 - CB["depth_y"][0] + 0.3                # PCB's southmost tab just off the rear wall
-CB_Z0 = FLOOR + 3.6                                   # PCB bottom: jacks hang 3.2 below it
-CB_POST_D, CB_PILOT = 5.0, 1.7                        # M2 self-tapping (board says M2xL2.5)
-MB_RIBBON_PX = (870, 1440, 1005, 1465)                # motherboard header the ribbon plugs into (assumed)
-assert CB_Z0 + CB["z_range"][1] < BOARD_Z - 3, "child board hits the motherboard"
+
 
 
 # ---------------------------------------------------------------- helpers
@@ -371,8 +364,6 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
         box(f"post_{i}", px, py, FLOOR - 0.01, px + POST, py + POST, Z_TOP, adds)
     for i, (hx, hy) in enumerate(FAN_HOLES):
         cyl(f"fan_post_{i}", hx, hy, (FLOOR + FAN_Z0) / 2, FAN_POST_D, FAN_Z0 - FLOOR + 0.01, adds)
-    for i, h in enumerate(CB["holes"]):
-        cyl(f"cb_post_{i}", CB_X0 + h["x"], CB_Y0 + h["y"], (FLOOR + CB_Z0) / 2, CB_POST_D, CB_Z0 - FLOOR + 0.01, adds)
     rj45_hood_adds(adds, rj45_dz)
     boolean(tray, "UNION", adds)
 
@@ -419,16 +410,8 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
         n = post_notch(px, py)
         if n:
             box(f"post_notch_{i}", *n[:2], BOARD_Z - EDGE_CLEAR, *n[2:], Z_TOP + 1, cuts)
-    # child board: post pilots, rear-wall openings for its jacks
-    for i, h in enumerate(CB["holes"]):
-        cyl(f"cb_pilot_{i}", CB_X0 + h["x"], CB_Y0 + h["y"], CB_Z0, CB_PILOT, 10, cuts)
-    u = CB["parts"]["usb_a"]
-    box("cb_usb_cut", CB_X0 + u["x"][0] - 0.5, Y_OUT0 - 1, max(FLOOR, CB_Z0 + u["z"][0] - 0.5),
-        CB_X0 + u["x"][1] + 0.5, Y_IN0 + 1, CB_Z0 + u["z"][1] + 0.5, cuts)
-    a = CB["parts"]["audio"]
-    cyl("cb_audio_cut", CB_X0 + sum(a["x"]) / 2, (Y_OUT0 + Y_IN0) / 2, CB_Z0 + sum(a["z"]) / 2, 6.5, WALL + 2, cuts, axis="Y")
-    # Ethernet cable pass-through: rear wall, midway between the child board and the SE post
-    hx = (CB_X0 + CB["length_x"] + X_IN1 - POST) / 2
+    # Ethernet cable pass-through: rear wall, beside the SE post
+    hx = X_IN1 - POST - CABLE_HOLE_EAST
     hz = (FLOOR + Z_TOP) / 2
     box("cable_hole", hx - CABLE_HOLE_W / 2, Y_OUT0 - 1, hz - CABLE_HOLE_H / 2,
         hx + CABLE_HOLE_W / 2, Y_IN0 + 1, hz + CABLE_HOLE_H / 2, cuts)
@@ -479,7 +462,6 @@ def build_context(root, board_glb, fan_glb):
     """Board, drive and fan: assembly/preview only, not printed."""
     board_objs = import_glb(board_glb, root, (0, 0, BOARD_Z))
     fan_objs = import_glb(fan_glb, root, (FAN_X0, FAN_Y0, FAN_Z0))
-    cb_objs = import_glb(os.path.join(HERE, "..", "childboard", "out", "childboard.glb"), root, (CB_X0, CB_Y0, CB_Z0))
     drive = box("drive_2_5in", DRIVE_X0, DRIVE_Y0, FLOOR + DRIVE_BOSS_H,
                 DRIVE_X0 + DRIVE_SX, DRIVE_Y0 + DRIVE_SY, FLOOR + DRIVE_BOSS_H + DRIVE_T, root)
     drive.data.materials.append(material("drive", (0.25, 0.27, 0.3)))
@@ -487,7 +469,7 @@ def build_context(root, board_glb, fan_glb):
     sata = box("drive_sata_connector", xe - 4, DRIVE_Y0 + 8, FLOOR + DRIVE_BOSS_H + 1,
                xe + 0.5, DRIVE_Y0 + 8 + 40, FLOOR + DRIVE_BOSS_H + DRIVE_T - 1.5, root)
     sata.data.materials.append(material("sata", (0.95, 0.85, 0.2)))
-    return board_objs + fan_objs + cb_objs + [drive, sata]
+    return board_objs + fan_objs + [drive, sata]
 
 
 # ---------------------------------------------------------------- fit tests
@@ -589,24 +571,6 @@ def build_rj45_fits(root, outdir):
         bpy.data.collections.remove(work)
 
 
-def build_childboard_fit(root):
-    """Three posts at the child board's holes on a bar, with pilot holes."""
-    work = new_coll("_work", root)
-    pts = [(h["x"], h["y"]) for h in CB["holes"]]
-    piece = bar("Fit_childboard", pts[0], pts[1], 0, FIT_BASE_T, root)
-    add = new_coll("_add", work)
-    bar("b2", pts[1], pts[2], 0, FIT_BASE_T, add)
-    for i, (x, y) in enumerate(pts):
-        cyl(f"p{i}", x, y, FIT_BASE_T + 2.5, CB_POST_D, 5.0, add)
-    boolean(piece, "UNION", add)
-    cuts = new_coll("_cuts", work)
-    for i, (x, y) in enumerate(pts):
-        cyl(f"c{i}", x, y, FIT_BASE_T + 3, CB_PILOT, 8, cuts)
-    boolean(piece, "DIFFERENCE", cuts)
-    bpy.data.collections.remove(work)
-    return piece
-
-
 def build_pin_gauge(root):
     """Row of board-mount pins, GAUGE_PINS diameters, each on a collar the board
     rests on, with its size raised on the base. Press a board hole over each:
@@ -667,9 +631,6 @@ def main(outdir):
     fit = build_fit_test(tray, case)
     export_stl(fit, os.path.join(outdir, "fit_test.stl"))
     fit.hide_render = True
-    cbfit = build_childboard_fit(case)
-    export_stl(cbfit, os.path.join(outdir, "fit_childboard.stl"))
-    cbfit.hide_render = True
     gauge = build_pin_gauge(case)
     export_stl(gauge, os.path.join(outdir, "pin_gauge.stl"))
     gauge.hide_render = True
@@ -695,15 +656,9 @@ def main(outdir):
                 f"panel face Y {Y_FRONT + PANEL_T:.1f}\n")
         f.write(f"fan: X {FAN_X0:.1f}-{FAN_X0 + FAN['width_x']:.1f}, Y {FAN_Y0:.1f}-{FAN_Y0 + FAN['depth_y']:.1f}, "
                 f"Z {FAN_Z0:.1f}-{FAN_Z0 + FAN['thickness']:.1f}; gap to tab {NOTCH_X - FAN_X0 - FAN['width_x']:.1f}\n")
-        mx0, _, mx1, my1 = brd.rect_mm(*MB_RIBBON_PX)
-        m = CB["parts"]["mb_conn"]
-        cx = (CB_X0 + CB["length_x"] + X_IN1 - POST) / 2
+        cx = X_IN1 - POST - CABLE_HOLE_EAST
         f.write(f"power button hole: {BUTTON_HOLE_D} mm, front panel, center X {BUTTON_X:.1f} Z {PANEL_H / 2:.1f}\n")
         f.write(f"rear Ethernet cable hole: {CABLE_HOLE_W} x {CABLE_HOLE_H} mm, center X {cx:.1f} Z {(FLOOR + Z_TOP) / 2:.1f}\n")
-        f.write(f"child board: X {CB_X0:.1f}-{CB_X0 + CB['length_x']:.1f}, Y {CB_Y0 + CB['depth_y'][0]:.1f}-"
-                f"{CB_Y0 + CB['depth_y'][1]:.1f}, PCB Z {CB_Z0:.1f}; MB_CONN X {CB_X0 + m['x'][0]:.1f}-"
-                f"{CB_X0 + m['x'][1]:.1f} Y {CB_Y0 + m['y'][0]:.1f}-{CB_Y0 + m['y'][1]:.1f} Z {CB_Z0 + m['z'][1]:.1f}; "
-                f"motherboard header X {mx0:.1f}-{mx1:.1f} Y ~{my1:.1f} Z {BOARD_Z + brd.PCB_T:.1f}\n")
         f.write("tray footprint for printing: "
                 f"{PANEL_W:.0f} x {Y_FRONT + PANEL_T - Y_OUT0:.0f} mm\n")
 
