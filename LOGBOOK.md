@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — Investigation: can any host run a Satisfactory dedicated server?
+Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N3450 4c, 7.6 GiB (max 8 GB), load ~5, swap in use.
+homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate
+(game server wants ~12–16 GB RAM + strong single-thread CPU); casaos hardware added to its README.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 

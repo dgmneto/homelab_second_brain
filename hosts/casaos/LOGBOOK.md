@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — Investigation: can any host run a Satisfactory dedicated server?
+Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N3450 4c, 7.6 GiB (max 8 GB), load ~5, swap in use.
+homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate
+(game server wants ~12–16 GB RAM + strong single-thread CPU); casaos hardware added to its README.
+
 ## 2026-11-02 — terminus-worker joined internalNetwork (172.21.0.142)
 Compose change in `~/homelab/services/terminus` (committed on casaos, push from Mac). See services/terminus.
 
