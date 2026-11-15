@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **terminus** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-15 — "TRMNL screen broken": server side healthy
+Investigation. Device 7 polls `/api/display` every 15 min without gaps (NPM log), downloads PNG 200, wifi -27 dBm,
+3.95 V. AI Board render at 09:09 looked correct (pulled the PNG and viewed it). trmnl-ai generating every ~20 min.
+1-bit ~5 KB PNGs are the norm for days. Fault must be on the device/panel; asked the user what it shows.
+Added triage gotcha 12.
+
 ## 2026-11-02 — TRMNL stuck on Friday 15:11: AI Board was never auto-rebuilt
 Symptom: device showed "last update Fri 3pm". Device polled `/api/display` every 15 min fine (200),
 but screen 6 (`extension-ai_board`) `updated_at` = 2026-10-30 15:11 — the last *manual*

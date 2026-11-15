@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — TRMNL "broken" + many HA entities unavailable (investigation)
+HA: tado° X Matter entities all unavailable since 2026-11-14 19:04: Apple TV (Thread BR) ↔ UniFi IPv6 routing loop
+(`tracepath -6` to node addresses); fix = restart Apple TV. Runbooks added to matter + homeassistant READMEs,
+`services/homeassistant/tools/unavailable.sql`. TRMNL: server pipeline verified healthy end to end (see terminus
+LOGBOOK); device-side issue pending the user's description. No changes on servers.
+
 ## 2026-11-15 — Health check: both hosts up (investigation, no changes)
 From a cloud session over Tailscale (`ssh claude@casaos`, `ssh claude@homelab-notebook`).
 - **casaos**: up 60 days, load ~2. Disks fine: `/` 54%, `/footage` 7%, `/library` 60%; both LVM RAID1 LVs

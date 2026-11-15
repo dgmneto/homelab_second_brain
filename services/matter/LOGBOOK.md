@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-15 — All tado° X nodes unavailable: Apple TV ↔ UniFi routing loop
+Investigation, no change. At 2026-11-14 19:00–19:04 every node (2,3,7,8,9,10) hit subscription/CASE timeouts and
+has been retrying since. mDNS (`tools/browse.py`) still shows the Apple TV BR + all nodes' `_matter._tcp` records;
+route `fde9:b6c5:757::/64 via fe80::67:28bc:f5ae:b3b6` (Apple TV) present; Apple TV pingable. But
+`ping -6` to node addresses → `Time exceeded: Hop limit` from `2a02:8012:882b::1`; `tracepath -6` loops Apple TV ↔
+UniFi. Conclusion: the Apple TV stopped forwarding into Thread. Recommended fix to the user: restart the Apple TV.
+Runbook added to README.
+
 ## 2026-11-06 — tado° X audit: firewall plan finalised (second review)
 Read-only. `matter-server --help` (8.1.2): no option to pin the CHIP UDP port (`--port` = TCP websocket). Unit:
 DynamicUser, empty CapabilityBoundingSet; `ip_unprivileged_port_start` 1024. Gotcha found: MainPID is the start

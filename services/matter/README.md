@@ -6,7 +6,7 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 > `ws://192.168.11.21:5580/ws` (HA's matter entry points here). State `/var/lib/private/matter-server` (DynamicUser),
 > PAA certs `/var/cache/private/matter-server/certs`, logs `journalctl -u matter-server`. **Must run with
 > `--vendorid=65521`** (the fabric's admin was created under 0xFFF1; the module default 4939 crashes it).
-> `--primary-interface=enp2s0`, firewall 5580/tcp + 5353/udp. **0 Matter devices commissioned** as of the move
+> `--primary-interface=enp2s0`, firewall 5580/tcp + 5353/udp. 0 Matter devices commissioned as of the move (6 tado° X since — see below)
 > (fabric kept). casaos container removed; pre-move copy `/footage/services/matter/data.bak-pre-move-20261030`.
 > **Thread (2026-11-06):** the only Thread border router is the **Apple TV 4K gen 3 `192.168.11.236`** (Apple network
 > `MyHome1662126353`, OMR `fde9:b6c5:757::/64`); HA holds **no** Thread dataset (fine for multi-admin). CHIP operational
@@ -14,6 +14,20 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 > [TADO-X-READINESS.md](TADO-X-READINESS.md) for the staged (log → accept) UDP rule scoped to `enp2s0` + `fde9:b6c5:757::/64` and the reusable mDNS/RA
 > diagnostics + firewall drift check in [tools/](tools/). **Gotcha:** `systemctl show -p MainPID matter-server` is the
 > start-script wrapper; the socket owner is its child: use the unit's cgroup PIDs with `sudo ss -uapn` (no `avahi`/`tcpdump` on the box; they run on HA's own python + zeroconf).
+> **Now (2026-11-15): 6 tado° X Thread devices commissioned** (Matter nodes 2, 3, 7, 8, 9, 10 on HA's fabric
+> `BFABFD88F60E01A6`; also on Apple Home + tado fabrics).
+>
+> **Runbook: all Matter entities unavailable at once** (seen 2026-11-14 19:00). Log shows `CASESession timed out`
+> / `Subscription Liveness timeout` for *every* node within ~2 min ⇒ Thread/border-router problem, not devices.
+> 1. `ping -6 -c2 <a node's fde9:… address>` from homelab-notebook. Addresses: run `tools/browse.py`
+>    (`_matter._tcp`, fabric `BFABFD88F60E01A6-<node id>`). **mDNS records still showing ≠ devices alive**: the
+>    Apple TV's SRP advertising proxy keeps serving them.
+> 2. `Time exceeded: Hop limit` from `2a02:8012:882b::1` ⇒ **routing loop**: `tracepath -6 -n <addr>` alternates
+>    Apple TV (`…:1c38:bf3c:dd2c:4c4a`) ↔ UniFi (`2a02:8012:882b::1`). The Apple TV still advertises the RIO
+>    route but stopped forwarding into Thread. Fix = **restart the Apple TV** (Settings → System → Restart, or
+>    unplug ~10 s), then `sudo systemctl restart matter-server` if nodes don't resubscribe within a few minutes.
+>    No firewall involvement: the pings get an ICMP answer from the router, so they never reach the Thread mesh.
+>
 > Below = the old casaos setup.
 
 ## Image
