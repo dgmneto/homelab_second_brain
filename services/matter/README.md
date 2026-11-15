@@ -24,7 +24,7 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 >    Apple TV's SRP advertising proxy keeps serving them.
 > 2. `Time exceeded: Hop limit` from `2a02:8012:882b::1` ⇒ **routing loop**: `tracepath -6 -n <addr>` alternates
 >    Apple TV (`…:1c38:bf3c:dd2c:4c4a`) ↔ UniFi (`2a02:8012:882b::1`). The Apple TV still advertises the RIO
->    route but stopped forwarding into Thread. Fix = **restart the Apple TV** (Settings → System → Restart, or
+>    route but stopped forwarding into Thread. **Known cause (2026-11-14): Tailscale enabled on the Apple TV** — a tvOS VPN breaks the border router's forwarding. Turning Tailscale off on the Apple TV restored it immediately (all 6 nodes resubscribed in <1 min). **Never run Tailscale on the Apple TV** (`apple-tv` tailnet node). Otherwise fix = **restart the Apple TV** (Settings → System → Restart, or
 >    unplug ~10 s), then `sudo systemctl restart matter-server` if nodes don't resubscribe within a few minutes.
 >    No firewall involvement: the pings get an ICMP answer from the router, so they never reach the Thread mesh.
 >
