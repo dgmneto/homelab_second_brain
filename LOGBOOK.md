@@ -4,6 +4,18 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — Health check: both hosts up (investigation, no changes)
+From a cloud session over Tailscale (`ssh claude@casaos`, `ssh claude@homelab-notebook`).
+- **casaos**: up 60 days, load ~2. Disks fine: `/` 54%, `/footage` 7%, `/library` 60%; both LVM RAID1 LVs
+  `Cpy%Sync 100`; no disk I/O errors in dmesg. All long-running containers Up (plex, jellyfin, sonarr, radarr,
+  bazarr, prowlarr, qbittorrent, gluetunProtonVPN, overseerr, arani, nginxIntern, nginxProxyManagerProd, ddns,
+  watchtower, autoheal, terminus stack, trmnl-ai). Exited: `hermes` + `hermes-docker-proxy` (5 weeks — old
+  casaos copy, hermes now runs natively on homelab-notebook) and the one-shot `terminus-init-certificates-1`.
+- **homelab-notebook**: no failed units; home-assistant (HTTP 200 on :8123), zigbee2mqtt, mosquitto,
+  matter-server, pihole-ftl, hermes-agent/hermes-backend, tailscaled all active; `/` 4%;
+  `homelab-backup.timer` last ran 03:42 today. Gotcha: `uptime` reports "2875 days" — bogus (clock/uptime
+  quirk), ignore it. The unit is `hermes-agent`, not `hermes` (`systemctl is-active hermes` says inactive).
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 
