@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — Compose repo: committed live prowlarr/watchtower/hermes config (push pending from Mac)
+`/home/dgmneto/homelab` had uncommitted `services/prowlarr/compose.yaml` (internalNetwork) and `services/watchtower/compose.yaml`
+(`--schedule "0 0 10 * * 0"`) plus an untracked `services/hermes/` (hermes + hermes-docker-proxy, both stopped for about 5 weeks). All three
+match the running containers, so they were committed as dgmneto. `main` is now **ahead of origin by 10** (d32bd32 and earlier, plus this one):
+run `git push` in `~/homelab` on casaos from the Mac (casaos has no GitHub key).
+
 ## 2026-11-15 — Investigation: can any host run a Satisfactory dedicated server?
 Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N3450 4c, 7.6 GiB (max 8 GB), load ~5, swap in use.
 homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate

@@ -93,6 +93,9 @@ didn't run: `CLAUDE_CODE_REMOTE=true .claude/hooks/session-start.sh`; daemon log
 **Re-run the hook after `git pull` brings a hook change** — `~/.ssh/config` is only rewritten when the
 hook runs, so a long session keeps the old config (seen 2026-10-28: stale config sent `homelab-notebook`
 to `dgmneto@192.168.11.21` → `Permission denied (publickey)`; re-running fixed it).
+**Long-lived sessions get logged out:** a cloud session resumed after hours (seen 2026-11-16) had `tailscale status` →
+`Logged out.` and `ssh casaos` → `Connection closed by UNKNOWN port 65535`. Fix: `bash .claude/hooks/session-start.sh`
+(rejoins with a fresh hostname such as `claude-cloud-session-1`), then ssh works again.
 
 Manual equivalent (what the hook does):
 ```

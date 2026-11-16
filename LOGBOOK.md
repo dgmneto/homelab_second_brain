@@ -4,6 +4,18 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — Merged six stranded claude/* branches into main; committed casaos live config
+Previous cloud sessions had pushed work to branches that were never merged. Merged into `main` (`--no-ff`):
+`claude/relaxed-dirac-8odk24` (also contains `claude/ecstatic-meitner-51euhx`), `vigilant-newton-jh54lu`,
+`happy-ride-g47q8i`, `bold-johnson-7nbz0z`, `keen-euler-s04txq`, `jolly-keller-0ju1da`. The logbook conflicts were resolved by
+keeping both sides and slotting incoming entries in by date; a script checked that every entry header from every branch is present.
+One content conflict: `services/matter/README.md`. Kept main's version and added the 2026-11-14 outage (routing loop caused by
+Tailscale on the Apple TV) as "cause #2" next to the UniFi-RA runbook ("cause #1").
+casaos `/home/dgmneto/homelab`: the uncommitted prowlarr (internalNetwork), watchtower (Sun 10:00 schedule) and untracked
+`services/hermes/` compose files matched the running containers (`docker inspect`), so they were committed as dgmneto. The repo is now
+**10 commits ahead of origin, so push from the Mac** (this session could not get push access to `dgmneto/homelab`). Also: this session's
+Tailscale had logged out, so `ssh casaos` failed until the hook was re-run (noted in services/tailscale README).
+
 ## 2026-11-15 — Investigation: can any host run a Satisfactory dedicated server?
 Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N3450 4c, 7.6 GiB (max 8 GB), load ~5, swap in use.
 homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate
