@@ -4,55 +4,23 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
-## 2026-11-16 — casaos rack case designed
-A 10" 3U printable case for casaos (ZimaBoard 832, SAS HBA via a riser, Flex-ATX PSU, 2 SATA + 2 SAS 3.5" drives) in `hosts/casaos/hardware/case/`. Detail in the casaos host logbook.
-
 ## 2026-11-16 — Merged six stranded claude/* branches into main; committed casaos live config
 Previous cloud sessions had pushed work to branches that were never merged. Merged into `main` (`--no-ff`):
 `claude/relaxed-dirac-8odk24` (also contains `claude/ecstatic-meitner-51euhx`), `vigilant-newton-jh54lu`,
-`happy-ride-g47q8i`, `bold-johnson-7nbz0z`, `keen-euler-s04txq`, `jolly-keller-0ju1da`. The logbook conflicts were resolved by
-keeping both sides and slotting incoming entries in by date; a script checked that every entry header from every branch is present.
-One content conflict: `services/matter/README.md`. Kept main's version and added the 2026-11-14 outage (routing loop caused by
-Tailscale on the Apple TV) as "cause #2" next to the UniFi-RA runbook ("cause #1").
+`happy-ride-g47q8i`, `bold-johnson-7nbz0z`, `keen-euler-s04txq`, `jolly-keller-0ju1da`, and later the same day
+`fervent-shannon-d8ej9s` (casaos rack case). Conflicts were resolved one at a time. Logbooks: each branch's entries
+describe different work, so all were kept, ordered newest-first by the time of the commit that added them (a first pass had put
+same-day entries out of order; fixed in a follow-up commit, which also fixes 2026-11-11 entries that were oldest-first on their own branch).
+`services/matter/README.md`: the two "all tado unavailable" runbooks were combined into one runbook with cause #1 (UniFi RA, 11-11) and
+cause #2 (Tailscale on the Apple TV causing a routing loop, 11-14). `hosts/casaos/README.md`: the two hardware descriptions were combined into one section
+(ZimaBoard 832 identity + measured CPU/RAM/load + case link).
 casaos `/home/dgmneto/homelab`: the uncommitted prowlarr (internalNetwork), watchtower (Sun 10:00 schedule) and untracked
 `services/hermes/` compose files matched the running containers (`docker inspect`), so they were committed as dgmneto. The repo is now
 **10 commits ahead of origin, so push from the Mac** (this session could not get push access to `dgmneto/homelab`). Also: this session's
 Tailscale had logged out, so `ssh casaos` failed until the hook was re-run (noted in services/tailscale README).
 
-## 2026-11-15 — Investigation: can any host run a Satisfactory dedicated server?
-Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N3450 4c, 7.6 GiB (max 8 GB), load ~5, swap in use.
-homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate
-(game server wants ~12–16 GB RAM + strong single-thread CPU); casaos hardware added to its README.
-
-## 2026-11-15 — homelab-notebook unreachable (investigation)
-homelab-notebook is down: Tailscale shows it offline (last seen ~4h ago), and on the LAN casaos gets no ARP reply for 192.168.11.21. Home automation (HA, z2m, mosquitto, matter) is down with it. Detail in the homelab-notebook host logbook.
-
-## 2026-11-15 — homelab-notebook flapping: hard reboots, back for ~1 min, down again
-It came back around 21:42 after an abrupt crash at 21:29, with all home-automation services active, then dropped off the LAN again within a minute. It looks like repeated power loss or crashes. Detail in the homelab-notebook host logbook.
-
-## 2026-11-15 — homelab-notebook link check: 1 Gbps→100 Mbps downshift ("check cabling!"), link flaps, reboots
-Detail in the homelab-notebook host logbook.
-
-## 2026-11-15 — Health check: both hosts up (investigation, no changes)
-From a cloud session over Tailscale (`ssh claude@casaos`, `ssh claude@homelab-notebook`).
-- **casaos**: up 60 days, load ~2. Disks fine: `/` 54%, `/footage` 7%, `/library` 60%; both LVM RAID1 LVs
-  `Cpy%Sync 100`; no disk I/O errors in dmesg. All long-running containers Up (plex, jellyfin, sonarr, radarr,
-  bazarr, prowlarr, qbittorrent, gluetunProtonVPN, overseerr, arani, nginxIntern, nginxProxyManagerProd, ddns,
-  watchtower, autoheal, terminus stack, trmnl-ai). Exited: `hermes` + `hermes-docker-proxy` (5 weeks — old
-  casaos copy, hermes now runs natively on homelab-notebook) and the one-shot `terminus-init-certificates-1`.
-- **homelab-notebook**: no failed units; home-assistant (HTTP 200 on :8123), zigbee2mqtt, mosquitto,
-  matter-server, pihole-ftl, hermes-agent/hermes-backend, tailscaled all active; `/` 4%;
-  `homelab-backup.timer` last ran 03:42 today. Gotcha: `uptime` reports "2875 days" — bogus (clock/uptime
-  quirk), ignore it. The unit is `hermes-agent`, not `hermes` (`systemctl is-active hermes` says inactive).
-
-## 2026-11-15 — TRMNL "broken" + many HA entities unavailable (investigation)
-HA: tado° X Matter entities all unavailable since 2026-11-14 19:04: Apple TV (Thread BR) ↔ UniFi IPv6 routing loop
-(`tracepath -6` to node addresses); fix = restart Apple TV. Runbooks added to matter + homeassistant READMEs,
-`services/homeassistant/tools/unavailable.sql`. TRMNL: server pipeline verified healthy end to end (see terminus
-LOGBOOK); device-side issue pending the user's description. No changes on servers.
-
-## 2026-11-15 — Matter outage root cause: Tailscale on the Apple TV
-User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
+## 2026-11-16 — casaos rack case designed
+A 10" 3U printable case for casaos (ZimaBoard 832, SAS HBA via a riser, Flex-ATX PSU, 2 SATA + 2 SAS 3.5" drives) in `hosts/casaos/hardware/case/`. Detail in the casaos host logbook.
 
 ## 2026-11-15 — Rack case: rear support brackets
 Left/right L brackets for the Lab Rax rack's rear posts; the case rests on their ledges. Detail in the homelab-notebook host logbook.
@@ -69,6 +37,41 @@ The child board now lies loose in the case: posts, rear openings and fit_childbo
 ## 2026-11-15 — Rack case: rear Ethernet cable hole for a USB adapter
 16 x 14 mm hole in the rear wall for an Ethernet cable to a USB Ethernet adapter inside. Detail in the homelab-notebook host logbook.
 
+## 2026-11-15 — homelab-notebook link check: 1 Gbps→100 Mbps downshift ("check cabling!"), link flaps, reboots
+Detail in the homelab-notebook host logbook.
+
+## 2026-11-15 — homelab-notebook flapping: hard reboots, back for ~1 min, down again
+It came back around 21:42 after an abrupt crash at 21:29, with all home-automation services active, then dropped off the LAN again within a minute. It looks like repeated power loss or crashes. Detail in the homelab-notebook host logbook.
+
+## 2026-11-15 — homelab-notebook unreachable (investigation)
+homelab-notebook is down: Tailscale shows it offline (last seen ~4h ago), and on the LAN casaos gets no ARP reply for 192.168.11.21. Home automation (HA, z2m, mosquitto, matter) is down with it. Detail in the homelab-notebook host logbook.
+
+## 2026-11-15 — Investigation: can any host run a Satisfactory dedicated server?
+Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N3450 4c, 7.6 GiB (max 8 GB), load ~5, swap in use.
+homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate
+(game server wants ~12–16 GB RAM + strong single-thread CPU); casaos hardware added to its README.
+
+## 2026-11-15 — Matter outage root cause: Tailscale on the Apple TV
+User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
+
+## 2026-11-15 — TRMNL "broken" + many HA entities unavailable (investigation)
+HA: tado° X Matter entities all unavailable since 2026-11-14 19:04: Apple TV (Thread BR) ↔ UniFi IPv6 routing loop
+(`tracepath -6` to node addresses); fix = restart Apple TV. Runbooks added to matter + homeassistant READMEs,
+`services/homeassistant/tools/unavailable.sql`. TRMNL: server pipeline verified healthy end to end (see terminus
+LOGBOOK); device-side issue pending the user's description. No changes on servers.
+
+## 2026-11-15 — Health check: both hosts up (investigation, no changes)
+From a cloud session over Tailscale (`ssh claude@casaos`, `ssh claude@homelab-notebook`).
+- **casaos**: up 60 days, load ~2. Disks fine: `/` 54%, `/footage` 7%, `/library` 60%; both LVM RAID1 LVs
+  `Cpy%Sync 100`; no disk I/O errors in dmesg. All long-running containers Up (plex, jellyfin, sonarr, radarr,
+  bazarr, prowlarr, qbittorrent, gluetunProtonVPN, overseerr, arani, nginxIntern, nginxProxyManagerProd, ddns,
+  watchtower, autoheal, terminus stack, trmnl-ai). Exited: `hermes` + `hermes-docker-proxy` (5 weeks — old
+  casaos copy, hermes now runs natively on homelab-notebook) and the one-shot `terminus-init-certificates-1`.
+- **homelab-notebook**: no failed units; home-assistant (HTTP 200 on :8123), zigbee2mqtt, mosquitto,
+  matter-server, pihole-ftl, hermes-agent/hermes-backend, tailscaled all active; `/` 4%;
+  `homelab-backup.timer` last ran 03:42 today. Gotcha: `uptime` reports "2875 days" — bogus (clock/uptime
+  quirk), ignore it. The unit is `hermes-agent`, not `hermes` (`systemctl is-active hermes` says inactive).
+
 ## 2026-11-11 — Killed plex-qbittorrent-watchdog
 User asked to kill it ("isn't working properly"). It had been stuck since 10:50 thinking Plex was
 streaming, holding 7 torrents stopped. Stopped + disabled the `dgmneto` user unit on casaos, resumed
@@ -76,9 +79,36 @@ the torrents it held (4 resumed, 3 already gone), and marked it decommissioned a
 services/plex, qbittorrent, watchdog, casaos cron.md, notes. Detail in
 `services/plex-qbittorrent-watchdog/LOGBOOK.md`.
 
-## 2026-11-11 — tado devices all unavailable: Thread path down
-matter-server/HA fine; the Thread devices can't be reached through the Apple TV from any LAN host since 06:27. The UniFi now
-sends IPv6 RAs from a non-link-local address (hosts lose their v6 default route). Waiting on user checks. Detail in services/matter.
+## 2026-11-11 — What the new UniFi "Matter" tab is
+Investigation only. It came with Network 11.0.99 (overnight auto-update): Thread/Matter monitoring that pairs into devices as an
+extra fabric; not a controller or BR. Not configured (no settings keys, v2 matter/thread endpoints 404). Recommended leaving it off
+(fabric slots). Documented in services/unifi/README.md.
+
+## 2026-11-11 — Node 8: online on Thread, SRP registration missing
+User: Small Room TRV responds in Apple Home (setpoint change triggered heating). Direct DNS-SD lookup of
+`BFABFD88F60E01A6-0000000000000008._matter._tcp` from homelab-notebook → no answer (node 2 resolves fine). So the device is on
+the mesh but has no SRP/DNS-SD registration at the Apple TV; Apple Home/tado don't need it, matter-server does. Advised a
+battery reseat. Read-only.
+
+## 2026-11-11 — Small Room TRV (node 8): not advertised on any fabric
+User: it shows in tado and Apple Home. mDNS browse (tools/browse.py) at ~13:10: 21 `_matter._tcp` records, grouped by Thread
+host = 5 devices, each on HA fabric `BFABFD88…` plus 2–3 other fabrics (Apple/tado). Node 8 has no record on **any** fabric,
+so it is not registered with the Apple TV BR at all; Apple Home/tado likely show a cached tile. Asked the user to test it
+(change setpoint → reacts / "No Response"), then reseat batteries to force a Thread rejoin. Read-only.
+
+## 2026-11-11 — UDR restart fixed the RA; 5/6 tado nodes back
+User restarted the UDR ~12:51 UTC. Polled `tools/ra.py` from homelab-notebook: offline 12:52–12:53, at 12:53:54 RA from
+`fe80::7a45:58ff:feb1:a57d` again; v6 default route back, `curl -6 ipv6.google.com` 200. Nodes 3/7/9/10 resubscribed by
+12:53:52 on their own. Node 2 had hit matter-server's "giving up after 30 minutes" (11:17) and never retried →
+`sudo systemctl restart matter-server` on homelab-notebook at 12:59; node 2 back 13:00. **Node 8 (Small Room TRV) still
+down**: no `_matter._tcp` record on mDNS since the morning, so matter-server never tries it; device/Thread side, needs a
+check in the tado app. Runbook gotchas added to services/matter/README.md.
+
+## 2026-11-11 — tado outage: trigger = overnight UDR auto-update (UniFi API)
+Read-only, via `UNIFI_API_KEY` + the Site Manager connector. UniFi system log: UDR firmware 5.1.35 → 6.0.17 at 04:02:59 UTC
+and UniFi Network 10.6.109 → 11.0.99 at 04:17:23 UTC (auto-update daily 03:00). Default IPv6 settings unchanged (PD, SLAAC,
+RA on). Re-checked 12:45: `tools/ra.py` still shows the RA from `2a02:8012:882b::1`; `tools/nodes.py` all 6 nodes
+`avail=False`; homelab-notebook still has no v6 default route. Nothing changed on the gateway; restart proposed to the user.
 
 ## 2026-11-11 — UniFi controller checked via API (closes tado X audit UniFi items)
 Read-only. `UNIFI_API_KEY` is a Site Manager key: `api.ui.com/v1/{hosts,sites,devices}` → 200; local `https://192.168.11.1`
@@ -91,60 +121,33 @@ External→Internal blocked v4+v6. **Root cause of the ~94 Mbps Apple TV ceiling
 negotiates at 100 Mbps** (0 errors) — likely a 2-pair cable. TADO-X-READINESS UniFi row now PASS; new services/unifi
 README; lan-ipv6 note, Plex runbook, CLAUDE.md updated. Nothing changed on the network.
 
-## 2026-11-11 — tado outage: trigger = overnight UDR auto-update (UniFi API)
-Read-only, via `UNIFI_API_KEY` + the Site Manager connector. UniFi system log: UDR firmware 5.1.35 → 6.0.17 at 04:02:59 UTC
-and UniFi Network 10.6.109 → 11.0.99 at 04:17:23 UTC (auto-update daily 03:00). Default IPv6 settings unchanged (PD, SLAAC,
-RA on). Re-checked 12:45: `tools/ra.py` still shows the RA from `2a02:8012:882b::1`; `tools/nodes.py` all 6 nodes
-`avail=False`; homelab-notebook still has no v6 default route. Nothing changed on the gateway; restart proposed to the user.
+## 2026-11-11 — tado devices all unavailable: Thread path down
+matter-server/HA fine; the Thread devices can't be reached through the Apple TV from any LAN host since 06:27. The UniFi now
+sends IPv6 RAs from a non-link-local address (hosts lose their v6 default route). Waiting on user checks. Detail in services/matter.
 
-## 2026-11-11 — UDR restart fixed the RA; 5/6 tado nodes back
-User restarted the UDR ~12:51 UTC. Polled `tools/ra.py` from homelab-notebook: offline 12:52–12:53, at 12:53:54 RA from
-`fe80::7a45:58ff:feb1:a57d` again; v6 default route back, `curl -6 ipv6.google.com` 200. Nodes 3/7/9/10 resubscribed by
-12:53:52 on their own. Node 2 had hit matter-server's "giving up after 30 minutes" (11:17) and never retried →
-`sudo systemctl restart matter-server` on homelab-notebook at 12:59; node 2 back 13:00. **Node 8 (Small Room TRV) still
-down**: no `_matter._tcp` record on mDNS since the morning, so matter-server never tries it; device/Thread side, needs a
-check in the tado app. Runbook gotchas added to services/matter/README.md.
-
-## 2026-11-11 — Small Room TRV (node 8): not advertised on any fabric
-User: it shows in tado and Apple Home. mDNS browse (tools/browse.py) at ~13:10: 21 `_matter._tcp` records, grouped by Thread
-host = 5 devices, each on HA fabric `BFABFD88…` plus 2–3 other fabrics (Apple/tado). Node 8 has no record on **any** fabric,
-so it is not registered with the Apple TV BR at all; Apple Home/tado likely show a cached tile. Asked the user to test it
-(change setpoint → reacts / "No Response"), then reseat batteries to force a Thread rejoin. Read-only.
-
-## 2026-11-11 — Node 8: online on Thread, SRP registration missing
-User: Small Room TRV responds in Apple Home (setpoint change triggered heating). Direct DNS-SD lookup of
-`BFABFD88F60E01A6-0000000000000008._matter._tcp` from homelab-notebook → no answer (node 2 resolves fine). So the device is on
-the mesh but has no SRP/DNS-SD registration at the Apple TV; Apple Home/tado don't need it, matter-server does. Advised a
-battery reseat. Read-only.
-
-## 2026-11-11 — What the new UniFi "Matter" tab is
-Investigation only. It came with Network 11.0.99 (overnight auto-update): Thread/Matter monitoring that pairs into devices as an
-extra fabric; not a controller or BR. Not configured (no settings keys, v2 matter/thread endpoints 404). Recommended leaving it off
-(fabric slots). Documented in services/unifi/README.md.
-
-## 2026-11-10 — tado° X devices via Matter: HA entity check
-6 tado° X devices (2 thermostats, 4 TRVs) commissioned to HA on 11-09, all online. Loft TRV still on fw 1.0 and briefly
-flapped; one stale humidity entity; messy entity IDs. Detail in services/matter LOGBOOK/README.
-
-## 2026-11-10 — Found the Zigbee heating devices the tado° X replace
-4 AVATTO TRVs (still online), Shelly hall relay and Bosch dining-room thermostat (both offline since 11-09), plus 8 HA
-automations still bound to them. Read-only; detail in services/matter README.
-
-## 2026-11-10 — Retired the Zigbee heating; tado° X on the dashboard
-Removed 6 old heating devices from z2m (MQTT remove request), and from HA 8 heating automations, `zoned_heating` and a template
-helper (HA stopped; backups taken). The Home dashboard now uses the tado climate entities. Verified post-restart. Detail in the
-homeassistant/z2mqtt logbooks.
-
-## 2026-11-10 — Apple Home duplicates of tado removed
-HA HomeKit Bridge no longer exports `climate`; tado devices stay native in Apple Home. Detail in the homeassistant logbook.
+## 2026-11-10 — Tapo camera working in HA again
+tapo_control stays in HACS. Nix now supplies onvif + pytapo 3.4.30 + python-kasa; deployed and verified (camera entities live).
 
 ## 2026-11-10 — Hall light diagnosis, TRV rejoin blocked, octopus_energy to HACS
 Entry hall switch lost its Zigbee route (mesh down to 2 routers after the thermostat swap): power-cycle needed. 3 old TRVs
 rejoined → removed + blocklisted (Nix too). octopus_energy moved from Nix to HACS (+pydantic), deployed. Detail in the
 host/service logbooks.
 
-## 2026-11-10 — Tapo camera working in HA again
-tapo_control stays in HACS. Nix now supplies onvif + pytapo 3.4.30 + python-kasa; deployed and verified (camera entities live).
+## 2026-11-10 — Apple Home duplicates of tado removed
+HA HomeKit Bridge no longer exports `climate`; tado devices stay native in Apple Home. Detail in the homeassistant logbook.
+
+## 2026-11-10 — Retired the Zigbee heating; tado° X on the dashboard
+Removed 6 old heating devices from z2m (MQTT remove request), and from HA 8 heating automations, `zoned_heating` and a template
+helper (HA stopped; backups taken). The Home dashboard now uses the tado climate entities. Verified post-restart. Detail in the
+homeassistant/z2mqtt logbooks.
+
+## 2026-11-10 — Found the Zigbee heating devices the tado° X replace
+4 AVATTO TRVs (still online), Shelly hall relay and Bosch dining-room thermostat (both offline since 11-09), plus 8 HA
+automations still bound to them. Read-only; detail in services/matter README.
+
+## 2026-11-10 — tado° X devices via Matter: HA entity check
+6 tado° X devices (2 thermostats, 4 TRVs) commissioned to HA on 11-09, all online. Loft TRV still on fw 1.0 and briefly
+flapped; one stale humidity entity; messy entity IDs. Detail in services/matter LOGBOOK/README.
 
 ## 2026-11-09 — HA: Ground Floor thermostat dashboard icon fixed
 Matter thermostat has no `hvac_action`; bubble-card icon script now derives it and has a static fallback. Detail in

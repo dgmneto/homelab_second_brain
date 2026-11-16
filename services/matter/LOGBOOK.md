@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-15 — Root cause: Tailscale on the Apple TV
+User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
+
 ## 2026-11-15 — All tado° X nodes unavailable: Apple TV ↔ UniFi routing loop
 Investigation, no change. At 2026-11-14 19:00–19:04 every node (2,3,7,8,9,10) hit subscription/CASE timeouts and
 has been retrying since. mDNS (`tools/browse.py`) still shows the Apple TV BR + all nodes' `_matter._tcp` records;
@@ -10,9 +13,6 @@ route `fde9:b6c5:757::/64 via fe80::67:28bc:f5ae:b3b6` (Apple TV) present; Apple
 `ping -6` to node addresses → `Time exceeded: Hop limit` from `2a02:8012:882b::1`; `tracepath -6` loops Apple TV ↔
 UniFi. Conclusion: the Apple TV stopped forwarding into Thread. Recommended fix to the user: restart the Apple TV.
 Runbook added to README.
-
-## 2026-11-15 — Root cause: Tailscale on the Apple TV
-User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
 
 ## 2026-11-11 — Node 8: online on Thread, SRP registration missing
 User: Small Room TRV responds in Apple Home (setpoint change triggered heating). Direct DNS-SD lookup of
