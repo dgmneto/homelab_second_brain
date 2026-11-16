@@ -32,11 +32,40 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   so they stay gone unless the phone re-registers them). Unsupported entities of a **live** integration (e.g. UniFi Protect) get
 >   recreated if deleted → set `disabled_by: "user"` instead. HACS `restart_required_*` repairs do **not** clear on restart;
 >   dismiss them in Settings → Repairs.
+> - **Heating = tado° X over Matter since 2026-11-10** (devices: [../matter/README.md](../matter/README.md#commissioned-devices-server-truth-2026-11-10)).
+>   tado runs schedules, calibration and boiler demand itself, so **HA has no heating automations any more**: the
+>   8 calibrator/offset automations, the `zoned_heating` config entry (old boiler logic: 4 AVATTO TRVs → Shelly hall relay)
+>   and the "Number of TRV valves demanding heat" template helper were deleted 2026-11-10 (backups `*.bak-pre-tado-cleanup-20261110`).
+>   `zoned_heating`'s code is still in `custom_components/` (unused). Dashboard "Home" view: room cards' radiator icons
+>   and the First Floor separator's fire icon use the tado `climate.*` entities, and work out heating/idle in JS
+>   (tado over Matter has **no `hvac_action`**: below the setpoint = heating). Air Sensors history graph uses
+>   `climate.living_room_living_room_thermostat`.
+> - **HomeKit Bridge ("HASS Bridge", port 21064) exports only `light` + `cover`** (filter in the homekit config entry's
+>   `options.filter`; a few lights excluded by entity). `climate` was removed 2026-11-10: the tado° X devices are
+>   natively in Apple Home (that's where they were commissioned), so bridging them showed every TRV/thermostat twice.
+>   **Don't re-add `climate`** unless a non-Matter climate device appears; then include that entity only.
+>   Sensors (temp/humidity/battery) were never bridged: `sensor` was never in the filter (verified in `.storage/homekit.<entry>.aids`, which keeps
+>   every accessory ID ever allocated, stale ones included: harmless).
+> - **Custom components = HACS, not Nix (2026-11-10).** All of them (`hacs`, `octopus_energy`, `tapo_control`,
+>   `espsomfy_rts`, `zoned_heating`) are plain dirs in `/var/lib/hass/custom_components`, updated from HACS. Nix only supplies
+>   their Python requirements in `extraPackages` (HA can't pip-install), e.g. `pydantic` for octopus_energy. **Gotcha:** a
+>   Nix `customComponents` entry is a symlink into the read-only store, so HACS shows an update it can't apply
+>   (`Errno 13 … /tmp/hacs_backup/<name>`). That's why octopus_energy was moved off it. When a HACS update adds a
+>   requirement, the integration fails to load: add it to `extraPackages` and deploy.
+> - **Editing the dashboard without a token:** same stop/back up/edit/start as below, on `.storage/lovelace.lovelace`
+>   (`data.config.views[].sections[].cards[]`). Edit with HA's own python (`sudo readlink /proc/<HA MainPID>/exe`;
+>   the box has no `python3`/`jq` on PATH) and `chown hass:hass` afterwards.
 > - Leftovers status (2026-11-01): `better_thermostat` removed from HACS (+ its 2 HACS entities); dead YAML `http:` block
->   removed; Repairs cleared (stale HACS restart_required + http issues deleted, octopus notice dismissed). Automation
->   "Ground Floor/Update Thermostat Temperature" repointed to `climate.dining_room_thermostat` / its calibration number
+>   removed; Repairs cleared (stale HACS restart_required + http issues deleted, octopus notice dismissed). (Superseded 2026-11-10: all
+>   heating automations deleted.) Automation "Ground Floor/Update Thermostat Temperature" repointed to `climate.dining_room_thermostat` / its calibration number
 >   but **kept off on purpose**: "Ground Floor/(NEW) TRV Calibrator" already calibrates that thermostat, and both on would fight.
->   **Still open: `tapo_control`** (code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
+>   **`tapo_control` (HACS 7.2.13), working again 2026-11-10:** Nix now supplies what it needs. That's `onvif`/`ffmpeg`/`stream` in
+>   `extraComponents` (the missing `onvif` library caused the "Invalid config: onvif, tapo_control" notice at every
+>   boot), plus `python-kasa` and an override of **pytapo to 3.4.30** (nixpkgs has 3.4.19) in `extraPackages`.
+>   **When HACS updates tapo_control, compare manifest.json `requirements`' pytapo pin with the override in
+>   home-automation.nix**: bump the version and hash (`sha256-` + base64 of PyPI's sdist sha256) if the pin changed.
+>   Verified after deploy: no setup errors; 68/77 enabled entities have state (9 unavailable, e.g. `button.…_sync_time`).
+>   (Was: code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
 >   entities, used nowhere). Latest 7.2.13 pins `pytapo==3.4.30` (+python-kasa) vs Nix's 3.4.19 with pip skipped, so a restore is
 >   fragile. Built-in `tplink` integration is the alternative. RTSP (554) is closed on the camera, so a "camera account"
 >   in the Tapo app is needed for streams either way. Outbound IPv6 fails fast: see `notes/lan-ipv6.md`.
@@ -82,6 +111,6 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
   still lists it installed and a config entry + 109 entities remain. No HA backup has it (only 3 kept, all
   ≥ Sep 20). Fix: HACS → Tapo Control → Redownload, then restart HA.
 - **`octopus_energy` code is missing too** (found 2026-10-30): config entry present, no folder in
-  `custom_components`. The NixOS move restores it from nixpkgs.
+  `custom_components`. The NixOS move restored it from nixpkgs. **Since 2026-11-10 it is HACS-managed again** (see top).
 - **Migration to homelab-notebook in progress:** see [MIGRATION.md](MIGRATION.md).
 - Image is unpinned (`latest`); a Watchtower pull can introduce breaking HA core upgrades.

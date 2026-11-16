@@ -31,8 +31,21 @@ metadata:
 
 **Inbound exposure:** every host now has a globally routable address. Protection = UniFi's IPv6 firewall (default: block
 unsolicited inbound from the internet) + per-host firewalls (homelab-notebook: NixOS firewall covers v6; **casaos has no host
-firewall and Docker publishes ports on `[::]`**). Not yet verified from outside (the cloud agent has no IPv6). To verify, from an
+firewall and Docker publishes ports on `[::]`**). **Config verified 2026-11-11** via the UniFi API: only predefined zone policies, External→Internal = block (IPv4 *and*
+IPv6), no custom allow rules ([services/unifi](../services/unifi/README.md)). Not yet verified from outside (the cloud agent has no IPv6). To verify, from an
 IPv6-capable network outside the LAN (e.g. phone on mobile data): connect to `[<host v6>]:22/8123/53` → must fail.
 
 Check quickly: `ip -6 addr show scope global | grep 'inet6 2'` and `curl -6 -s -o /dev/null -w '%{http_code}' https://ipv6.google.com`.
 RA dump: `sudo nix shell nixpkgs#ndisc6 -c rdisc6 -w 3000 -r 3 enp2s0` (on homelab-notebook).
+
+## 2026-11-11 — UniFi RA now sourced from a GUA (broken)
+`tools/ra.py` (services/matter/tools): the UniFi (`78:45:58:b1:a5:7d`) advertises `2a02:8012:882b::/64`, router lifetime 1800 s,
+**from `2a02:8012:882b::1`**, not from its link-local `fe80::7a45:58ff:feb1:a57d` (that address no longer answers ND). Hosts must
+ignore the router part, so homelab-notebook and casaos have **no IPv6 default route** (the on-link /64 is still installed).
+Seen together with all tado/Thread devices becoming unreachable at 06:27. Fix is on the UniFi; see services/matter/README.md.
+**Trigger found (UniFi system log, via `services/unifi/tools/unifi.sh`):** overnight auto-update — UDR firmware **5.1.35 → 6.0.17**
+at 04:02:59 UTC, UniFi Network **10.6.109 → 11.0.99** at 04:17:23 UTC. No IPv6 config change: Default is still PD + SLAAC, RA on,
+priority high, preferred lifetime 14400. Still broken at 12:45 (RA from `2a02:8012:882b::1`, valid 54884 s). No public bug report
+found yet. Auto-update is on (daily 03:00, apps included). **Fixed by a UDR restart at 12:51 UTC**: RA from `fe80::7a45:58ff:feb1:a57d` again,
+v6 default route + `curl -6 ipv6.google.com` 200 on homelab-notebook at 12:54.
+

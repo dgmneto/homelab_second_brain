@@ -37,6 +37,7 @@ This is the knowledge layer.
 | [tailscale](tailscale/README.md) | casaos + **homelab-notebook** | casaos: native apt + systemd (not docker); notebook: NixOS module |
 | [terminus](terminus/README.md) | casaos | docker |
 | [trmnl-ai](trmnl-ai/README.md) | casaos | docker (LLM-designed TRMNL screen for terminus) |
+| [unifi](unifi/README.md) | UDR gateway (not a homelab host) | UniFi Network, cloud API via `UNIFI_API_KEY` |
 | [watchtower](watchtower/README.md) | casaos | docker |
 | [z2mqtt](z2mqtt/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30) |
 

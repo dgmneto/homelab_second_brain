@@ -3,6 +3,22 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — Rejoined TRVs blocked; Entry Hall switch lost its parent
+3 force-removed AVATTO TRVs (batteries still in) rejoined 07:10–19:23 as `0xa4c…`. Removed again with `block: true`;
+blocklist also added to the Nix z2m settings (the module regenerates configuration.yaml) and deployed, verified present after
+restart. `Entry Hall/Ligths` (ZBMINIL2, end device) last seen 17:24, `Delivery failed` at 20:49. The mesh is down to 2 routers after
+the Shelly/Bosch removal (both physically gone since 11-09). Needs a power-cycle on site.
+
+## 2026-11-10 — Removed the 6 heating devices replaced by tado° X
+Via MQTT `bridge/request/device/remove` (force) as the zigbee2mqtt user: Little Room, Guest Bedroom and Loft Bedroom TRV
+Valves, Hall/Thermostat, Dining Room/Thermostat → all `ok`. Office/TRV Valve "does not exist" (had already left the network),
+so its 19 retained discovery topics were cleared by hand and its devices.yaml entry deleted (z2m stopped/started). Backups
+`database.db`/`devices.yaml` `.bak-pre-tado-20261110`. z2m active, no errors after restart.
+
+## 2026-11-10 — Identified heating devices replaced by tado° X
+Read-only. 4 AVATTO TRVs still online; Shelly `Hall/Thermostat` last seen 11-09 17:47, Bosch `Dining Room/Thermostat` last
+seen 11-09 15:00. HA's Ground Floor calibrator makes z2m log a failed publish to the Bosch every 5 min. No change made.
+
 ## 2026-10-30 — HA migration Phase 2
 Moved to homelab-notebook (NixOS). casaos container removed 21:53:30; data split into devices/groups/secret.yaml; network resumed on the laptop at ~21:56 with all 26 devices. pan_id/ext_pan_id must be literals (no `!secret` support). UI proxy (nginxIntern host 21) repointed.
 

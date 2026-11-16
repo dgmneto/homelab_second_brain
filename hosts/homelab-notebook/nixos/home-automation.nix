@@ -129,6 +129,9 @@ in
           homeassistant.enabled = true;
           devices = "devices.yaml";
           groups = "groups.yaml";
+          # Retired AVATTO TRVs (replaced by tado X, 2026-11-10). Force-removed but still had batteries,
+          # so they rejoined; z2m's own `block` writes here, and the module would wipe it on restart.
+          blocklist = [ "0xa4c138568aeec433" "0xa4c138cc9ea0e43d" "0xa4c13868ef0d6c52" ];
         };
       };
       networking.firewall.allowedTCPPorts = [ 8080 ];
@@ -186,20 +189,35 @@ in
           "unifiprotect"
           "webostv"
           "zha"
+          # tapo_control (HACS) declares these as manifest dependencies; onvif's library
+          # (onvif-zeep-async) was missing, so the integration failed at every boot.
+          "onvif"
+          "ffmpeg"
+          "stream"
         ];
-        customComponents = with pkgsUnstable.home-assistant-custom-components; [
-          # Config entry exists on casaos but its code folder went missing; this restores it.
-          octopus_energy
-        ];
-        # hacs, espsomfy_rts and zoned_heating stay as plain dirs in
+        # octopus_energy moved to HACS 2026-11-10: the Nix copy was a read-only store symlink, so
+        # HACS updates failed (Errno 13 on its /tmp backup). Its only requirement, pydantic, is below.
+        customComponents = [ ];
+        # hacs, espsomfy_rts, zoned_heating, octopus_energy and tapo_control stay as plain dirs in
         # /var/lib/hass/custom_components (copied from casaos; the module only prunes
         # symlinks). Nix HA can't pip-install, so provide their requirements here.
         extraPackages = ps: with ps; [
           aiogithubapi
           aiofiles
           websocket-client
-          # tapo_control (HACS): code missing since Aug; redownload via HACS, dep is ready here.
-          pytapo
+          pydantic # octopus_energy (HACS)
+          # tapo_control (HACS) 7.2.13 pins pytapo==3.4.30; nixpkgs has 3.4.19 (same deps, so only
+          # version + hash change). Bump here when HACS bumps the pin: manifest.json "requirements".
+          (pytapo.overridePythonAttrs (_: rec {
+            version = "3.4.30";
+            src = pkgs.fetchPypi {
+              pname = "pytapo";
+              inherit version;
+              hash = "sha256-Eo/3k5rGE80GEnVug0+VydRP0z4mfq0Ueedw5hathCE=";
+            };
+            doCheck = false;
+          }))
+          python-kasa # tapo_control: "python-kasa[speedups]>=0.10.2"
         ];
       };
       # 8123 UI, 21064 HomeKit bridge ("HASS Bridge"), 1400 Sonos event callbacks

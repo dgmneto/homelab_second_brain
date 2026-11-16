@@ -3,6 +3,39 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-10 — tapo_control fixed via Nix-supplied deps
+Added `onvif`/`ffmpeg`/`stream` to extraComponents, plus `python-kasa` and pytapo overridden to 3.4.30 (from PyPI sdist) in
+extraPackages. Deployed 21:04. HA: no "Setup failed"; Living Room Pet Camera back (68/77 entities with state, camera
+`idle`). The "Invalid config: onvif, tapo_control" notice should no longer appear.
+
+## 2026-11-10 — octopus_energy handed to HACS
+The HACS update failed with Errno 13 because octopus_energy was a Nix-store symlink (read-only). Removed it from Nix
+customComponents and added pydantic to extraPackages (deployed). Installed a writable copy of 19.2.1, restarted HA. The
+user updates to 19.3.0 from HACS.
+
+## 2026-11-10 — "Invalid config: onvif, tapo_control" notification explained
+Read-only. tapo_control 7.2.13 was re-downloaded via HACS on 11-09 15:24; since the next boot (15:32) setup fails because
+`onvif` can't import (no onvif-zeep-async in the Nix build). Shows after every restart; unrelated to the tado work. README updated.
+
+## 2026-11-10 — HomeKit Bridge: stop exporting climate (tado duplicates)
+User saw every tado TRV/thermostat twice in Apple Home: once native (Matter), once via HASS Bridge, which included the
+whole `climate` domain. The only climate entities are the 6 tado ones. With HA stopped: removed `climate` from the homekit
+entry's `options.filter.include_domains` (now cover, light; backup `core.config_entries.bak-pre-homekit-climate-20261110`),
+then restarted HA.
+
+## 2026-11-10 — Heating automations removed, dashboard switched to tado° X
+User: tado runs heating now. With HA stopped (backups `*.bak-pre-tado-cleanup-20261110`): removed 8 automations from
+automations.yaml + registry (Ground Floor, Guest Bedroom, Office, Little Room and Loft offset/calibrator automations,
+Enable Thermostat); deleted config entries `zoned_heating` and the template "Number of TRV valves demanding heat"; purged
+the orphan Hall/Thermostat device + its select entity. Lovelace: old TRV/thermostat entities → the 6 tado climate entities,
+and icon JS now derives heating/idle (no hvac_action over Matter). HA restarted. Verified: no old entities, devices or
+dashboard refs; 6 automations left; all tado climates reporting; no new errors (only the known onvif/tapo ones).
+Not checked in a browser.
+
+## 2026-11-10 — Stale heating automations after tado° X install
+Read-only. 8 automations + 1 template still target the replaced Zigbee TRVs/thermostats (list in
+../matter/README.md). Ground Floor calibrator fails every 5 min against the vanished Bosch thermostat. Nothing changed.
+
 ## 2026-11-01 — Leftover fixes
 better_thermostat removed from HACS; dead YAML http block removed; Repairs cleared; ground-floor automation repointed and kept
 off. tapo_control analysed (one C225 camera, version pin mismatch with Nix pytapo), left for the user's decision.

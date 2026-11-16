@@ -19,6 +19,76 @@ The child board now lies loose in the case: posts, rear openings and fit_childbo
 ## 2026-11-15 — Rack case: rear Ethernet cable hole for a USB adapter
 16 x 14 mm hole in the rear wall for an Ethernet cable to a USB Ethernet adapter inside. Detail in the homelab-notebook host logbook.
 
+## 2026-11-11 — tado devices all unavailable: Thread path down
+matter-server/HA fine; the Thread devices can't be reached through the Apple TV from any LAN host since 06:27. The UniFi now
+sends IPv6 RAs from a non-link-local address (hosts lose their v6 default route). Waiting on user checks. Detail in services/matter.
+
+## 2026-11-11 — UniFi controller checked via API (closes tado X audit UniFi items)
+Read-only. `UNIFI_API_KEY` is a Site Manager key: `api.ui.com/v1/{hosts,sites,devices}` → 200; local `https://192.168.11.1`
+→ 403 from the agent proxy (private IP). Full Network-app reads work through the cloud connector
+`api.ui.com/v1/connector/consoles/<id>/proxy/network/...`; wrapped in `services/unifi/tools/unifi.sh` (redacts secrets —
+`rest/setting` returns the device SSH password in clear; raw dumps deleted). Findings: Apple TV `.236` (Tv unit Flex Mini
+port 5) and homelab-notebook `.21` (Office U6 IW port 4) wired on **Default**; both SSIDs on Default, no client
+isolation, IGMP snooping off, mDNS reflector on; Default IPv6 = PD + SLAAC; firewall = 82 predefined zone policies only,
+External→Internal blocked v4+v6. **Root cause of the ~94 Mbps Apple TV ceiling: Tv unit uplink (Main Switch port 1)
+negotiates at 100 Mbps** (0 errors) — likely a 2-pair cable. TADO-X-READINESS UniFi row now PASS; new services/unifi
+README; lan-ipv6 note, Plex runbook, CLAUDE.md updated. Nothing changed on the network.
+
+## 2026-11-11 — tado outage: trigger = overnight UDR auto-update (UniFi API)
+Read-only, via `UNIFI_API_KEY` + the Site Manager connector. UniFi system log: UDR firmware 5.1.35 → 6.0.17 at 04:02:59 UTC
+and UniFi Network 10.6.109 → 11.0.99 at 04:17:23 UTC (auto-update daily 03:00). Default IPv6 settings unchanged (PD, SLAAC,
+RA on). Re-checked 12:45: `tools/ra.py` still shows the RA from `2a02:8012:882b::1`; `tools/nodes.py` all 6 nodes
+`avail=False`; homelab-notebook still has no v6 default route. Nothing changed on the gateway; restart proposed to the user.
+
+## 2026-11-11 — UDR restart fixed the RA; 5/6 tado nodes back
+User restarted the UDR ~12:51 UTC. Polled `tools/ra.py` from homelab-notebook: offline 12:52–12:53, at 12:53:54 RA from
+`fe80::7a45:58ff:feb1:a57d` again; v6 default route back, `curl -6 ipv6.google.com` 200. Nodes 3/7/9/10 resubscribed by
+12:53:52 on their own. Node 2 had hit matter-server's "giving up after 30 minutes" (11:17) and never retried →
+`sudo systemctl restart matter-server` on homelab-notebook at 12:59; node 2 back 13:00. **Node 8 (Small Room TRV) still
+down**: no `_matter._tcp` record on mDNS since the morning, so matter-server never tries it; device/Thread side, needs a
+check in the tado app. Runbook gotchas added to services/matter/README.md.
+
+## 2026-11-11 — Small Room TRV (node 8): not advertised on any fabric
+User: it shows in tado and Apple Home. mDNS browse (tools/browse.py) at ~13:10: 21 `_matter._tcp` records, grouped by Thread
+host = 5 devices, each on HA fabric `BFABFD88…` plus 2–3 other fabrics (Apple/tado). Node 8 has no record on **any** fabric,
+so it is not registered with the Apple TV BR at all; Apple Home/tado likely show a cached tile. Asked the user to test it
+(change setpoint → reacts / "No Response"), then reseat batteries to force a Thread rejoin. Read-only.
+
+## 2026-11-11 — Node 8: online on Thread, SRP registration missing
+User: Small Room TRV responds in Apple Home (setpoint change triggered heating). Direct DNS-SD lookup of
+`BFABFD88F60E01A6-0000000000000008._matter._tcp` from homelab-notebook → no answer (node 2 resolves fine). So the device is on
+the mesh but has no SRP/DNS-SD registration at the Apple TV; Apple Home/tado don't need it, matter-server does. Advised a
+battery reseat. Read-only.
+
+## 2026-11-11 — What the new UniFi "Matter" tab is
+Investigation only. It came with Network 11.0.99 (overnight auto-update): Thread/Matter monitoring that pairs into devices as an
+extra fabric; not a controller or BR. Not configured (no settings keys, v2 matter/thread endpoints 404). Recommended leaving it off
+(fabric slots). Documented in services/unifi/README.md.
+
+## 2026-11-10 — tado° X devices via Matter: HA entity check
+6 tado° X devices (2 thermostats, 4 TRVs) commissioned to HA on 11-09, all online. Loft TRV still on fw 1.0 and briefly
+flapped; one stale humidity entity; messy entity IDs. Detail in services/matter LOGBOOK/README.
+
+## 2026-11-10 — Found the Zigbee heating devices the tado° X replace
+4 AVATTO TRVs (still online), Shelly hall relay and Bosch dining-room thermostat (both offline since 11-09), plus 8 HA
+automations still bound to them. Read-only; detail in services/matter README.
+
+## 2026-11-10 — Retired the Zigbee heating; tado° X on the dashboard
+Removed 6 old heating devices from z2m (MQTT remove request), and from HA 8 heating automations, `zoned_heating` and a template
+helper (HA stopped; backups taken). The Home dashboard now uses the tado climate entities. Verified post-restart. Detail in the
+homeassistant/z2mqtt logbooks.
+
+## 2026-11-10 — Apple Home duplicates of tado removed
+HA HomeKit Bridge no longer exports `climate`; tado devices stay native in Apple Home. Detail in the homeassistant logbook.
+
+## 2026-11-10 — Hall light diagnosis, TRV rejoin blocked, octopus_energy to HACS
+Entry hall switch lost its Zigbee route (mesh down to 2 routers after the thermostat swap): power-cycle needed. 3 old TRVs
+rejoined → removed + blocklisted (Nix too). octopus_energy moved from Nix to HACS (+pydantic), deployed. Detail in the
+host/service logbooks.
+
+## 2026-11-10 — Tapo camera working in HA again
+tapo_control stays in HACS. Nix now supplies onvif + pytapo 3.4.30 + python-kasa; deployed and verified (camera entities live).
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 
@@ -188,6 +258,7 @@ over the LAN and on the box: SHA256:Pi5MQV0M…) in `home-automation.nix`; the a
 (EXIT=0). Creating the `nbbackup` user + forced-command key on casaos was **blocked by the permission
 classifier** (new cross-host access), so nothing was created on either host. Pending user approval; steps in
 `services/homeassistant/MIGRATION.md` open item 2. casaos has `/usr/bin/rrsync` (rsync 3.2.7), `/footage` 437G free.
+
 ## 2026-10-30 — HA stack → homelab-notebook: Phase 0 (groundwork, nothing switched)
 Planned moving mosquitto/z2mqtt/matter-server/homeassistant from casaos Docker to homelab-notebook
 NixOS in 5 phases; runbook + findings in `services/homeassistant/MIGRATION.md`. Verified from the laptop:
