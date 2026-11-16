@@ -4,6 +4,14 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — Rack case: both west posts float, shorter; Ethernet jack opening
+`hardware/case/build_case.py`:
+- **Floating posts.** The NW lid post now floats like the SW one. Both come from `floating_post()`: a 7 x 7 column hung off the west wall and the south wall / front panel, with a 45 deg wedge underside.
+- **Shorter.** The posts are now `FLOAT_POST_H` = 10 mm (wedge 7 + 3 straight), down from ~14.5, so the tip sits at Z 31.7. Asserts keep them 1 mm clear of the fan top and of the board's tallest part, and tall enough for the wedge.
+- **Ethernet jack opening.** At the user's request, the front panel now has a through opening around the board's drop-jaw jack instead of being closed. The former inner `rj45_jack_pocket` now runs through the panel: X 19.2-36.4, Z ~20.7 to frame top + 0.3. There is still no hood, so nothing holds a plug down on the springs.
+
+Rebuilt: tray.stl and tray_rig.stl are manifold. Checked in renders: the front shows the jack through the new opening, and both west corner posts are short wedges. Not printed yet.
+
 ## 2026-11-16 — Rack case: tray_rig.stl, whole-tray skeleton test print
 The user wanted one quick test print that covers everything, not just the fan. `build_tray_rig` in `hardware/case/build_case.py` intersects the real tray, at full height, with keep volumes. It keeps:
 - all 7 board standoffs + pins

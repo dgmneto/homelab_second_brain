@@ -22,11 +22,11 @@ Layout:
     laptop: intake grill in the lid above the CPU block -> CPU block -> fan ->
     exhaust grill in the west wall beside the notch. No other vents, so the
     fan pulls everything through the CPU block. The SW lid-screw post would hit
-    the fan, so it floats: it hangs off the corner walls from just above the fan,
-    its underside a 45 deg wedge so it prints without support.
+    the fan, so both west posts float: each hangs off its corner walls, only
+    FLOAT_POST_H tall, its underside a 45 deg wedge so it prints without support.
   * Ethernet: USB Ethernet adapter on the loose child board, cable through the
-    rear wall. The board's drop-jaw RJ45 is unused; the front panel is closed
-    over it (only an inner pocket for the jack housing).
+    rear wall. No hood for the board's drop-jaw RJ45: the front panel just has
+    an opening around the jack (housing under the board up to its top-side frame).
 Parts to print: tray (floor + walls + front panel with rack ears) and lid; for the
 Lab Rax printable rack, rear_bracket_left/right.stl (ledges on the rear posts the
 case rests on).
@@ -95,7 +95,7 @@ GAUGE_PINS = [3.20 + 0.05 * i for i in range(9)]   # 3.20 .. 3.60
 
 # ---------------------------------------------------------------- lid
 POST = 7.0                 # corner posts for lid screws
-SW_POST_CLEAR = 1.0        # fan top -> underside of the floating SW post
+FLOAT_POST_H = 10.0        # west lid posts hang this far below the lid (wedge 7 + 3 straight)
 VENT_W, VENT_PITCH = 3.0, 6.0
 PORT_MARGIN = 1.0
 # Fit test 1: board 3.5 mm north, ports into the panel. Port fronts end this far
@@ -177,8 +177,10 @@ assert FAN_X0 + FAN["width_x"] <= NOTCH_X - 0.5, "fan does not fit the notch"
 assert FAN_Y0 >= Y_IN0 + 0.3, "fan hits the rear wall"
 assert FAN_Y0 + FAN["depth_y"] <= NOTCH_Y - 0.3, "fan hits the board's south edge"
 assert min(_xs) >= X_IN0 + 1.0, "board hits the west wall"
-SW_POST_Z0 = FAN_Z0 + FAN["thickness"] + SW_POST_CLEAR   # wedge tip, at the west wall
-assert SW_POST_Z0 + POST + 6 <= Z_TOP, "no room for the floating SW post above the fan"
+FLOAT_POST_Z0 = Z_TOP - FLOAT_POST_H                  # wedge tip, at the west wall
+assert FLOAT_POST_Z0 >= FAN_Z0 + FAN["thickness"] + 1, "floating SW post hits the fan"
+assert FLOAT_POST_Z0 >= BOARD_Z + brd.PCB_T + TALLEST + 1, "floating NW post hits the board's parts"
+assert FLOAT_POST_H >= POST + 2, "floating post too short for its wedge"
 assert BUTTON_X - BUTTON_NUT_D / 2 >= BOARD_EAST + 3, "power button nut hits the board"
 assert BUTTON_X + BUTTON_NUT_D / 2 <= X_IN1 - POST - 3, "power button nut hits the NE post"
 assert PANEL_H / 2 + BUTTON_NUT_D / 2 <= Z_TOP - 1, "power button nut hits the lid"
@@ -304,12 +306,14 @@ def post_notch(px, py):
     return x0, y0, x1, y1
 
 
-def sw_post(coll):
-    """SW lid-screw post, floating above the fan: a POST x POST column hung off the
-    west and south walls, its underside a 45 deg wedge rising east from the west
-    wall (prints without support)."""
-    x0, y0, x1, y1 = X_IN0 - 0.01, Y_IN0 - 0.01, X_IN0 + POST, Y_IN0 + POST
-    z0, z1 = SW_POST_Z0, Z_TOP
+def floating_post(name, py, coll):
+    """West lid-screw post (SW over the fan, NW to match), floating: a POST x POST
+    column hung off the west wall and the south wall / front panel, FLOAT_POST_H
+    tall, its underside a 45 deg wedge rising east from the west wall (prints
+    without support)."""
+    x0, x1 = X_IN0 - 0.01, X_IN0 + POST
+    y0, y1 = py - (0.01 if py < 0 else 0), py + POST + (0.01 if py > 0 else 0)
+    z0, z1 = FLOAT_POST_Z0, Z_TOP
     bm = bmesh.new()
     prof = [(x0, z0), (x1, z0 + POST), (x1, z1), (x0, z1)]
     vs = [bm.verts.new((x, y, z)) for y in (y0, y1) for x, z in prof]
@@ -319,7 +323,7 @@ def sw_post(coll):
         j = (i + 1) % 4
         bm.faces.new([vs[i], vs[j], vs[4 + j], vs[4 + i]])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return mesh_obj("post_sw_floating", bm, coll)
+    return mesh_obj(name, bm, coll)
 
 
 # ---------------------------------------------------------------- parts
@@ -337,8 +341,8 @@ def build_tray(root, pin_d=PIN_D):
         cyl(f"standoff_{i}", x, y, (FLOOR + BOARD_Z) / 2, STANDOFF_D, BOARD_Z - FLOOR + 0.01, adds)
         pin(f"pin_{i}", x, y, BOARD_Z - 0.01, pin_d, brd.PCB_T + PIN_ABOVE + 0.01, adds)
     for i, (px, py) in enumerate(post_xy()):
-        if (px, py) == (X_IN0, Y_IN0):
-            sw_post(adds)
+        if px == X_IN0:
+            floating_post(f"post_{i}_floating", py, adds)
         else:
             box(f"post_{i}", px, py, FLOOR - 0.01, px + POST, py + POST, Z_TOP, adds)
     for i, (hx, hy) in enumerate(FAN_HOLES):
@@ -362,7 +366,7 @@ def build_tray(root, pin_d=PIN_D):
                 bx + EDGE_CLEAR, ay + EDGE_CLEAR, top + EDGE_CLEAR, cuts)
     jx0, jx1 = brd.PORT_X["rj45"]
     box("rj45_jack_pocket", jx0 - EDGE_CLEAR, Y_FRONT - 1, BOARD_Z - brd.RJ45_JACK_BELOW - EDGE_CLEAR,
-        jx1 + EDGE_CLEAR, brd.rj45_front_y() + EDGE_CLEAR, RJ45_FRAME_TOP + 0.3, cuts)
+        jx1 + EDGE_CLEAR, Y_FRONT + PANEL_T + 1, RJ45_FRAME_TOP + 0.3, cuts)   # open through the panel
     # power button: east of the board, midway to the NE post, panel mid-height
     cyl("button_hole", BUTTON_X, Y_FRONT + PANEL_T / 2, PANEL_H / 2, BUTTON_HOLE_D, PANEL_T + 2, cuts, axis="Y")
     # rack ear slots
