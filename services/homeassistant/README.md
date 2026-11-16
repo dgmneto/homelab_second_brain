@@ -26,6 +26,14 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   there's no release asset) into that dir (owner `hass`, plus a `.js.gz`), or HACS → Redownload. No restart needed;
 >   clients must reload/clear the frontend cache.
 >
+> - **Ground Floor dashboard icon = the Matter (tado X) thermostat has no `hvac_action`.** `climate.living_room_living_room_thermostat`
+>   (platform `matter`) only reports state `heat`/`off` + `current_temperature`/`temperature`; Bubble-Card `styles` JS that maps
+>   `attributes.hvac_action` → icon gets `undefined` and the sub-button renders blank. Since 2026-11-09 the "Ground Floor"
+>   separator derives it (off → `mdi:radiator-off`, current < target → `mdi:radiator`, else `mdi:radiator-disabled`) and the
+>   sub-button has a static `icon` fallback. Read live attributes offline (no API token) from the recorder:
+>   `sudo nix shell nixpkgs#sqlite -c sqlite3 'file:/var/lib/hass/home-assistant_v2.db?mode=ro'` (states ⨝ states_meta ⨝
+>   state_attributes; put the SQL in a file piped over ssh to dodge quoting). No `jq`/`sqlite3`/`python3` on the box — copy
+>   `.storage/*` back and jq locally. Editing `.storage/lovelace.lovelace` needs HA stopped (it caches/overwrites it).
 > - **Removing dead entities without an API token** (done 2026-11-01): stop HA, back up `.storage/core.{config_entries,
 >   entity_registry,device_registry}`, jq-edit, start. A dead *integration* → delete its config entry + device. Dead
 >   mobile_app sensors → delete the registry entries (mobile_app keeps no separate sensor list in `.storage/mobile_app`,

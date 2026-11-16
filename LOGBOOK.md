@@ -131,6 +131,10 @@ host/service logbooks.
 ## 2026-11-10 — Tapo camera working in HA again
 tapo_control stays in HACS. Nix now supplies onvif + pytapo 3.4.30 + python-kasa; deployed and verified (camera entities live).
 
+## 2026-11-09 — HA: Ground Floor thermostat dashboard icon fixed
+Matter thermostat has no `hvac_action`; bubble-card icon script now derives it and has a static fallback. Detail in
+`services/homeassistant/LOGBOOK.md`.
+
 ## 2026-11-07 — Rack case: RJ45 height-variant fit pieces
 Six `rj45_fit_<dz>.stl` (hood height -0.5..+0.5 mm), each located on the H1/H2 board pins. Detail in the homelab-notebook host logbook.
 
