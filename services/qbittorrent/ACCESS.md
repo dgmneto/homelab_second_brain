@@ -7,7 +7,7 @@
   - Rides the gluetun VPN namespace (`network_mode: container:gluetunProtonVPN`); UI proxied to
     `gluetun:9090`, no host port. Down with gluetun.
   - ⚠️ The same password is **also hardcoded in** `../plex-qbittorrent-watchdog/watchdog.py`
-    (committed to the deployment repo). Rewire the watchdog to `op read` it and drop the literal,
-    then rotate.
+    (committed to the deployment repo). The watchdog is decommissioned (2026-11-11), but the literal
+    is still in that repo's history — rotate the password.
 
 Reach via the Claude-in-Chrome extension (see root `../../CLAUDE.md`).

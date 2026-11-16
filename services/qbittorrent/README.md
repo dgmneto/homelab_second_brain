@@ -14,8 +14,8 @@ ProtonVPN tunnel** provided by the `gluetunProtonVPN` container.
   order matters: gluetun must be up first.
 - ProtonVPN port forwarding (configured in gluetun) is pushed into qbittorrent via
   gluetun's `VPN_PORT_FORWARDING_UP_COMMAND` so inbound peer connections work.
-- A `plex-qbittorrent-watchdog` service exists in the stack (likely restarts
-  qbittorrent when the forwarded port / VPN changes).
+- ~~`plex-qbittorrent-watchdog`~~ — **decommissioned 2026-11-11**; it never restarted qbittorrent
+  anyway (it paused torrents during Plex playback). Nothing pauses torrents for Plex any more.
 
 ## Image
 
@@ -49,7 +49,6 @@ ProtonVPN tunnel** provided by the `gluetunProtonVPN` container.
 - `gluetunProtonVPN` — network provider (hard dependency).
 - `prowlarr` / `radarr` / `sonarr` / `bazarr` — indexer + *arr stack feed
   downloads here.
-- `plex-qbittorrent-watchdog` — monitors/restarts qbittorrent.
 
 ## Quirks / runbook
 
@@ -60,10 +59,9 @@ ProtonVPN tunnel** provided by the `gluetunProtonVPN` container.
   qbittorrent crashed.
 - Paths `/library/torrent` are identical host/container — keep that mapping for the
   *arr stack hardlink/move logic to work.
-- Torrents auto-pause while Plex is streaming: the host-side `systemd --user` service
-  **plex-qbittorrent-watchdog** stops/starts torrents via `docker exec` based on Plex
-  sessions. If downloads stall during playback (or never resume), check that service.
-  See `../plex-qbittorrent-watchdog/README.md`.
+- Torrents **no longer** auto-pause while Plex streams: the **plex-qbittorrent-watchdog**
+  was decommissioned 2026-11-11 (it got stuck thinking Plex was always streaming). See
+  `../plex-qbittorrent-watchdog/README.md`.
 
 ### Runbook: "downloads are all paused / stopped"
 
@@ -83,12 +81,12 @@ Claude-in-Chrome** — torrent state is visible instantly there; server logs do 
    |---|---|---|
    | orange globe, 0 peers | gluetun/VPN down | check `docker ps` gluetun first |
    | all `Stopped`, green globe, **0 B / 0%** | mass stop after a `watchtower` restart (unpinned `:latest`, 30s poll, recreates container → torrents return stopped) | select all → Resume |
-   | some `Stopped`, others mid-%, during/after Plex playback | **plex-qbittorrent-watchdog** stopped active torrents and didn't resume (crashed / lost state) → `journalctl --user -u plex-qbittorrent-watchdog` | restart watchdog; it only resumes hashes IT stopped |
+   | some `Stopped`, others mid-%, during/after Plex playback | was the **plex-qbittorrent-watchdog** — decommissioned 2026-11-11, so no longer a cause | select → Resume |
    | `Errored` torrents | missing files / moved disk | per-torrent recheck |
    | green globe, torrents `Downloading` but 0 B/s | no VPN port-forward / stalled peers | check gluetun port-forward |
 4. **Rule out config auto-pause:** Tools → Options → Downloads → "Do not start the
    download automatically" + "Torrent stop condition" (as of 2026-06-10 both OFF/None,
    so newly-added torrents are NOT expected to be stopped).
 5. Confirm watchtower restart theory: `docker logs qbittorrent | head` → `Build-date:`
-   vs outage time. Watchdog only stops *active* torrents, so all-`Stopped`-at-0B is the
-   restart signature, not the watchdog.
+   vs outage time. (The Plex watchdog is gone since 2026-11-11, so mass `Stopped` is the
+   watchtower restart signature.)

@@ -29,7 +29,7 @@ This is the knowledge layer.
 | [overseerr](overseerr/README.md) | casaos | docker |
 | [pihole](pihole/README.md) | **homelab-notebook** | NixOS module (tailnet ad-blocking DNS) |
 | [plex](plex/README.md) | casaos | docker |
-| [plex-qbittorrent-watchdog](plex-qbittorrent-watchdog/README.md) | casaos | `systemd --user` unit |
+| [plex-qbittorrent-watchdog](plex-qbittorrent-watchdog/README.md) | casaos | ⛔ decommissioned 2026-11-11 |
 | [prowlarr](prowlarr/README.md) | casaos | docker (gluetun netns) |
 | [qbittorrent](qbittorrent/README.md) | casaos | docker (gluetun netns) |
 | [radarr](radarr/README.md) | casaos | docker |

@@ -54,6 +54,13 @@ The child board now lies loose in the case: posts, rear openings and fit_childbo
 ## 2026-11-15 — Rack case: rear Ethernet cable hole for a USB adapter
 16 x 14 mm hole in the rear wall for an Ethernet cable to a USB Ethernet adapter inside. Detail in the homelab-notebook host logbook.
 
+## 2026-11-11 — Killed plex-qbittorrent-watchdog
+User asked to kill it ("isn't working properly"). It had been stuck since 10:50 thinking Plex was
+streaming, holding 7 torrents stopped. Stopped + disabled the `dgmneto` user unit on casaos, resumed
+the torrents it held (4 resumed, 3 already gone), and marked it decommissioned across
+services/plex, qbittorrent, watchdog, casaos cron.md, notes. Detail in
+`services/plex-qbittorrent-watchdog/LOGBOOK.md`.
+
 ## 2026-11-11 — tado devices all unavailable: Thread path down
 matter-server/HA fine; the Thread devices can't be reached through the Apple TV from any LAN host since 06:27. The UniFi now
 sends IPv6 RAs from a non-link-local address (hosts lose their v6 default route). Waiting on user checks. Detail in services/matter.

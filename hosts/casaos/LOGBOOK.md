@@ -8,6 +8,10 @@ Read-only. `ssh casaos` → `lscpu`/`free`/`dmidecode`/`docker stats`: Celeron N
 homelab-notebook per README: Celeron N4020 2c, 11.7 GB (HA stack uses ~2 GB), 5400 rpm HDD. Verdict: neither is adequate
 (game server wants ~12–16 GB RAM + strong single-thread CPU); casaos hardware added to its README.
 
+## 2026-11-11 — Removed dgmneto user unit plex-qbittorrent-watchdog
+`systemctl --user disable --now` (run as claude via `sudo -u dgmneto XDG_RUNTIME_DIR=/run/user/1002`).
+Unit now absent from dgmneto's user manager. Linger for dgmneto left on (harmless).
+
 ## 2026-11-02 — terminus-worker joined internalNetwork (172.21.0.142)
 Compose change in `~/homelab/services/terminus` (committed on casaos, push from Mac). See services/terminus.
 

@@ -40,5 +40,6 @@ manual removal in the nginxIntern admin UI (not done via this repo),
 
 ## Open items
 - Add vault logins for **Bazarr**, **Home Assistant**, **Zigbee2MQTT**, **Jellyfin**.
-- **qBittorrent:** password is in the vault but the same value is still hardcoded in
-  `services/plex-qbittorrent-watchdog/watchdog.py` — rewire to `op read` and rotate.
+- **qBittorrent:** password is in the vault but the same value is still hardcoded in the (now
+  decommissioned, 2026-11-11) `services/plex-qbittorrent-watchdog/watchdog.py` in the deployment
+  repo's git history — rotate it.
