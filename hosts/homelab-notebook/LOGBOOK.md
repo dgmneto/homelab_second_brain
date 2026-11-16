@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-16 — Rack case: tray fixes after the first full print
+Feedback from the user's first tray print, applied in `hardware/case/build_case.py`:
+- **SSD bosses removed.** The drive now sits flat on the floor (Z 2.5-12.0), with counterbored M3 holes straight through the 2.5 mm floor (`DRIVE_BOSS_*` gone). That leaves ~1 mm of floor under each screw head, so use thin-head drive screws.
+- **SW lid post floats above the fan.** The full-height SW corner post collided with the blower. It is now `sw_post()`: a 7 x 7 column hung off the west and south walls from 1 mm above the fan top (`SW_POST_CLEAR`, Z 27.1) up to the lid, with a 45 deg wedge underside rising east from the west wall, so it prints without support. An assert guards room for it. The lid-screw pilot breaks through the wedge underside, which is harmless.
+- **RJ45 hood removed.** The hood, its channel/latch cuts, `rj45_test.stl`, `rj45_fit_*.stl` and their renders are deleted, along with the `RJ45_*` hood constants. The front panel is now closed over the jack. Only the inner pocket for the board's jack housing remains, leaving ~0.7 mm of panel skin in front of it.
+Rebuilt: tray.stl is manifold; fit_test.stl keeps its 4 pre-existing non-manifold edges. Checked in a SW-corner render and a front render: the post clears the fan, and the panel shows only power/HDMI/USB openings. Not reprinted yet.
+
 ## 2026-11-15 — Rack case: rear support brackets for the Lab Rax rack
 Added `rear_bracket_left.stl` / `rear_bracket_right.stl` (mirror images, ~7 cm³ each) to `hardware/case/build_case.py` (`build_rear_bracket`, constants `RACK_*`/`BRK_*`). Each is an L that bolts to the front face of a rear post's flange through the case's U holes at 6.35 and 22.225 mm, using M6 clearance holes, M6 bolts from the front and nuts behind. A 4 mm ledge reaches 20 mm past the post's inner edge, so ~19 mm runs under the case floor, and 30 mm forward. It sits 0.1 mm below the case bottom so the case rests on it and the front ears only locate it. A 2 mm brace on the lip side stays clear of the bolt heads. Exported lying on the outer face, so the L is in the layer plane. Post geometry measured by sectioning the rack's `5U Vertical Post.3mf`: flange 30 x 6, holes 7.6 mm at 22.86 mm from the outer side, Z 6.32/22.23/38.12 per U; the 7 x 5 mm lip next to the side web keeps the bracket at X >= 14.5. The ledge sits ~4 mm into the U below, at the rear corners only. Verified the hole positions by sectioning the STL; Blender reports it manifold. Render: `out/rear_bracket.png`. Not printed yet.
 

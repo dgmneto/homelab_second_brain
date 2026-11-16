@@ -21,23 +21,19 @@ Layout:
     west wall. Forced air path, as in the
     laptop: intake grill in the lid above the CPU block -> CPU block -> fan ->
     exhaust grill in the west wall beside the notch. No other vents, so the
-    fan pulls everything through the CPU block.
-  * Ethernet: the board has half of a laptop "drop-jaw" jack. The plug rests,
-    contacts down, on springs in a housing under the board, its body passing
-    up through a board cutout, latch up. A printed hood on top, hanging off the
-    front panel, supplies the rest: side walls, a ceiling that holds the plug
-    down on the springs, a nose stop, and a lip the plug's own spring latch
-    snaps behind. Press the latch (on top) to release, like any RJ45 jack.
-
+    fan pulls everything through the CPU block. The SW lid-screw post would hit
+    the fan, so it floats: it hangs off the corner walls from just above the fan,
+    its underside a 45 deg wedge so it prints without support.
+  * Ethernet: USB Ethernet adapter on the loose child board, cable through the
+    rear wall. The board's drop-jaw RJ45 is unused; the front panel is closed
+    over it (only an inner pocket for the jack housing).
 Parts to print: tray (floor + walls + front panel with rack ears) and lid; for the
 Lab Rax printable rack, rear_bracket_left/right.stl (ledges on the rear posts the
 case rests on).
 Test first: pin_gauge.stl, a row of pins around the hole size to pick a snug
-PIN_D; rj45_test.stl, a small cut of the panel + hood to check plug fit;
+PIN_D;
 fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
 check the port openings against the real board (snug PIN_D pins: two pins must hold it square);
-rj45_fit_<dz>.stl, the same cut to the RJ45 alone, its hood RJ45_FIT_DZ higher/lower
-(dz raised on the frame): the one that holds the plug best sets RJ45_PLUG_FLOOR;
 The I/O child board (USB-A, audio) is not mounted: it lies loose inside, fixed by
 hand, with a USB Ethernet adapter on it (cable through the rear wall).
 """
@@ -76,7 +72,6 @@ GAP_SOUTH = 15.0           # room south of the board for cable loops
 # (ribbon header is in the board's SE corner).
 DRIVE_SX, DRIVE_SY, DRIVE_T = 100.0, 69.85, 9.5  # footprint X, Y; 9.5 covers 7 mm drives too
 DRIVE_X0, DRIVE_Y0 = 9.0, 66.0                   # SW corner; boxed in by standoffs H4/H5/H7
-DRIVE_BOSS_H, DRIVE_BOSS_D = 3.0, 7.0
 # bottom holes: 14.0 / 90.6 from the connector end, 4.07 / 65.79 from a long side
 DRIVE_HOLES = [(DRIVE_SX - a, b) for a in (14.0, 90.6) for b in (4.07, 65.79)]  # from SW corner
 SCREW_CLEAR = 3.4          # M3 clearance
@@ -95,6 +90,7 @@ GAUGE_PINS = [3.20 + 0.05 * i for i in range(9)]   # 3.20 .. 3.60
 
 # ---------------------------------------------------------------- lid
 POST = 7.0                 # corner posts for lid screws
+SW_POST_CLEAR = 1.0        # fan top -> underside of the floating SW post
 VENT_W, VENT_PITCH = 3.0, 6.0
 PORT_MARGIN = 1.0
 # Fit test 1: board 3.5 mm north, ports into the panel. Port fronts end this far
@@ -102,17 +98,6 @@ PORT_MARGIN = 1.0
 PORT_RECESS = 1.0
 EDGE_CLEAR = 0.5           # board edge / RJ45 jack -> pocket walls
 
-# ---------------------------------------------------------------- RJ45 hood
-# First print (11.9 / 6.8 / 6.6) was too tight for the plug to go in at all; the
-# 12.7 / 7.4 / 7.4 estimates after it were never confirmed. Channel and slot now
-# copy a third-party drop-jaw cover (rj45-cover.stl, 1 mm walls) that fit the real
-# board and plug perfectly (2026-11-07).
-RJ45_OPEN_W = 12.5         # cover inner width (plug 11.68)
-RJ45_BODY_H = 7.15         # cover inner height, springs -> ceiling (plug 6.60)
-RJ45_LATCH_W = 7.2         # cover slot width (7.16)
-RJ45_LATCH_FACE_H = 8.4    # plug overall height 8.00; top of latch slot = the catch lip
-RJ45_POCKET_H = 11.0       # behind the lip the latch springs back up into this pocket
-RJ45_WALL = 2.0
 # Rear-wall pass-through for an Ethernet cable to a USB Ethernet adapter inside (not
 # modelled; it plugs into the loose child board). Fits a plug with its boot.
 CABLE_HOLE_W, CABLE_HOLE_H = 16.0, 14.0
@@ -141,9 +126,6 @@ BRK_LEDGE_X1 = RACK_POST_W + 20.0   # case side is 1 mm in from the post; ~19 mm
 BRK_GAP = 0.1               # ledge top -> case bottom
 BRK_GUSSET_T = 2.0
 BRK_HOLE_D = 6.6            # M6 clearance
-# rj45_fit_*.stl: the hood's height over the springs (RJ45_PLUG_FLOOR is an estimate)
-RJ45_FIT_DZ = [-0.5, -0.3, -0.1, 0.1, 0.3, 0.5]
-
 # ---------------------------------------------------------------- derived
 _xs = [x for x, _ in brd.outline_mm()]
 _ys = [y for _, y in brd.outline_mm()]
@@ -175,9 +157,7 @@ Z_TOP = PANEL_H - LID_T                            # top of walls / bottom of li
 CX = (X_OUT0 + X_OUT1) / 2
 
 RJ45_CX = brd.rj45_center_x()
-RJ45_FLOOR = BOARD_Z - brd.RJ45_PLUG_FLOOR              # plug's contact face, on the springs
 RJ45_FRAME_TOP = BOARD_Z + brd.PCB_T + brd.RJ45_TOP_H   # top-side frame around the cutout
-RJ45_STOP_Y = brd.rj45_frame_rect()[1]                 # nose stop = back wall of the frame
 BUTTON_X = (BOARD_EAST + X_IN1 - POST) / 2
 _cpu = next(r for n, r, _, _ in brd.PARTS if n == "cpu_heatplate")
 CPU_RECT = brd.rect_mm(*_cpu)
@@ -189,7 +169,8 @@ assert FAN_X0 + FAN["width_x"] <= NOTCH_X - 0.5, "fan does not fit the notch"
 assert FAN_Y0 >= Y_IN0 + 0.3, "fan hits the rear wall"
 assert FAN_Y0 + FAN["depth_y"] <= NOTCH_Y - 0.3, "fan hits the board's south edge"
 assert min(_xs) >= X_IN0 + 1.0, "board hits the west wall"
-assert RJ45_FLOOR + RJ45_POCKET_H <= Z_TOP - 0.5, "RJ45 latch pocket hits the lid"
+SW_POST_Z0 = FAN_Z0 + FAN["thickness"] + SW_POST_CLEAR   # wedge tip, at the west wall
+assert SW_POST_Z0 + POST + 6 <= Z_TOP, "no room for the floating SW post above the fan"
 assert BUTTON_X - BUTTON_NUT_D / 2 >= BOARD_EAST + 3, "power button nut hits the board"
 assert BUTTON_X + BUTTON_NUT_D / 2 <= X_IN1 - POST - 3, "power button nut hits the NE post"
 assert PANEL_H / 2 + BUTTON_NUT_D / 2 <= Z_TOP - 1, "power button nut hits the lid"
@@ -315,57 +296,26 @@ def post_notch(px, py):
     return x0, y0, x1, y1
 
 
-# ---------------------------------------------------------------- RJ45 hood
-def rj45_hood_adds(coll, dz=0.0):
-    w = RJ45_OPEN_W / 2 + RJ45_WALL
-    top = min(RJ45_FLOOR + dz + RJ45_POCKET_H + RJ45_WALL, Z_TOP)   # the lid caps the latch pocket
-    # hood: sits 0.3 above the top-side frame, hangs off the panel
-    box("rj45_hood", RJ45_CX - w, RJ45_STOP_Y - RJ45_WALL, RJ45_FRAME_TOP + 0.3,
-        RJ45_CX + w, Y_FRONT + 0.01, top, coll)
-
-
-def rj45_hood_cuts(coll, dz=0.0):
-    """dz raises the ceiling, latch lip and pocket over the springs."""
-    hw, lw = RJ45_OPEN_W / 2, RJ45_LATCH_W / 2
-    floor = RJ45_FLOOR + dz
-    low = min(floor, RJ45_FLOOR)      # the opening never gets a ledge above the springs
-    # plug body channel, through the panel back to the nose stop
-    box("rj45_body", RJ45_CX - hw, RJ45_STOP_Y, low,
-        RJ45_CX + hw, Y_FRONT + PANEL_T + 1, floor + RJ45_BODY_H, coll)
-    # latch slot in the panel face (its top edge is the catch lip)
-    box("rj45_latch_slot", RJ45_CX - lw, Y_FRONT - 0.01, low,
-        RJ45_CX + lw, Y_FRONT + PANEL_T + 1, floor + RJ45_LATCH_FACE_H, coll)
-    # latch pocket behind the lip
-    box("rj45_latch_pocket", RJ45_CX - lw - 0.2, RJ45_STOP_Y, floor,
-        RJ45_CX + lw + 0.2, Y_FRONT, floor + RJ45_POCKET_H, coll)
-
-
-def build_rj45_coupon(tray, root):
-    """Small test print: panel + hood around the jack, with stand-ins for the
-    board's springs (floor) and top-side frame. Print panel-face down."""
-    me = tray.data.copy()
-    coupon = bpy.data.objects.new("RJ45_test", me)
-    root.objects.link(coupon)
-    work = new_coll("_work", root)
-    keep = new_coll("_keep", work)
-    w = 10.0
-    y0 = RJ45_STOP_Y - RJ45_WALL - 1
-    top = min(RJ45_FLOOR + RJ45_POCKET_H + RJ45_WALL, Z_TOP)   # the lid caps the latch pocket
-    box("keep", RJ45_CX - w, y0, RJ45_FLOOR - 3, RJ45_CX + w, Y_FRONT + PANEL_T + 1, top + 1, keep)
-    boolean(coupon, "INTERSECT", keep)
-    add = new_coll("_add", work)
-    hw, sw = RJ45_OPEN_W / 2, w - 0.5
-    box("standin_floor", RJ45_CX - sw, y0 + 0.5, RJ45_FLOOR - 3, RJ45_CX + sw, Y_FRONT + 0.2, RJ45_FLOOR, add)
-    for sx in (-1, 1):
-        box(f"standin_frame{sx}", RJ45_CX + sx * hw, y0 + 0.5, RJ45_FLOOR - 0.01,
-            RJ45_CX + sx * sw, Y_FRONT + 0.2, RJ45_FRAME_TOP + 0.5, add)   # 0.2 into the hood
-    boolean(coupon, "UNION", add)
-    bpy.data.collections.remove(work)
-    return coupon
+def sw_post(coll):
+    """SW lid-screw post, floating above the fan: a POST x POST column hung off the
+    west and south walls, its underside a 45 deg wedge rising east from the west
+    wall (prints without support)."""
+    x0, y0, x1, y1 = X_IN0 - 0.01, Y_IN0 - 0.01, X_IN0 + POST, Y_IN0 + POST
+    z0, z1 = SW_POST_Z0, Z_TOP
+    bm = bmesh.new()
+    prof = [(x0, z0), (x1, z0 + POST), (x1, z1), (x0, z1)]
+    vs = [bm.verts.new((x, y, z)) for y in (y0, y1) for x, z in prof]
+    bm.faces.new(vs[:4][::-1])
+    bm.faces.new(vs[4:])
+    for i in range(4):
+        j = (i + 1) % 4
+        bm.faces.new([vs[i], vs[j], vs[4 + j], vs[4 + i]])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return mesh_obj("post_sw_floating", bm, coll)
 
 
 # ---------------------------------------------------------------- parts
-def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
+def build_tray(root, pin_d=PIN_D):
     work = new_coll("_work", root)
     tray = box("Tray", X_OUT0, Y_OUT0, 0, X_OUT1, Y_FRONT, Z_TOP, root)
 
@@ -378,14 +328,13 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
     for i, (x, y, _) in enumerate(brd.HOLES_MM):
         cyl(f"standoff_{i}", x, y, (FLOOR + BOARD_Z) / 2, STANDOFF_D, BOARD_Z - FLOOR + 0.01, adds)
         pin(f"pin_{i}", x, y, BOARD_Z - 0.01, pin_d, brd.PCB_T + PIN_ABOVE + 0.01, adds)
-    for i, (dx, dy) in enumerate(DRIVE_HOLES):
-        cyl(f"drive_boss_{i}", DRIVE_X0 + dx, DRIVE_Y0 + dy, FLOOR + DRIVE_BOSS_H / 2 - 0.01,
-            DRIVE_BOSS_D, DRIVE_BOSS_H + 0.02, adds)
     for i, (px, py) in enumerate(post_xy()):
-        box(f"post_{i}", px, py, FLOOR - 0.01, px + POST, py + POST, Z_TOP, adds)
+        if (px, py) == (X_IN0, Y_IN0):
+            sw_post(adds)
+        else:
+            box(f"post_{i}", px, py, FLOOR - 0.01, px + POST, py + POST, Z_TOP, adds)
     for i, (hx, hy) in enumerate(FAN_HOLES):
         cyl(f"fan_post_{i}", hx, hy, (FLOOR + FAN_Z0) / 2, FAN_POST_D, FAN_Z0 - FLOOR + 0.01, adds)
-    rj45_hood_adds(adds, rj45_dz)
     boolean(tray, "UNION", adds)
 
     cuts = new_coll("_cuts", work)
@@ -395,7 +344,6 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
         ax, _, bx, _ = brd.port_rect(name)
         box(f"cut_{name}", ax - PORT_MARGIN, Y_FRONT - 1, BOARD_Z - below - PORT_MARGIN,
             bx + PORT_MARGIN, Y_FRONT + PANEL_T + 1, top + above + PORT_MARGIN, cuts)
-    rj45_hood_cuts(cuts, rj45_dz)
     # pockets in the panel's inner face: board north edge where it reaches in, and
     # the RJ45 jack (under the board, and its top-side frame)
     north = brd.outline_mm()[:6]
@@ -419,10 +367,10 @@ def build_tray(root, pin_d=PIN_D, rj45_dz=0.0):
                 cyl(f"ear_{sx}_{hz}_{dx}", ex + dx * (EAR_SLOT_L - EAR_SLOT_D) / 2, yc, z, EAR_SLOT_D, ly, cuts, axis="Y")
             box(f"ear_{sx}_{hz}_mid", ex - (EAR_SLOT_L - EAR_SLOT_D) / 2, Y_FRONT - 1, z - EAR_SLOT_D / 2,
                 ex + (EAR_SLOT_L - EAR_SLOT_D) / 2, Y_FRONT + PANEL_T + 1, z + EAR_SLOT_D / 2, cuts)
-    # drive screws from below, counterbored
+    # drive screws from below, counterbored; the drive sits flat on the floor
     for i, (dx, dy) in enumerate(DRIVE_HOLES):
         x, y = DRIVE_X0 + dx, DRIVE_Y0 + dy
-        cyl(f"drive_hole_{i}", x, y, FLOOR, SCREW_CLEAR, 2 * (FLOOR + DRIVE_BOSS_H) + 2, cuts)
+        cyl(f"drive_hole_{i}", x, y, FLOOR, SCREW_CLEAR, 2 * FLOOR + 2, cuts)
         cyl(f"drive_cbore_{i}", x, y, 0, SCREW_CBORE_D, 2 * SCREW_CBORE_H, cuts)
     # lid screw pilots in corner posts
     for i, (px, py) in enumerate(post_xy()):
@@ -483,12 +431,12 @@ def build_context(root, board_glb, fan_glb):
     """Board, drive and fan: assembly/preview only, not printed."""
     board_objs = import_glb(board_glb, root, (0, 0, BOARD_Z))
     fan_objs = import_glb(fan_glb, root, (FAN_X0, FAN_Y0, FAN_Z0))
-    drive = box("drive_2_5in", DRIVE_X0, DRIVE_Y0, FLOOR + DRIVE_BOSS_H,
-                DRIVE_X0 + DRIVE_SX, DRIVE_Y0 + DRIVE_SY, FLOOR + DRIVE_BOSS_H + DRIVE_T, root)
+    drive = box("drive_2_5in", DRIVE_X0, DRIVE_Y0, FLOOR,
+                DRIVE_X0 + DRIVE_SX, DRIVE_Y0 + DRIVE_SY, FLOOR + DRIVE_T, root)
     drive.data.materials.append(material("drive", (0.25, 0.27, 0.3)))
     xe = DRIVE_X0 + DRIVE_SX   # SATA data+power connector, east end (visual only)
-    sata = box("drive_sata_connector", xe - 4, DRIVE_Y0 + 8, FLOOR + DRIVE_BOSS_H + 1,
-               xe + 0.5, DRIVE_Y0 + 8 + 40, FLOOR + DRIVE_BOSS_H + DRIVE_T - 1.5, root)
+    sata = box("drive_sata_connector", xe - 4, DRIVE_Y0 + 8, FLOOR + 1,
+               xe + 0.5, DRIVE_Y0 + 8 + 40, FLOOR + DRIVE_T - 1.5, root)
     sata.data.materials.append(material("sata", (0.95, 0.85, 0.2)))
     return board_objs + fan_objs + [drive, sata]
 
@@ -511,7 +459,7 @@ def bar(name, p, q, z0, z1, coll, w=FIT_BAR_W):
 
 
 def build_fit_test(tray, root, name="Fit_test", ports=None, label=None):
-    """Tray cut down to the front panel strip (ports + RJ45 hood) and the two north
+    """Tray cut down to the front panel strip (ports) and the two north
     board mounts (H1, H2; the rest checked out in fit test 1), re-based on a light
     bar frame. Everything drops by the same amount, so board-to-panel alignment is
     exact; only the standoffs get shorter. ports: keep only these ports' strip of
@@ -575,21 +523,6 @@ def text_mesh(name, body, x, y, z0, size, coll, depth=0.6):
     t.select_set(True)
     bpy.ops.object.convert(target="MESH")
     return t
-
-
-def build_rj45_fits(root, outdir):
-    """rj45_fit_<dz>.stl: fit_test cut to the RJ45 alone, one per RJ45_FIT_DZ, the
-    hood channel raised by dz (mm, raised on the frame). The board drops on the H1/H2
-    pins, so only the hood height differs between them."""
-    for dz in RJ45_FIT_DZ:
-        work = new_coll("_work_tray", root)
-        tray = build_tray(work, rj45_dz=dz)
-        tag = f"{dz:+.1f}"
-        fit = build_fit_test(tray, root, f"RJ45_fit_{tag}", ports=["rj45"], label=tag)
-        export_stl(fit, os.path.join(outdir, f"rj45_fit_{tag}.stl"))
-        fit.hide_render = True
-        bpy.data.objects.remove(tray)
-        bpy.data.collections.remove(work)
 
 
 def build_rear_bracket(root, name):
@@ -694,10 +627,6 @@ def main(outdir):
     gauge = build_pin_gauge(case)
     export_stl(gauge, os.path.join(outdir, "pin_gauge.stl"))
     gauge.hide_render = True
-    build_rj45_fits(case, outdir)
-    coupon = build_rj45_coupon(tray, case)
-    export_stl(coupon, os.path.join(outdir, "rj45_test.stl"))
-    coupon.hide_render = True
 
     build_context(ctx, os.path.join(HERE, "..", "board", "out", "board.glb"),
                   os.path.join(HERE, "..", "fan", "out", "fan.glb"))
@@ -711,9 +640,7 @@ def main(outdir):
         f.write(f"board bottom at Z {BOARD_Z:.1f}, tallest part top at Z {BOARD_Z + brd.PCB_T + TALLEST:.1f}, "
                 f"lid underside at Z {Z_TOP:.1f}\n")
         f.write(f"drive: X {DRIVE_X0}-{DRIVE_X0 + DRIVE_SX:.1f}, Y {DRIVE_Y0}-{DRIVE_Y0 + DRIVE_SY:.1f}, "
-                f"Z {FLOOR + DRIVE_BOSS_H}-{FLOOR + DRIVE_BOSS_H + DRIVE_T}\n")
-        f.write(f"RJ45: plug Z {RJ45_FLOOR:.1f}-{RJ45_FLOOR + RJ45_BODY_H:.1f} (through the board, latch up), center X {RJ45_CX:.1f}, nose stop Y {RJ45_STOP_Y:.1f}, "
-                f"panel face Y {Y_FRONT + PANEL_T:.1f}\n")
+                f"Z {FLOOR}-{FLOOR + DRIVE_T}\n")
         f.write(f"fan: X {FAN_X0:.1f}-{FAN_X0 + FAN['width_x']:.1f}, Y {FAN_Y0:.1f}-{FAN_Y0 + FAN['depth_y']:.1f}, "
                 f"Z {FAN_Z0:.1f}-{FAN_Z0 + FAN['thickness']:.1f}; gap to tab {NOTCH_X - FAN_X0 - FAN['width_x']:.1f}\n")
         cx = X_IN1 - POST - CABLE_HOLE_EAST

@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — Rack case: tray fixes after the first full print
+Feedback from the user's first tray print, applied in `hardware/case/build_case.py`:
+- **SSD bosses removed.** The drive now sits flat on the floor (Z 2.5-12.0), with counterbored M3 holes straight through the 2.5 mm floor (`DRIVE_BOSS_*` gone). That leaves ~1 mm of floor under each screw head, so use thin-head drive screws.
+- **SW lid post floats above the fan.** The full-height SW corner post collided with the blower. It is now `sw_post()`: a 7 x 7 column hung off the west and south walls from 1 mm above the fan top (`SW_POST_CLEAR`, Z 27.1) up to the lid, with a 45 deg wedge underside rising east from the west wall, so it prints without support. An assert guards room for it. The lid-screw pilot breaks through the wedge underside, which is harmless.
+- **RJ45 hood removed.** The hood, its channel/latch cuts, `rj45_test.stl`, `rj45_fit_*.stl` and their renders are deleted, along with the `RJ45_*` hood constants. The front panel is now closed over the jack. Only the inner pocket for the board's jack housing remains, leaving ~0.7 mm of panel skin in front of it.
+Rebuilt: tray.stl is manifold; fit_test.stl keeps its 4 pre-existing non-manifold edges. Checked in a SW-corner render and a front render: the post clears the fan, and the panel shows only power/HDMI/USB openings. Not reprinted yet.
+
 ## 2026-11-16 — Merged six stranded claude/* branches into main; committed casaos live config
 Previous cloud sessions had pushed work to branches that were never merged. Merged into `main` (`--no-ff`):
 `claude/relaxed-dirac-8odk24` (also contains `claude/ecstatic-meitner-51euhx`), `vigilant-newton-jh54lu`,
