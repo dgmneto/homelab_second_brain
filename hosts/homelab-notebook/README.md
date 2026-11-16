@@ -17,9 +17,9 @@ Layout:
 
 ## Hardware
 
-`192.168.11.21` (DHCP — reserve it on the router), Acer Aspire A315-34, Celeron N4020 (2 cores),
+`192.168.11.21` (DHCP — reserve it on the router; **NIC `enp2s0` (wired, Realtek RTL8168h / r8169, 1 Gbps), MAC `08:8f:c3:96:1a:67`** (verified 2026-11-15). Link health: `cat /sys/class/net/enp2s0/{speed,carrier_changes}` + `journalctl -k -b | grep -iE 'enp2s0|downshift'`. A "Downshift … 100Mbps, check cabling!" message means a bad cable or connector (seen 2026-11-15). iperf3 is not installed on either host. Search casaos' `ip neigh` for it if the lease ever moves. When the box is unreachable, check from casaos: `ping 192.168.11.21` + `ip neigh show 192.168.11.21`. FAILED there means the box itself is off the LAN, not a Tailscale problem), Acer Aspire A315-34, Celeron N4020 (2 cores),
 4 GB soldered RAM + SO-DIMM slot now populated (**11.7 GB total** per `free -m`, 2026-10-28; slot max 12 GB), 1 TB 5400 rpm HDD (partitions labelled
-`HL-BOOT`/`HL-SWAP`/`HL-ROOT`). NixOS 26.05, **no Docker** — services are native NixOS modules.
+`HL-BOOT`/`HL-SWAP`/`HL-ROOT`). **The RTC does not keep time over a power loss**: after the 2026-11-15 crashes the box booted at 1 Jan, and the journal shows boots "starting" 2026-03-17 (uptime reads ~2875 days) until NTP syncs. So don't trust `uptime` or `--list-boots` dates; use `journalctl -b -1 | tail` for when the last boot ended. A side effect: `pihole-ftl-setup` fails at boot ("No DNS resolution available"), which leaves the system `degraded`. NixOS 26.05, **no Docker** — services are native NixOS modules.
 
 ## Access
 
