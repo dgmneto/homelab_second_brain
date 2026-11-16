@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — casaos rack case designed
+A 10" 3U printable case for casaos (ZimaBoard 832, SAS HBA via a riser, Flex-ATX PSU, 2 SATA + 2 SAS 3.5" drives) in `hosts/casaos/hardware/case/`. Detail in the casaos host logbook.
+
 ## 2026-11-15 — Rack case: rear support brackets
 Left/right L brackets for the Lab Rax rack's rear posts; the case rests on their ledges. Detail in the homelab-notebook host logbook.
 

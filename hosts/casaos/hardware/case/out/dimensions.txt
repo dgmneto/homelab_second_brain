@@ -1,0 +1,13 @@
+front panel: 254.0 x 132.56 mm (3U, 10")
+body: 220.0 W x 238.2 D x 132.56 H mm (depth incl. panel)
+rack ear slots Z (from panel bottom): 5.96, 66.28, 126.61
+column X 2.5-90.5, divider X 90.5-93.5, cage X 93.5-217.5
+drive slots 26.7 wide, ribs 5.73; drives Y 36.0-183.0, top Z 104.6; 49.7 mm behind them for connectors
+slot X: 93.5, 125.9, 158.4, 190.8
+PSU (Flex ATX 81.5x40.5x150.0): X 5.8, Y 82.7-232.7, Z 3.0-43.5
+board shelf top Z 56.5; ZimaBoard Z 56.5-87.5, Y 94.0-232.7
+HBA shelf top Z 101.5; card envelope 168.0x69.0x20.0 at Z 104.5-124.5; lid underside Z 130.06
+fans: 120 mm at X 156.0 Z 66.3; 80 mm at X 52.0 Z 88.0
+power button hole 16.2 mm at X 30.0 Z 26.0; DC cable hole 9.0 mm rear at X 80.0 Z 49.5
+tray footprint for printing: 254 x 238 x 133 mm
+clearance check: OK

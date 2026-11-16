@@ -10,6 +10,10 @@ changes: OS, disks, users, cron). Cross-cutting memories about this box live in
 [ssh-access](../../notes/ssh-access.md), [footage-disk-leak](../../notes/footage-disk-leak.md),
 [disk-health-storage-array](../../notes/disk-health-storage-array.md).
 
+**Hardware:** a **ZimaBoard 832** (Celeron N3450, 8 GB, onboard AHCI SATA only; `dmidecode` 2026-11-16) with 2 × 3.5" SATA
+disks (the RAID1 pair) and a 29 GB eMMC system disk. A 3D-printed 10" 3U rack case for it plus a SAS HBA
+and 2 more 3.5" SAS disks is designed in [hardware/case/](hardware/case/README.md) (not printed yet).
+
 ## Access
 
 The homelab is `homelab` (`192.168.11.13`, hostname `casaos`), an **x86_64 Debian 12 (bookworm)**
