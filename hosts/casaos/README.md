@@ -10,13 +10,16 @@ changes: OS, disks, users, cron). Cross-cutting memories about this box live in
 [ssh-access](../../notes/ssh-access.md), [footage-disk-leak](../../notes/footage-disk-leak.md),
 [disk-health-storage-array](../../notes/disk-health-storage-array.md).
 
-## Hardware (verified 2026-11-15)
+## Hardware (verified 2026-11-15/16)
 
-Intel **Celeron N3450** (Apollo Lake, 4 cores/4 threads, 1.1 GHz base / 2.2 GHz burst), **7.6 GiB RAM**
-(4×2 GB, board max 8 GB — already maxed), 1.9 GiB swap (~1.1 GiB in use). Root on eMMC
-`/dev/mmcblk0p2` (27 GB, 54%); `/footage` (492 GB) and `/library` (3.1 TB) on the LVM RAID1 mirror.
+**ZimaBoard 832** (`dmidecode` 2026-11-16): Intel **Celeron N3450** (Apollo Lake, 4 cores/4 threads, 1.1 GHz base / 2.2 GHz
+burst), **7.6 GiB RAM** (8 GB onboard, already maxed), onboard AHCI SATA only. 1.9 GiB swap (~1.1 GiB in use). Root on
+the 29 GB eMMC `/dev/mmcblk0p2` (27 GB, 54%); 2 × 3.5" SATA disks (the RAID1 pair) carry `/footage` (492 GB) and
+`/library` (3.1 TB) on the LVM RAID1 mirror.
 Steady-state load average ~4.5–6 on 4 cores (qbittorrent is the main CPU user). Low-power box: no
 headroom for CPU/RAM-heavy workloads (e.g. a Satisfactory dedicated server needs 12–16 GB + fast cores).
+A 3D-printed 10" 3U rack case for it plus a SAS HBA and 2 more 3.5" SAS disks is designed in
+[hardware/case/](hardware/case/README.md) (not printed yet).
 
 ## Access
 

@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — Rack case designed (10" 3U, ZimaBoard + HBA + 4 x 3.5")
+Read the hardware over Tailscale SSH (`claude@casaos`). `dmidecode` reports a ZimaBoard 832. `lspci` shows only the onboard
+Intel AHCI controller, so no HBA is installed yet. `lsblk`/`smartctl` show sda HGST HUS724040ALA640 and sdb Toshiba MG08ADA400E,
+both 3.5" 7200 rpm, plus the eMMC. Designed a printable 3U case for the Lab Rax rack: a column with a Flex-ATX PSU, the ZimaBoard
+and the HBA on removable shelves, and a cage with 4 x 3.5" slots behind a 120 mm fan. `hardware/case/build_case.py` uses manifold3d, not Blender.
+`render.mjs` renders through Playwright + three.js. `build_case.py` checks clearances and the assembly paths: OK. All STLs are manifold
+(status NoError). Unverified dimensions are listed in the case README. The notebook's rear brackets are reused. Nothing printed or bought.
+
 ## 2026-11-16 — Compose repo: committed live prowlarr/watchtower/hermes config (push pending from Mac)
 `/home/dgmneto/homelab` had uncommitted `services/prowlarr/compose.yaml` (internalNetwork) and `services/watchtower/compose.yaml`
 (`--schedule "0 0 10 * * 0"`) plus an untracked `services/hermes/` (hermes + hermes-docker-proxy, both stopped for about 5 weeks). All three
