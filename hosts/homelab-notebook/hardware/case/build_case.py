@@ -17,7 +17,7 @@ Layout:
     tab), long side east-west, connector at the east end toward the SATA
     ribbon header in the board's SE corner.
   * Stock blower fan (fan/, traced from photos) lives in the SW notch, top
-    flush with the board, on two posts at its M2.5 holes, outlet against the
+    flush with the board, on two posts pinned through its holes, outlet against the
     west wall. Forced air path, as in the
     laptop: intake grill in the lid above the CPU block -> CPU block -> fan ->
     exhaust grill in the west wall beside the notch. No other vents, so the
@@ -34,6 +34,8 @@ Test first: pin_gauge.stl, a row of pins around the hole size to pick a snug
 PIN_D;
 fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
 check the port openings against the real board (snug PIN_D pins: two pins must hold it square);
+fan_rig.stl (fan posts + pins and board standoffs H4/H7 on a bar frame) to check the
+fan's pins and its position under the board's SW notch;
 The I/O child board (USB-A, audio) is not mounted: it lies loose inside, fixed by
 hand, with a USB Ethernet adapter on it (cable through the rear wall).
 """
@@ -164,7 +166,10 @@ CPU_RECT = brd.rect_mm(*_cpu)
 TALLEST = max([p[3] for p in brd.PORTS] + [p[2] for p in brd.PARTS])
 
 FAN_Z0 = BOARD_Z + brd.PCB_T - FAN["thickness"]      # fan top flush with the board top
-FAN_POST_D, FAN_PILOT = 7.0, 2.1                     # M2.5 self-tapping
+FAN_POST_D = 7.0
+# Fan drops onto pins in its two 2.7 mm holes (no screws), like the board: same
+# 0.16 under the hole as the board's PIN_D. Check on fan_rig.stl.
+FAN_PIN_D, FAN_PIN_H = 2.55, 4.0
 assert FAN_X0 + FAN["width_x"] <= NOTCH_X - 0.5, "fan does not fit the notch"
 assert FAN_Y0 >= Y_IN0 + 0.3, "fan hits the rear wall"
 assert FAN_Y0 + FAN["depth_y"] <= NOTCH_Y - 0.3, "fan hits the board's south edge"
@@ -335,6 +340,7 @@ def build_tray(root, pin_d=PIN_D):
             box(f"post_{i}", px, py, FLOOR - 0.01, px + POST, py + POST, Z_TOP, adds)
     for i, (hx, hy) in enumerate(FAN_HOLES):
         cyl(f"fan_post_{i}", hx, hy, (FLOOR + FAN_Z0) / 2, FAN_POST_D, FAN_Z0 - FLOOR + 0.01, adds)
+        pin(f"fan_pin_{i}", hx, hy, FAN_Z0 - 0.01, FAN_PIN_D, FAN_PIN_H + 0.01, adds)
     boolean(tray, "UNION", adds)
 
     cuts = new_coll("_cuts", work)
@@ -384,9 +390,6 @@ def build_tray(root, pin_d=PIN_D):
     hz = (FLOOR + Z_TOP) / 2
     box("cable_hole", hx - CABLE_HOLE_W / 2, Y_OUT0 - 1, hz - CABLE_HOLE_H / 2,
         hx + CABLE_HOLE_W / 2, Y_IN0 + 1, hz + CABLE_HOLE_H / 2, cuts)
-    # fan posts: pilot holes
-    for i, (hx, hy) in enumerate(FAN_HOLES):
-        cyl(f"fan_pilot_{i}", hx, hy, FAN_Z0, FAN_PILOT, 16, cuts)
     # fan exhaust: west wall, sized to the fan's outlet only so all air takes the CPU path
     oy0, oy1 = FAN["outlet"]["y"]
     vent_slots("west_vent_", cuts, "Y", FAN_Y0 + oy0 + 1, FAN_Y0 + oy1 - 1,
@@ -510,6 +513,38 @@ def build_fit_test(tray, root, name="Fit_test", ports=None, label=None):
     return fit
 
 
+FAN_RIG_POST = 3.0        # fan post height in fan_rig (board standoffs keep their offset)
+
+
+def build_fan_rig(root):
+    """fan_rig.stl: the two fan posts + pins and the board's H4/H7 standoffs + pins
+    (the holes the fan was triangulated against) on a light bar frame, everything
+    lowered by the same amount. Drop the board on H4/H7 and the fan on its pins:
+    checks fan pin fit, fan position against the board, and fan top vs board top."""
+    zf = FAN_Z0 - FAN_RIG_POST                         # posts start here
+    zb = zf - FIT_BASE_T                               # bottom of the frame
+    P = {"F1": FAN_HOLES[0], "F2": FAN_HOLES[1],
+         "H4": brd.HOLES_MM[3][:2], "H7": brd.HOLES_MM[6][:2]}
+    work = new_coll("_work", root)
+    a, b = P["F1"], P["F2"]
+    rig = bar("Fan_rig", a, b, zb, zb + FIT_BASE_T, root)
+    add = new_coll("_add", work)
+    for a, b in [("F1", "H4"), ("H4", "H7"), ("H7", "F2"), ("F1", "H7")]:
+        bar(f"bar_{a}_{b}", P[a], P[b], zb, zb + FIT_BASE_T, add)
+    for n, (x, y) in P.items():
+        cyl(f"pad_{n}", x, y, zb + FIT_BASE_T / 2, (FAN_POST_D if n[0] == "F" else STANDOFF_D) + 3, FIT_BASE_T, add)
+        if n[0] == "F":
+            cyl(f"post_{n}", x, y, (zb + FIT_BASE_T + FAN_Z0) / 2 - 0.01, FAN_POST_D, FAN_Z0 - zb - FIT_BASE_T + 0.02, add)
+            pin(f"pin_{n}", x, y, FAN_Z0 - 0.01, FAN_PIN_D, FAN_PIN_H + 0.01, add)
+        else:
+            cyl(f"post_{n}", x, y, (zb + FIT_BASE_T + BOARD_Z) / 2 - 0.01, STANDOFF_D, BOARD_Z - zb - FIT_BASE_T + 0.02, add)
+            pin(f"pin_{n}", x, y, BOARD_Z - 0.01, PIN_D, brd.PCB_T + PIN_ABOVE + 0.01, add)
+    boolean(rig, "UNION", add)
+    bpy.data.collections.remove(work)
+    rig.location.z = -zb
+    return rig
+
+
 def text_mesh(name, body, x, y, z0, size, coll, depth=0.6):
     """Raised text, centred on x, its baseline at y, standing on z0."""
     cu = bpy.data.curves.new(name, "FONT")
@@ -624,6 +659,9 @@ def main(outdir):
     brk_r = mirrored(brk, "Rear_bracket_right", case)
     export_stl(brk_r, os.path.join(outdir, "rear_bracket_right.stl"))
     brk.hide_render = brk_r.hide_render = True
+    fan_rig = build_fan_rig(case)
+    export_stl(fan_rig, os.path.join(outdir, "fan_rig.stl"))
+    fan_rig.hide_render = True
     gauge = build_pin_gauge(case)
     export_stl(gauge, os.path.join(outdir, "pin_gauge.stl"))
     gauge.hide_render = True

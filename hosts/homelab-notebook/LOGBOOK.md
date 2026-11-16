@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-16 — Rack case: fan on pins + fan_rig.stl test print
+`hardware/case/build_case.py`: the fan's two posts now end in chamfered pins (`FAN_PIN_D` 2.55 mm, 4 mm tall) through its 2.7 mm holes instead of M2.5 pilot holes, so no screws; the fan drops on like the board. The diameter copies the board's 0.16 mm undersize (PIN_D 3.40 in 3.56 holes). New quick test print `out/fan_rig.stl` (`build_fan_rig`, ~77 x 90 mm footprint, 13.5 mm tall, 164 kB). It has the two fan posts + pins and the board's H4/H7 standoffs + pins (the holes the fan was triangulated against) on a 2 mm bar frame, everything lowered by the same amount (fan posts 3 mm). The board drops on H4/H7 and the fan on its pins. That checks the fan pin fit, the fan's position against the board, and the fan top being flush with the board top. Verified in a render with the board and fan models in place; tray and rig export manifold. Not printed yet.
+
 ## 2026-11-16 — Rack case: tray fixes after the first full print
 Feedback from the user's first tray print, applied in `hardware/case/build_case.py`:
 - **SSD bosses removed.** The drive now sits flat on the floor (Z 2.5-12.0), with counterbored M3 holes straight through the 2.5 mm floor (`DRIVE_BOSS_*` gone). That leaves ~1 mm of floor under each screw head, so use thin-head drive screws.
