@@ -4,6 +4,18 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-16 — Rack case: tray_rig.stl, whole-tray skeleton test print
+The user wanted one quick test print that covers everything, not just the fan. `build_tray_rig` in `hardware/case/build_case.py` intersects the real tray, at full height, with keep volumes. It keeps:
+- all 7 board standoffs + pins
+- both fan posts + pins
+- the 4 drive screw holes (floor discs with counterbores)
+- the front panel strip from the west wall to past the power button (ports, RJ45 jack pocket, button hole), cut off 3 mm above the highest opening
+- the SW corner: west wall with the fan exhaust grill, a bit of south wall, and the floating post.
+
+The pieces are tied together by strips of the tray's own floor: a minimum spanning tree over the anchors, plus each node's next-nearest link. The strips are part of the same intersect, so there are no coplanar unions. A first try with a separately unioned bar frame gave 26 non-manifold edges.
+
+Result `out/tray_rig.stl`: ~60 cm³ against ~240 cm³ for the full tray, footprint ~180 x 238 mm. Board, fan and drive all mount at their real positions. Manifold. Checked in renders with and without the board/fan models. Not printed yet. `fan_rig.stl` stays as the smaller fan-only check.
+
 ## 2026-11-16 — Rack case: fan on pins + fan_rig.stl test print
 `hardware/case/build_case.py`: the fan's two posts now end in chamfered pins (`FAN_PIN_D` 2.55 mm, 4 mm tall) through its 2.7 mm holes instead of M2.5 pilot holes, so no screws; the fan drops on like the board. The diameter copies the board's 0.16 mm undersize (PIN_D 3.40 in 3.56 holes). New quick test print `out/fan_rig.stl` (`build_fan_rig`, ~77 x 90 mm footprint, 13.5 mm tall, 164 kB). It has the two fan posts + pins and the board's H4/H7 standoffs + pins (the holes the fan was triangulated against) on a 2 mm bar frame, everything lowered by the same amount (fan posts 3 mm). The board drops on H4/H7 and the fan on its pins. That checks the fan pin fit, the fan's position against the board, and the fan top being flush with the board top. Verified in a render with the board and fan models in place; tray and rig export manifold. Not printed yet.
 

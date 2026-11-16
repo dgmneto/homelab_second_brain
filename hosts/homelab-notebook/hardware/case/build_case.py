@@ -34,6 +34,9 @@ Test first: pin_gauge.stl, a row of pins around the hole size to pick a snug
 PIN_D;
 fit_test.stl (panel strip + the H1/H2 board mounts on a light frame, lowered) to
 check the port openings against the real board (snug PIN_D pins: two pins must hold it square);
+tray_rig.stl, the whole tray at full height cut to a skeleton (all board, fan and
+drive mounts, the port/button panel strip, the SW fan corner on a bar frame): the
+fast full-fit check before printing the real tray;
 fan_rig.stl (fan posts + pins and board standoffs H4/H7 on a bar frame) to check the
 fan's pins and its position under the board's SW notch;
 The I/O child board (USB-A, audio) is not mounted: it lies loose inside, fixed by
@@ -545,6 +548,70 @@ def build_fan_rig(root):
     return rig
 
 
+def build_tray_rig(tray, root):
+    """tray_rig.stl: the whole tray at full height, cut down to what touches the
+    parts: all 7 board standoffs + pins, the fan posts + pins, the drive screw
+    holes (floor discs, counterbored), the front panel strip with the ports, RJ45
+    jack pocket and power button hole, and the SW corner (west wall with the fan
+    exhaust grill, south wall, floating post), tied together by strips of the
+    floor. Board, fan and drive all go in
+    at once, exactly where the tray puts them."""
+    work = new_coll("_work", root)
+    me = tray.data.copy()
+    rig = bpy.data.objects.new("Tray_rig", me)
+    root.objects.link(rig)
+    keep_parts = new_coll("_keep_parts", work)
+    holes = [(x, y) for x, y, _ in brd.HOLES_MM]
+    drive = [(DRIVE_X0 + dx, DRIVE_Y0 + dy) for dx, dy in DRIVE_HOLES]
+    for i, (x, y) in enumerate(holes):
+        cyl(f"keep_h{i}", x, y, Z_TOP / 2, STANDOFF_D + 3, Z_TOP + 2, keep_parts)
+    for i, (x, y) in enumerate(FAN_HOLES):
+        cyl(f"keep_f{i}", x, y, Z_TOP / 2, FAN_POST_D + 3, Z_TOP + 2, keep_parts)
+    for i, (x, y) in enumerate(drive):
+        cyl(f"keep_d{i}", x, y, Z_TOP / 2, SCREW_CBORE_D + 4, Z_TOP + 2, keep_parts)
+    zp = max([BOARD_Z + brd.PCB_T + p[3] + PORT_MARGIN for p in brd.PORTS]
+             + [PANEL_H / 2 + BUTTON_HOLE_D / 2]) + 3
+    px1 = BUTTON_X + BUTTON_HOLE_D / 2 + 5
+    keep = box("keep_panel", X_OUT0 - 1, Y_FRONT - 12, -1, px1, Y_FRONT + PANEL_T + 1, zp, work)
+    box("keep_sw", X_OUT0 - 1, Y_OUT0 - 1, -1, X_IN0 + POST + 1, FAN_Y0 + FAN["depth_y"] + 2, PANEL_H + 1, keep_parts)
+
+    # frame: the tray's own floor along a spanning tree over the kept pieces, plus
+    # each node's next-nearest link (kept by the same intersect: no coplanar unions)
+    pts = holes + list(FAN_HOLES) + drive
+    pts += [(x, Y_FRONT - 3) for x in (X_IN0 + 4, (X_IN0 + px1) / 2, px1 - 4)]
+    pts += [(X_IN0 + 4, Y_IN0 + 4), (X_IN0 + 4, FAN_Y0 + FAN["depth_y"] - 2)]
+    n = len(pts)
+    d = lambda i, j: math.dist(pts[i], pts[j])
+    edges, inside = set(), {0}
+    while len(inside) < n:
+        i, j = min(((i, j) for i in inside for j in range(n) if j not in inside), key=lambda e: d(*e))
+        edges.add((min(i, j), max(i, j)))
+        inside.add(j)
+    for i in range(n):
+        near = sorted((j for j in range(n) if j != i), key=lambda j: d(i, j))
+        for j in near:
+            e = (min(i, j), max(i, j))
+            if e not in edges:
+                edges.add(e)
+                break
+    for i, j in sorted(edges):
+        bar(f"bar_{i}_{j}", pts[i], pts[j], -1, FLOOR + 0.3, keep_parts)
+    boolean(keep, "UNION", keep_parts)
+    only = new_coll("_keep", work)
+    work.objects.unlink(keep)
+    only.objects.link(keep)
+    boolean(rig, "INTERSECT", only)
+    bpy.data.collections.remove(work)
+    bm = bmesh.new()                                      # drop zero-area slivers from coincident faces
+    bm.from_mesh(rig.data)
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-4, edges=bm.edges)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_area() < 1e-6], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(rig.data)
+    bm.free()
+    return rig
+
+
 def text_mesh(name, body, x, y, z0, size, coll, depth=0.6):
     """Raised text, centred on x, its baseline at y, standing on z0."""
     cu = bpy.data.curves.new(name, "FONT")
@@ -659,6 +726,9 @@ def main(outdir):
     brk_r = mirrored(brk, "Rear_bracket_right", case)
     export_stl(brk_r, os.path.join(outdir, "rear_bracket_right.stl"))
     brk.hide_render = brk_r.hide_render = True
+    rig = build_tray_rig(tray, case)
+    export_stl(rig, os.path.join(outdir, "tray_rig.stl"))
+    rig.hide_render = True
     fan_rig = build_fan_rig(case)
     export_stl(fan_rig, os.path.join(outdir, "fan_rig.stl"))
     fan_rig.hide_render = True
