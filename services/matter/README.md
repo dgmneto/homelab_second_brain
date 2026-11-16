@@ -33,7 +33,15 @@ HA's fabric; 5/6: timeouts). Per device HA gets: `climate` (heat-only Thermostat
 humidity, a **binary** battery sensor (BatChargeLevel only, no %), 1–2 identify buttons; reboot count/uptime/boot reason
 are disabled by the integration.
 **Gotchas:**
-- **"All tado unavailable at once" runbook (incident 2026-11-11 06:27–06:29).** All 6 nodes dropped within 2 min and
+- **"All tado unavailable" cause #2: routing loop from Tailscale on the Apple TV (incident 2026-11-14 19:00).**
+  Same symptoms (every node `CASESession timed out` / `Subscription Liveness timeout` within ~2 min), but
+  `ping -6 -c2 <node fde9:… addr>` returns `Time exceeded: Hop limit` from `2a02:8012:882b::1`, and
+  `tracepath -6 -n <addr>` alternates Apple TV (`…:1c38:bf3c:dd2c:4c4a`) ↔ UniFi (`2a02:8012:882b::1`): the Apple TV still
+  advertises the RIO route but stopped forwarding into Thread. **Cause: Tailscale enabled on the Apple TV**. A tvOS VPN
+  breaks the border router's forwarding. Turning it off restored all 6 nodes in <1 min. **Never run Tailscale on the Apple TV**
+  (`apple-tv` tailnet node). Otherwise: restart the Apple TV, then `sudo systemctl restart matter-server` if nodes don't
+  resubscribe. No firewall involvement (the ICMP answer comes from the router, so pings never reach the mesh).
+- **"All tado unavailable at once" runbook (cause #1: UniFi RA) (incident 2026-11-11 06:27–06:29).** All 6 nodes dropped within 2 min and
   stayed down with `CASESession timed out`. Check in this order (all read-only, from a cloud session):
   1. `tools/nodes.py` → every `avail=False` means a shared path, not one device.
   2. `tools/browse.py` (run it with **matter-server's** env: `{ sed -n 3p <.matter-server-wrapped>; cat browse.py; }`. HA's

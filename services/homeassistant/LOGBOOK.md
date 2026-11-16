@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-15 — Unavailable entities triage
+Investigation. Listed unavailable entities from the recorder DB (new `tools/unavailable.sql`). Groups: all tado° X
+Matter climate entities since 2026-11-14 19:04 (Thread routing loop, see matter LOGBOOK); Sonos `media_player.living_room`
++ settings, Octopus cost sensors, iPhone sensors since 11-10 21:04; UniFi Protect router/front_garden entities since
+11-13 06:49; living-room pet camera controls since 11-13 22:26. Only the Matter group was diagnosed.
+
 ## 2026-11-10 — tapo_control fixed via Nix-supplied deps
 Added `onvif`/`ffmpeg`/`stream` to extraComponents, plus `python-kasa` and pytapo overridden to 3.4.30 (from PyPI sdist) in
 extraPackages. Deployed 21:04. HA: no "Setup failed"; Living Room Pet Camera back (68/77 entities with state, camera

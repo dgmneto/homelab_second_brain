@@ -4,6 +4,27 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-15 — Health check: both hosts up (investigation, no changes)
+From a cloud session over Tailscale (`ssh claude@casaos`, `ssh claude@homelab-notebook`).
+- **casaos**: up 60 days, load ~2. Disks fine: `/` 54%, `/footage` 7%, `/library` 60%; both LVM RAID1 LVs
+  `Cpy%Sync 100`; no disk I/O errors in dmesg. All long-running containers Up (plex, jellyfin, sonarr, radarr,
+  bazarr, prowlarr, qbittorrent, gluetunProtonVPN, overseerr, arani, nginxIntern, nginxProxyManagerProd, ddns,
+  watchtower, autoheal, terminus stack, trmnl-ai). Exited: `hermes` + `hermes-docker-proxy` (5 weeks — old
+  casaos copy, hermes now runs natively on homelab-notebook) and the one-shot `terminus-init-certificates-1`.
+- **homelab-notebook**: no failed units; home-assistant (HTTP 200 on :8123), zigbee2mqtt, mosquitto,
+  matter-server, pihole-ftl, hermes-agent/hermes-backend, tailscaled all active; `/` 4%;
+  `homelab-backup.timer` last ran 03:42 today. Gotcha: `uptime` reports "2875 days" — bogus (clock/uptime
+  quirk), ignore it. The unit is `hermes-agent`, not `hermes` (`systemctl is-active hermes` says inactive).
+
+## 2026-11-15 — TRMNL "broken" + many HA entities unavailable (investigation)
+HA: tado° X Matter entities all unavailable since 2026-11-14 19:04: Apple TV (Thread BR) ↔ UniFi IPv6 routing loop
+(`tracepath -6` to node addresses); fix = restart Apple TV. Runbooks added to matter + homeassistant READMEs,
+`services/homeassistant/tools/unavailable.sql`. TRMNL: server pipeline verified healthy end to end (see terminus
+LOGBOOK); device-side issue pending the user's description. No changes on servers.
+
+## 2026-11-15 — Matter outage root cause: Tailscale on the Apple TV
+User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
+
 ## 2026-11-15 — Rack case: rear support brackets
 Left/right L brackets for the Lab Rax rack's rear posts; the case rests on their ledges. Detail in the homelab-notebook host logbook.
 

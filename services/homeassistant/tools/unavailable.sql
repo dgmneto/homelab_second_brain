@@ -1,0 +1,1 @@
+select sm.entity_id, datetime(s.last_updated_ts,'unixepoch') from states s join states_meta sm on s.metadata_id=sm.metadata_id where s.state_id in (select max(state_id) from states group by metadata_id) and s.state='unavailable' order by s.last_updated_ts;

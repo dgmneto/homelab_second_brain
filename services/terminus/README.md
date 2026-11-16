@@ -142,6 +142,14 @@ RESET (on the XIAO) only reboots; BOOT+power is flashing mode. Reflash/upgrade: 
    **Manual `Screen.new.perform` in the web container hides both** — it runs on internalNetwork; a
    screen that only updates when you force it is NOT proof the scheduler works.
 
+12. **"Screen broken" triage, server side, in 1 minute** (2026-11-15): (a) NPM log above: `/api/display` every
+   15 min + `/uploads/<id>.png` 200 ⇒ device is online and fetching; (b) pull the PNG the device last got
+   (`docker exec terminus curl -s http://localhost:2300/uploads/<id>.png > x.png`) and look at it; (c)
+   `select wifi_signal,battery_voltage,updated_at from device`. If all three are fine, the fault is on the panel/device.
+   AI Board PNGs are **1-bit, ~4.5–5.5 KB** — that is normal (not a sign of a blank render). An occasional
+   `404` on `/uploads/*.png` (≈1/day) happens when the screen is rebuilt between `/api/display` and the
+   download; the next cycle fixes it. Only the latest PNG stays on disk; for history use the NPM log `Length`.
+
 ## Reflashing the kit from the Mac (no buttons needed)
 The trmnl.com/flash page needs flashing mode, which is hard to hit on this kit. Working method
 (2026-10-25): esptool 5.1.0 is installed on the Mac (`python3 -m esptool`). Plug the kit into the Mac

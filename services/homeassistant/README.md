@@ -96,6 +96,11 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 - **Recreating this container costs ~4 min:** the LinuxServer image re-fixes Python package permissions on a new container before HA starts.
 
 ## Quirks / runbook
+- **"Lots of entities unavailable" — list them first, by time** (no HA token needed; read-only on the recorder DB):
+  `ssh claude@homelab-notebook 'cat > /tmp/q.sql; sudo nix-shell -p sqlite --run "sqlite3 -readonly /var/lib/hass/home-assistant_v2.db < /tmp/q.sql"' < services/homeassistant/tools/unavailable.sql`
+  (feed SQL via a file: quoting it inline through ssh + nix-shell breaks). Entities that went unavailable at the
+  same minute share a cause; e.g. all tado° climate entities at once = Thread/Matter, see
+  [matter README runbook](../matter/README.md).
 - **`/footage` full → HA crash-loop.** HA's config is bind-mounted on the `/footage` LVM volume (`/footage/services/homeassistant/config`). When `/footage` fills to 100%, HA fails to write its SQLite recorder DB / config and crash-loops with `OSError: [Errno 28] No space left on device`, appearing "down" even though `/` has plenty of free space. **Check `df -h /footage` first.** Past recurring filler was the `openclaw` `chrome.service` crash-loop (see memory note) — `openclaw` was decommissioned 2026-08-03, so that specific cause no longer applies, but the "check `/footage` first" advice still holds for whatever fills it next.
 - `autoheal` + `watchtower` containers run alongside; the `restart: always` policy plus autoheal will keep restarting HA, which masks the real disk-full cause.
 - **"All devices missing" = MQTT entities `unavailable`, not a deleted registry.** 2026-09-22: a
