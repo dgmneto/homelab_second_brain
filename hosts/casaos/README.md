@@ -81,6 +81,15 @@ Created 2026-10-30: system user `nbbackup` (uid 998), home `/footage/backups/hom
 - **Reverse proxy:** two nginx-proxy-manager instances — `nginxProd` (public) and `nginxIntern`
   (internal/LAN).
 - **DNS:** `ddns` (cloudflare-ddns) keeps the public record current.
+- **Compose repo → GitHub (`dgmneto/homelab`):** casaos has no GitHub key, so commit on the box as dgmneto
+  (`sudo -u dgmneto git -C /home/dgmneto/homelab ...`; run from `cd /tmp`, since `claude` can't enter `~dgmneto`)
+  and push from somewhere else. Either **from the Mac** (`ssh dgmneto@homelab 'cd ~/homelab && git push'`; uses the Mac's agent),
+  or **from a cloud session** (verified 2026-11-18): attach the repo with `add_repo` (owner `dgmneto`, repo `homelab`, access
+  `push`; the user has to approve it in chat, since auto mode refuses it unasked), `git clone --depth 1` it, then carry the
+  commits over as a bundle:
+  `ssh claude@casaos 'cd /tmp && sudo -u dgmneto git -C /home/dgmneto/homelab bundle create - origin/main..main' > x.bundle`,
+  `git fetch x.bundle main:refs/remotes/casaos/main && git merge --ff-only casaos/main && git -c push.negotiate=true push origin main`.
+  Then mark it pushed on casaos: `... git update-ref refs/remotes/origin/main <sha>` (casaos can't `fetch` either).
 
 ## Networking gotcha — VPN-routed services
 `qbittorrent` has **no network of its own**: `network_mode: container:gluetunProtonVPN` routes all its traffic

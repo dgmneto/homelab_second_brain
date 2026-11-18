@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. Host-level changes on casaos: OS, disks, users, cron/timers.
 See `../../LOGBOOK.md` for the project-wide log; service detail in `../../services/<svc>/LOGBOOK.md`.
 
+## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
+User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
+casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;
+OPENROUTER key / terminus passwords come from env/gitignored `.env`), pushed: `4c396c1..06f846e`. On casaos, `update-ref
+refs/remotes/origin/main 06f846e` → `git status` = `main...origin/main` (in sync). The recipe is now in the casaos README, and CLAUDE.md
+points to it; MIGRATION.md's "local only" note for `511e3d6` is corrected.
+
 ## 2026-11-16 — Compose repo: committed live prowlarr/watchtower/hermes config (push pending from Mac)
 `/home/dgmneto/homelab` had uncommitted `services/prowlarr/compose.yaml` (internalNetwork) and `services/watchtower/compose.yaml`
 (`--schedule "0 0 10 * * 0"`) plus an untracked `services/hermes/` (hermes + hermes-docker-proxy, both stopped for about 5 weeks). All three

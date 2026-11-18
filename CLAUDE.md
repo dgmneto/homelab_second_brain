@@ -59,7 +59,7 @@ quirks of one app → `services/`.
 
 Top gotchas (detail in the host READMEs):
 - **casaos' compose repo (`/home/dgmneto/homelab`) is NOT backed up automatically** (the broken Sunday `backup.sh`
-  cron was deleted 2026-11-01). casaos has no working GitHub key: commit on the box (as dgmneto) and **push from the Mac**.
+  cron was deleted 2026-11-01). casaos has no working GitHub key: commit on the box (as dgmneto) and **push from the Mac**, or from a cloud session via `add_repo` + a git bundle (recipe in the casaos README, "Deployment architecture").
 - **casaos** is x86_64, not a Raspberry Pi. If the 1Password SSH agent is locked, bypass it:
   `ssh -o IdentityAgent=none -o IdentitiesOnly=yes -i ~/.ssh/id_rsa dgmneto@homelab`. Use `dgmneto`
   (sudo needs the user's password), not `openclaw`. A service "down" is usually a **full disk** —

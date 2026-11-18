@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
+User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
+casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;
+OPENROUTER key / terminus passwords come from env/gitignored `.env`), pushed: `4c396c1..06f846e`. On casaos, `update-ref
+refs/remotes/origin/main 06f846e` → `git status` = `main...origin/main` (in sync). The recipe is now in the casaos README, and CLAUDE.md
+points to it; MIGRATION.md's "local only" note for `511e3d6` is corrected.
+
 ## 2026-11-16 — Rack case: both west posts float, shorter; Ethernet jack opening
 `hardware/case/build_case.py`:
 - **Floating posts.** The NW lid post now floats like the SW one. Both come from `floating_post()`: a 7 x 7 column hung off the west wall and the south wall / front panel, with a 45 deg wedge underside.
