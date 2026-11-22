@@ -9,6 +9,7 @@ has the service → host map.
 |---|---|---|---|---|
 | [casaos](casaos/README.md) | `192.168.11.13` | x86_64 Debian 12, Docker compose | `ssh dgmneto@homelab` (fallback key `~/.ssh/id_rsa`) | every service except hermes |
 | [homelab-notebook](homelab-notebook/README.md) | `192.168.11.21` (DHCP) | NixOS 26.05, native modules, no Docker | `ssh homelab-notebook` (key only in 1Password) | hermes |
+| [divino-pc](divino-pc/README.md) | — | Windows 11 Home (personal gaming desktop) | — | nothing (not a server) |
 
 Adding a host: create `hosts/<hostname>/README.md` (hardware, OS, access, storage, deploy method) +
 `LOGBOOK.md`, add a row above, and add it to the hosts table in `../CLAUDE.md`.

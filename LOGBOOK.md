@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-22 — Documented Divino_PC (gaming desktop), GTA VI question
+The user asked if Divino_PC can run GTA VI. The repo had no record of that PC. I added `hosts/divino-pc/` with the specs from the store
+listing screenshot (Ryzen 7 5700X3D, 32 GB DDR4, Win 11). The GPU is still unknown, and it decides the answer. As of the June 2026
+cutoff, GTA VI was announced for consoles only (Nov 19, 2026), with no PC version or requirements.
+
 ## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
 User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
 casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;
