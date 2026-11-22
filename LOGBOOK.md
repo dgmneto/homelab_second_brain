@@ -6,7 +6,7 @@ the matching `services/<svc>/LOGBOOK.md`.
 
 ## 2026-11-22 — Documented Divino_PC (gaming desktop), GTA VI question
 The user asked if Divino_PC can run GTA VI. The repo had no record of that PC. I added `hosts/divino-pc/` with the specs from the store
-listing screenshot (Ryzen 7 5700X3D, 32 GB DDR4, Win 11). The GPU is still unknown, and it decides the answer. As of the June 2026
+listing screenshot (Ryzen 7 5700X3D, 32 GB DDR4, Win 11). Later the user confirmed the GPU is an RTX 5070 Ti 16 GB, which means yes, comfortably. As of the June 2026
 cutoff, GTA VI was announced for consoles only (Nov 19, 2026), with no PC version or requirements.
 
 ## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
