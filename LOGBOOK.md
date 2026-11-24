@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — HA OTBR integration for the SLZB-MR5U
+Added HA's OpenThread Border Router integration (`http://192.168.11.121:8080`) for visibility; HA Thread panel now lists both BRs on
+`MyHome1662126353`. Thread dataset/role unchanged (verified via OTBR REST). See [services/thread](services/thread/README.md).
+
 ## 2026-11-24 — SLZB-MR5U enabled as 2nd Thread border router
 New SMLIGHT SLZB-MR5U (`192.168.11.121`): radio 2 switched to built-in OTBR, joined the existing Apple Thread network
 `MyHome1662126353` (dataset from HA's iOS-synced store) as router. It briefly self-formed a rogue `OpenThread-ESP` network, which was

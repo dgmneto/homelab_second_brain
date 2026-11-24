@@ -45,9 +45,12 @@ the mesh via the MR5U and take one extra Thread hop to the Apple TV.
   were still children of the Apple TV right after the join.
 - Ping RTTs to the tado devices are **~0.03–3 s (avg ~1.5 s)**. That's their sleepy-end-device poll interval, not link
   quality. Compare **loss** and the Apple TV's MAC counters, not RTT.
-- HA does **not** have an `otbr` config entry yet (only `thread`, plus `smlight` for the SLZB-06M). Adding it in the
-  HA UI (Settings → Devices → Add → OpenThread Border Router, URL `http://192.168.11.121:8080`) gives the HA Thread panel
-  visibility. If HA offers to make its network preferred, it is already `MyHome1662126353`.
+- **HA `otbr` integration added 2026-11-24** (URL `http://192.168.11.121:8080`; shortcut:
+  `http://192.168.11.21:8123/config/integrations/dashboard/add?domain=otbr`). It kept the OTBR's existing (Apple) dataset:
+  partition/rloc unchanged. HA → Settings → Thread now shows preferred network `MyHome1662126353` with **2 border routers**
+  (Living Room, SLZB-MR5U). This is visibility/management only. Matter traffic doesn't depend on it. The MR5U is
+  also offered as a discovered **SMLIGHT** integration; not added (would only add device sensors).
+- The Claude built-in browser pane keeps its own HA session: the user must sign in **in the pane**, not in their Chrome.
 
 ## Measuring quality (before/after method)
 1. Node addresses: from the Mac, `dscacheutil -q host -a name <thread-hostname>.local` (hostnames in
