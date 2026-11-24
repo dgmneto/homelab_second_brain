@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Tailscale off on the Apple TV, loop persists
+~09:01 user disabled Tailscale on the Apple TV (`apple-tv` offline, last seen 4m ago at 09:05). Still at 09:05: nodes all `avail=False`,
+`ping -6` node addrs → hop-limit exceeded from the UniFi, tracepath still loops Apple TV ↔ UniFi. Unlike 11-15 (recovered in <1 min),
+disabling isn't enough this time → asked the user to restart the Apple TV.
+
 ## 2026-11-24 — Restart on request; nodes down because of Apple TV Tailscale (2nd time)
 `sudo systemctl restart matter-server` at 08:48:42 GMT (was up since 11-18 00:20, 0 restarts). Clean start, 6 nodes loaded, nodes 2,3,8,9,10
 discovered on mDNS, all CASE timeouts afterwards. Journal: last `Re-Subscription succeeded` 2026-11-22 19:26 (node 9), first timeout 19:28 → down ~2 days before the restart.

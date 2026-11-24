@@ -36,7 +36,8 @@ are disabled by the integration.
 - **FIRST CHECK when all tado are unavailable: `ssh claude@homelab-notebook 'tailscale status | grep apple-tv'`.** If the
   line does **not** say `offline`, Tailscale is on on the Apple TV and that's the cause (cause #2 below). It happened **twice**:
   2026-11-14 19:00 and again 2026-11-22 19:28 (found 11-24). **Restarting matter-server does not help** while the loop is there.
-  The fix is on the TV: turn Tailscale off. Then restart matter-server if nodes don't come back within ~2 min (30-min give-up, see below).
+  The fix is on the TV: turn Tailscale off. **On 11-24 that alone was not enough**: `apple-tv` went `offline` but the hop-limit loop
+  persisted >4 min, so also **restart the Apple TV** (Settings → System → Restart) if `ping -6 <node fde9: addr>` still says `Time exceeded`. Then restart matter-server if nodes don't come back within ~2 min (30-min give-up, see below).
 - **"All tado unavailable" cause #2: routing loop from Tailscale on the Apple TV (incidents 2026-11-14 19:00, 2026-11-22 19:28).**
   Same symptoms (every node `CASESession timed out` / `Subscription Liveness timeout` within ~2 min), but
   `ping -6 -c2 <node fde9:… addr>` returns `Time exceeded: Hop limit` from `2a02:8012:882b::1`, and
