@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Sensors silent: bindings still on old coordinator IEEE → reconfigure
+9 air sensors, button, blinds switch, Entry Hall silent since 16:54 (normally 4–14 reports/26 min). `database.db`: all binds →
+`0x8c8b48fffe9583ba` (old IEEE). `device/configure` for all 19: OK for Living Room/Lights, Loft Bedroom/Switch, Office/Lights, Little Room/Lights,
+Guest Room/Lights; 14 sleepy/unreachable failed (`Delivery failed`). Started a 45-min retry loop; the user was asked to press each sensor's button.
+
 ## 2026-11-24 — SLZB-06M unplugged
 User unplugged the old coordinator (radio not reset; kept as rollback). Verified offline from the Mac (`nc -z 192.168.11.228 80` fails).
 

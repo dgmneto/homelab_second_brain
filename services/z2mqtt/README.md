@@ -80,8 +80,12 @@ Worked without re-pairing. Steps as done:
 3. Change `serial.port` in `home-automation.nix` and deploy. z2m log: `Adapter network does not match config. Leaving network...` →
    `Forming from backup` → `New network formed!` → `zigbee-herdsman started (restored)`.
 - **Coordinator IEEE did NOT carry over:** `Coordinator address changed, updating to '0xfc1119fffeaa036b'`. The MR5U radio already has a custom
-  EUI64 burned in, and herdsman doesn't overwrite it. Same PAN/keys/channel, so devices stay joined. Reporting bindings made to the old IEEE
-  may need **Reconfigure** in z2m (wake sleepy devices first) for any device that goes quiet.
+  EUI64 burned in, and herdsman doesn't overwrite it. Same PAN/keys/channel, so devices stay joined, **but every reporting binding still targets
+  the old IEEE `0x8c8b48fffe9583ba`** (`database.db` → `endpoints.*.binds[].deviceIeeeAddress`). It kept working for ~20 min while devices had the
+  old IEEE→0x0000 mapping cached. After the PoE-reboot outage they lost it, and **all battery sensors went silent** (0 reports in 50 min vs
+  4–14 per 26 min normally). **Fix = reconfigure every device** (`zigbee2mqtt/bridge/request/device/configure` `{"id":"<name>"}`) right after a
+  migration, before anything else happens. Routers and rx-on switches re-bind at once. Sleepy devices fail with `Delivery failed`
+  until woken (press their button; retry configure in a loop). **Next migration: reconfigure all devices immediately after the restore.**
 - **`nixos-rebuild switch` restarts a manually stopped z2m** even when its config didn't change (that happened here on a failed edit: z2m
   briefly tried to talk to the bootloader. Harmless, but stop it again before continuing).
 - `sed` with `#` as the delimiter fails on Nix comments. Use `perl -0pi -e 's|…|…|'`.
