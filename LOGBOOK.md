@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — matter-server restart request blocked (wrong cloud environment)
+Asked to restart `matter-server` on homelab-notebook. Not done: this cloud session ran on the `Default`
+environment (no `TS_AUTHKEY`, `pkgs.tailscale.com` refused by the proxy), so the SessionStart hook could not
+join the tailnet and no `ssh` client existed. Documented in services/tailscale/README.md: use the
+`Homelab Second Brain` environment. Command to run once reachable: `ssh homelab-notebook sudo systemctl restart matter-server`.
+
 ## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
 User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
 casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;

@@ -82,6 +82,11 @@ Required pieces (added 2026-10-28):
   `users: [dgmneto]`; switched so agent actions are attributable and dgmneto keeps its sudo password.
 
 ## Claude cloud sessions (claude.ai/code) on the tailnet
+**Pick the right cloud environment first.** Only the **`Homelab Second Brain`** environment has `TS_AUTHKEY`
+(+ `UNIFI_API_KEY`) and unrestricted network. A session started on the account's **`Default`** environment has
+neither: the hook fails at the download (`pkgs.tailscale.com` → proxy 403), there's no `ssh`, and no auth key, so
+casaos/homelab-notebook are unreachable. A running session can't be moved onto an unrestricted environment —
+**start a new session on `Homelab Second Brain`** (seen 2026-11-24, "restart matter server" request).
 **Automated:** [`.claude/hooks/session-start.sh`](../../.claude/hooks/session-start.sh) (SessionStart hook,
 registered in `.claude/settings.json`, remote sessions only) does all of this at every session start:
 downloads tailscale to `/opt/tailscale`, installs `openssh-client`, writes `~/.ssh/config` (`casaos`/
