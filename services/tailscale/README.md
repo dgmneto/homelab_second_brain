@@ -8,7 +8,7 @@ gluetun breakage, and it stays out of watchtower's weekly `:latest` pulls.
 Installed 2026-10-28, version 1.104.4 from `https://pkgs.tailscale.com/stable/debian` (bookworm).
 Updates come via `apt` (not watchtower).
 
-> **Do not enable Tailscale on the Apple TV** (`apple-tv` node, 100.81.174.65): it is the only Thread border router and the tvOS VPN breaks Thread forwarding → every Matter device unavailable (2026-11-14). See [matter README](../matter/README.md).
+> **Do not enable Tailscale on the Apple TV** (`apple-tv` node, 100.81.174.65): it is the only Thread border router and the tvOS VPN breaks Thread forwarding → every Matter device unavailable (2026-11-14, **and again 2026-11-22**: it keeps getting switched back on). Check with `tailscale status | grep apple-tv` (must say `offline`). Durable fix to consider (user's call): remove the `apple-tv` node from the tailnet in the admin console so it can't silently reconnect. See [matter README](../matter/README.md).
 
 ## Node
 

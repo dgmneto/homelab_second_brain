@@ -4,6 +4,13 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — Restarted matter-server; tado still down: Tailscale on the Apple TV again
+User asked to restart matter-server. `sudo systemctl restart matter-server` on homelab-notebook (as `claude`) at 08:48 GMT; service
+`active`, 6 nodes loaded, 5 found on mDNS, but every node gets `CASESession timed out`. They had been down since **2026-11-22 19:28**
+(before the restart). `ping -6` to node `fde9:` addresses → `Time exceeded: Hop limit` from `2a02:8012:882b::1`, tracepath loops Apple TV ↔ UniFi,
+and `tailscale status` shows `apple-tv` **online** = same cause as 2026-11-14. Fix is on the user's side (turn Tailscale off on the Apple TV).
+Updated the matter + tailscale READMEs: `tailscale status | grep apple-tv` is now the first check, and the Apple TV link-local changed.
+
 ## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
 User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
 casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;

@@ -33,7 +33,11 @@ HA's fabric; 5/6: timeouts). Per device HA gets: `climate` (heat-only Thermostat
 humidity, a **binary** battery sensor (BatChargeLevel only, no %), 1–2 identify buttons; reboot count/uptime/boot reason
 are disabled by the integration.
 **Gotchas:**
-- **"All tado unavailable" cause #2: routing loop from Tailscale on the Apple TV (incident 2026-11-14 19:00).**
+- **FIRST CHECK when all tado are unavailable: `ssh claude@homelab-notebook 'tailscale status | grep apple-tv'`.** If the
+  line does **not** say `offline`, Tailscale is on on the Apple TV and that's the cause (cause #2 below). It happened **twice**:
+  2026-11-14 19:00 and again 2026-11-22 19:28 (found 11-24). **Restarting matter-server does not help** while the loop is there.
+  The fix is on the TV: turn Tailscale off. Then restart matter-server if nodes don't come back within ~2 min (30-min give-up, see below).
+- **"All tado unavailable" cause #2: routing loop from Tailscale on the Apple TV (incidents 2026-11-14 19:00, 2026-11-22 19:28).**
   Same symptoms (every node `CASESession timed out` / `Subscription Liveness timeout` within ~2 min), but
   `ping -6 -c2 <node fde9:… addr>` returns `Time exceeded: Hop limit` from `2a02:8012:882b::1`, and
   `tracepath -6 -n <addr>` alternates Apple TV (`…:1c38:bf3c:dd2c:4c4a`) ↔ UniFi (`2a02:8012:882b::1`): the Apple TV still
@@ -49,7 +53,7 @@ are disabled by the integration.
      `BFABFD88F60E01A6-…` `_matter._tcp` records are visible even while down: the SRP lease is cached by the BR, so
      **seeing the record ≠ reachable**.
   3. `ping -6 fde9:b6c5:757:0:<iid>` for those addresses. 100 % loss from homelab-notebook **and casaos** while
-     `ping -6 fe80::67:28bc:f5ae:b3b6%enp2s0` works = traffic dies at/behind the Apple TV, not in HA or the NixOS firewall
+     `ping -6 <Apple TV link-local>%enp2s0` works (link-local **changes**: `fe80::67:28bc:f5ae:b3b6` until mid-Nov, `fe80::109f:7643:d75c:480c` on 11-24; get the current one from `ip -6 route | grep fde9`) = traffic dies at/behind the Apple TV, not in HA or the NixOS firewall
      (replies to our pings are ESTABLISHED and accepted).
   4. `tools/ra.py`. On 11-11 the UniFi (MAC `78:45:58:b1:a5:7d`) sent its RA from **`2a02:8012:882b::1`, not link-local**
      (on 11-06 it was `fe80::7a45:58ff:feb1:a57d`; that neighbour is now FAILED). RFC 4861 hosts drop the router part, so

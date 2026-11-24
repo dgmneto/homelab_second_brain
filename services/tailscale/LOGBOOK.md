@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **tailscale** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — `apple-tv` node back online, breaking Thread again
+Investigation, no change. `tailscale status --json` on homelab-notebook: `apple-tv` (100.81.174.65) Online=true; it caused a Thread routing
+loop since 2026-11-22 19:28 (see matter LOGBOOK). README now suggests removing the node from the tailnet so it can't come back.
+
 ## 2026-10-28 — Verified cloud-session access to both servers
 From a cloud session: `ssh casaos` → claude, `sudo -n whoami` = root; `ssh homelab-notebook` → claude,
 `sudo -n whoami` = root, NixOS 26.05.20261007.2efa67f. First notebook attempt failed (publickey) because

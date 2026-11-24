@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Restart on request; nodes down because of Apple TV Tailscale (2nd time)
+`sudo systemctl restart matter-server` at 08:48:42 GMT (was up since 11-18 00:20, 0 restarts). Clean start, 6 nodes loaded, nodes 2,3,8,9,10
+discovered on mDNS, all CASE timeouts afterwards. Journal: last `Re-Subscription succeeded` 2026-11-22 19:26 (node 9), first timeout 19:28 → down ~2 days before the restart.
+Diagnosis per the README runbook: RA is fine (default via `fe80::7a45:58ff:feb1:a57d`), Apple TV BR on mDNS (`sb=00000fb1`) and pingable at its
+**new** link-local `fe80::109f:7643:d75c:480c`, node addrs → hop-limit exceeded from the UniFi, tracepath alternates
+`…1c38:bf3c:dd2c:4c4a` ↔ `2a02:8012:882b::1`; tailnet `apple-tv` Online=true. Waiting on the user to turn Tailscale off on the Apple TV.
+
 ## 2026-11-15 — Root cause: Tailscale on the Apple TV
 User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
 
