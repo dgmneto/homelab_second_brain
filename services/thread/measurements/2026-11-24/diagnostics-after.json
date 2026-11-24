@@ -1,0 +1,190 @@
+[
+ {
+  "ExtAddress": "42de14503c311bc8",
+  "Rloc16": 57344,
+  "Mode": {
+   "RxOnWhenIdle": 1,
+   "DeviceType": 1,
+   "NetworkData": 1
+  },
+  "Connectivity": {
+   "ParentPriority": 0,
+   "LinkQuality3": 1,
+   "LinkQuality2": 0,
+   "LinkQuality1": 0,
+   "LeaderCost": 1,
+   "IdSequence": 0,
+   "ActiveRouters": 2,
+   "SedBufferSize": 1280,
+   "SedDatagramCount": 1
+  },
+  "Route": {
+   "IdSequence": 0,
+   "RouteData": [
+    {
+     "RouteId": 28,
+     "LinkQualityOut": 3,
+     "LinkQualityIn": 3,
+     "RouteCost": 1
+    },
+    {
+     "RouteId": 56,
+     "LinkQualityOut": 0,
+     "LinkQualityIn": 0,
+     "RouteCost": 1
+    }
+   ]
+  },
+  "LeaderData": {
+   "PartitionId": 1098299111,
+   "Weighting": 68,
+   "DataVersion": 81,
+   "StableDataVersion": 254,
+   "LeaderRouterId": 28
+  },
+  "IP6AddressList": [
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:e000",
+   "fde9:b6c5:757:0:d1a9:6b1:c2f2:c5a3",
+   "fd78:ebf6:9d69:4da2:e1e:7cf4:73de:fc64",
+   "fe80:0:0:0:40de:1450:3c31:1bc8",
+   "fd19:d69c:fe9c:1:b9fe:4c84:637f:a15a"
+  ],
+  "MACCounters": {
+   "IfInUnknownProtos": 0,
+   "IfInErrors": 1,
+   "IfOutErrors": 0,
+   "IfInUcastPkts": 17,
+   "IfInBroadcastPkts": 57,
+   "IfInDiscards": 0,
+   "IfOutUcastPkts": 12,
+   "IfOutBroadcastPkts": 37,
+   "IfOutDiscards": 0
+  },
+  "ChildTable": [],
+  "ChannelPages": "00"
+ },
+ {
+  "ExtAddress": "ae4bc5024a668795",
+  "Rloc16": 28672,
+  "Mode": {
+   "RxOnWhenIdle": 1,
+   "DeviceType": 1,
+   "NetworkData": 1
+  },
+  "Connectivity": {
+   "ParentPriority": 0,
+   "LinkQuality3": 1,
+   "LinkQuality2": 0,
+   "LinkQuality1": 0,
+   "LeaderCost": 0,
+   "IdSequence": 0,
+   "ActiveRouters": 2,
+   "SedBufferSize": 1280,
+   "SedDatagramCount": 1
+  },
+  "Route": {
+   "IdSequence": 0,
+   "RouteData": [
+    {
+     "RouteId": 28,
+     "LinkQualityOut": 0,
+     "LinkQualityIn": 0,
+     "RouteCost": 1
+    },
+    {
+     "RouteId": 56,
+     "LinkQualityOut": 3,
+     "LinkQualityIn": 3,
+     "RouteCost": 1
+    }
+   ]
+  },
+  "LeaderData": {
+   "PartitionId": 1098299111,
+   "Weighting": 68,
+   "DataVersion": 81,
+   "StableDataVersion": 254,
+   "LeaderRouterId": 28
+  },
+  "IP6AddressList": [
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:fc12",
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:fc11",
+   "fde9:b6c5:757:0:b322:ca05:35d3:9075",
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:fc38",
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:fc10",
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:fc00",
+   "fd78:ebf6:9d69:4da2:0:ff:fe00:7000",
+   "fd78:ebf6:9d69:4da2:7666:1bf8:b113:621b",
+   "fe80:0:0:0:ac4b:c502:4a66:8795"
+  ],
+  "MACCounters": {
+   "IfInUnknownProtos": 0,
+   "IfInErrors": 12,
+   "IfOutErrors": 20,
+   "IfInUcastPkts": 11054,
+   "IfInBroadcastPkts": 62,
+   "IfInDiscards": 572,
+   "IfOutUcastPkts": 2531,
+   "IfOutBroadcastPkts": 986,
+   "IfOutDiscards": 20
+  },
+  "ChildTable": [
+   {
+    "ChildId": 51,
+    "Timeout": 12,
+    "Mode": {
+     "RxOnWhenIdle": 0,
+     "DeviceType": 0,
+     "NetworkData": 0
+    }
+   },
+   {
+    "ChildId": 1,
+    "Timeout": 12,
+    "Mode": {
+     "RxOnWhenIdle": 0,
+     "DeviceType": 0,
+     "NetworkData": 0
+    }
+   },
+   {
+    "ChildId": 57,
+    "Timeout": 12,
+    "Mode": {
+     "RxOnWhenIdle": 0,
+     "DeviceType": 0,
+     "NetworkData": 0
+    }
+   },
+   {
+    "ChildId": 3,
+    "Timeout": 12,
+    "Mode": {
+     "RxOnWhenIdle": 0,
+     "DeviceType": 0,
+     "NetworkData": 0
+    }
+   },
+   {
+    "ChildId": 4,
+    "Timeout": 12,
+    "Mode": {
+     "RxOnWhenIdle": 0,
+     "DeviceType": 0,
+     "NetworkData": 0
+    }
+   },
+   {
+    "ChildId": 9,
+    "Timeout": 12,
+    "Mode": {
+     "RxOnWhenIdle": 0,
+     "DeviceType": 0,
+     "NetworkData": 0
+    }
+   }
+  ],
+  "ChannelPages": "00",
+  "MaxChildTimeout": 240
+ }
+]

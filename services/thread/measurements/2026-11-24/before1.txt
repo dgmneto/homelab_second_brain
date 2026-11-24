@@ -1,0 +1,12 @@
+== before1 2026-11-24T15:55:49Z
+-- meshcop BRs
+Timestamp     A/R    Flags  if Domain               Service Type         Instance Name
+15:55:49.581  Add        2  12 local.               _meshcop._udp.       Living Room
+-- RIO routes
+fde9:b6c5:757::/64                      fe80::189f:c96:5398:f346%en0            UGc                   en0       
+node 2 LivingRoomThermostat fde9:b6c5:757:0:ed78:7737:ad56:1629 :: 30 packets transmitted, 30 packets received, 0.0% packet loss round-trip min/avg/max/std-dev = 457.022/1578.511/2666.393/815.188 ms 
+node 3 HallThermostat fde9:b6c5:757:0:6736:2f19:1b2e:3f64 :: 30 packets transmitted, 30 packets received, 0.0% packet loss round-trip min/avg/max/std-dev = 354.628/1611.523/2888.047/844.881 ms 
+node 9 OfficeTRV fde9:b6c5:757:0:a049:4967:870e:a54b :: 30 packets transmitted, 30 packets received, 0.0% packet loss round-trip min/avg/max/std-dev = 473.518/1675.242/2864.662/815.564 ms 
+node 7 GuestTRV fde9:b6c5:757:0:ef2b:7ee6:186e:86e1 :: 30 packets transmitted, 30 packets received, 0.0% packet loss round-trip min/avg/max/std-dev = 265.438/1465.675/2991.635/839.385 ms 
+node 8 SmallRoomTRV fde9:b6c5:757:0:b8bd:d783:e07d:44ff :: 30 packets transmitted, 30 packets received, 0.0% packet loss round-trip min/avg/max/std-dev = 232.985/1636.155/2934.032/816.565 ms 
+node 10 LoftTRV fde9:b6c5:757:0:7c52:4632:18cd:8ba8 :: 30 packets transmitted, 30 packets received, 0.0% packet loss round-trip min/avg/max/std-dev = 428.531/1650.141/2942.229/835.632 ms 

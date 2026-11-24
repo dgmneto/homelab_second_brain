@@ -1,0 +1,3 @@
+--- fde9:b6c5:757:0:6736:2f19:1b2e:3f64 ping statistics ---
+150 packets transmitted, 140 received, +1 duplicates, 6.66667% packet loss, time 151721ms
+rtt min/avg/max/mdev = 45.669/1355.422/3029.797/879.592 ms, pipe 4

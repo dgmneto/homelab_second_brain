@@ -7,8 +7,8 @@ Python Matter Server — bridges Matter/Thread devices to Home Assistant over a 
 > PAA certs `/var/cache/private/matter-server/certs`, logs `journalctl -u matter-server`. **Must run with
 > `--vendorid=65521`** (the fabric's admin was created under 0xFFF1; the module default 4939 crashes it).
 > `--primary-interface=enp2s0`, firewall 5580/tcp + 5353/udp. 0 devices at the move (fabric kept); **6 tado° X nodes since 2026-11-09**, see "Commissioned devices" below. casaos container removed; pre-move copy `/footage/services/matter/data.bak-pre-move-20261030`.
-> **Thread (2026-11-06):** the only Thread border router is the **Apple TV 4K gen 3 `192.168.11.236`** (Apple network
-> `MyHome1662126353`, OMR `fde9:b6c5:757::/64`); HA holds **no** Thread dataset (fine for multi-admin). CHIP operational
+> **Thread (2026-11-24): two border routers** — Apple TV (leader) + **SLZB-MR5U `192.168.11.121`** (OTBR, joined 2026-11-24); network, BRs, OTBR REST API and quality measurements: [../thread](../thread/README.md). (Was, 2026-11-06: the only Thread border router is the **Apple TV 4K gen 3 `192.168.11.236`** (Apple network
+> `MyHome1662126353`, OMR `fde9:b6c5:757::/64`); HA holds the Apple dataset since 2026-11-10 (iOS-app sync; on 11-06 it held none). CHIP operational
 > UDP port is **ephemeral** (e.g. 47870) and not opened in the NixOS firewall — see the tado° X audit
 > [TADO-X-READINESS.md](TADO-X-READINESS.md) for the staged (log → accept) UDP rule scoped to `enp2s0` + `fde9:b6c5:757::/64` and the reusable mDNS/RA
 > diagnostics + firewall drift check in [tools/](tools/). **Gotcha:** `systemctl show -p MainPID matter-server` is the

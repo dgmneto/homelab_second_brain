@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Second Thread BR (SLZB-MR5U) joined; before/after pings
+No matter-server change. SLZB-MR5U OTBR joined Apple's Thread network as router/BR; homelab-notebook now routes `fde9:b6c5:757::/64`
+via both BRs (ECMP). Baseline 7-day counts: 35 unavailable, 263 liveness timeouts, 2200 CASE timeouts. See [../thread](../thread/README.md).
+
 ## 2026-11-15 — Root cause: Tailscale on the Apple TV
 User had enabled Tailscale on the Apple TV (Thread BR) ~2026-11-14 19:00. After they turned it off (tailnet shows `apple-tv` offline), `ping -6` to node addresses works and nodes 2,3,7,8,9,10 all logged `Subscription succeeded` by 12:51. Documented as the first thing to check (matter + tailscale READMEs).
 

@@ -46,6 +46,7 @@ hand: publish an empty retained message (`-r -n`) to each `homeassistant/+/<ieee
 
 ## Networks / devices
 - Networks: `macVlanNetwork`, `internalNetwork`.
+- **Second coordinator available, unused (2026-11-24):** SLZB-MR5U `192.168.11.121` **radio 1** (EFR32MG24, Zigbee coordinator fw 20250212, socket `tcp://192.168.11.121:6638`). Its radio 2 is now the Thread OTBR ([../thread](../thread/README.md)). Nothing points z2m at it yet. Note: Thread also uses **channel 25**.
 - **No local USB/serial device.** The Zigbee coordinator is **network-attached**: `serial.port: tcp://192.168.11.228:6638`, `adapter: ember` (EZSP), baud 115200. So there is no `devices:` / `/dev/ttyUSB*` passthrough — the host `casaos` has no serial coordinator plugged in.
 - Zigbee network: channel 25, pan_id 62.
 

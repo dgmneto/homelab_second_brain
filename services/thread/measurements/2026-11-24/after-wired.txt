@@ -1,0 +1,13 @@
+fde9:b6c5:757::/64 proto ra metric 105 pref low
+== after-wired 2026-11-24T16:09:57Z host=homelab-notebook
+fde9:b6c5:757::/64 proto ra metric 105 pref low
+Marked node as unavailable since-7d: 35
+Subscription Liveness timeout since-7d: 263
+CASESession timed out since-7d: 2200
+esubscri since-7d: 533
+node 3 HallThermostat :: 60 packets transmitted, 60 received, 0% packet loss, time 60258ms rtt min/avg/max/mdev = 92.709/1294.206/2926.089/844.794 ms, pipe 3 
+node 7 GuestTRV :: 60 packets transmitted, 60 received, 0% packet loss, time 60235ms rtt min/avg/max/mdev = 68.253/1573.245/3144.968/905.971 ms, pipe 4 
+node 2 LivingRoomThermostat :: 60 packets transmitted, 60 received, 0% packet loss, time 60235ms rtt min/avg/max/mdev = 29.461/1462.272/3024.459/893.494 ms, pipe 3 
+node 10 LoftTRV :: 60 packets transmitted, 59 received, 1.66667% packet loss, time 60114ms rtt min/avg/max/mdev = 90.635/1581.544/3015.750/879.483 ms, pipe 3 
+node 9 OfficeTRV :: 60 packets transmitted, 59 received, 1.66667% packet loss, time 60138ms rtt min/avg/max/mdev = 92.728/1445.572/3078.417/905.942 ms, pipe 3 
+node 8 SmallRoomTRV :: 60 packets transmitted, 58 received, 3.33333% packet loss, time 60256ms rtt min/avg/max/mdev = 89.634/1463.570/3220.670/882.382 ms, pipe 4 

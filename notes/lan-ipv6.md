@@ -1,11 +1,15 @@
 ---
 name: lan-ipv6
-description: LAN has native IPv6 from Zen since 2026-11-01 (delegated /48 2a02:8012:882b::/48; Default LAN = 2a02:8012:882b::/64 via SLAAC). The old ULA fd00::/64 is NO LONGER advertised (gone by 2026-11-06). Thread BR = Apple TV 192.168.11.236, OMR route fde9:b6c5:757::/64. Never disable IPv6 - Matter/Thread needs it; inbound IPv6 relies on the UniFi firewall.
+description: LAN has native IPv6 from Zen since 2026-11-01 (delegated /48 2a02:8012:882b::/48; Default LAN = 2a02:8012:882b::/64 via SLAAC). The old ULA fd00::/64 is NO LONGER advertised (gone by 2026-11-06). Thread BRs = Apple TV 192.168.11.236 + SLZB-MR5U 192.168.11.121 (since 2026-11-24), OMR route fde9:b6c5:757::/64. Never disable IPv6 - Matter/Thread needs it; inbound IPv6 relies on the UniFi firewall.
 metadata:
   node_type: memory
   type: reference
 ---
 # LAN IPv6 (native since 2026-11-01)
+
+> **Update 2026-11-24:** 2 Thread BRs now: Apple TV (link-local changed to `fe80::189f:c96:5398:f346`) + SLZB-MR5U
+> `192.168.11.121` (`fe80::90da:72ff:fefa:b910`); both advertise RIO `fde9:b6c5:757::/64` → ECMP route on Linux hosts. See
+> [services/thread](../services/thread/README.md).
 
 > **Update 2026-11-06 (RA captured with `services/matter/tools/ra.py`):** UniFi's RA now carries **only**
 > `2a02:8012:882b::/64` — the ULA `fd00::/64` below is **gone** (hosts have no `fd00::` address any more; some long-running

@@ -4,6 +4,12 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — SLZB-MR5U enabled as 2nd Thread border router
+New SMLIGHT SLZB-MR5U (`192.168.11.121`): radio 2 switched to built-in OTBR, joined the existing Apple Thread network
+`MyHome1662126353` (dataset from HA's iOS-synced store) as router. It briefly self-formed a rogue `OpenThread-ESP` network, which was
+disabled within seconds. Before/after ping + mesh diagnostics measured (no significant IP-level change yet; redundancy gained).
+Radio 1 (Zigbee) untouched. New [services/thread](services/thread/README.md); matter README/TADO doc/lan-ipv6 note updated.
+
 ## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
 User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
 casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;

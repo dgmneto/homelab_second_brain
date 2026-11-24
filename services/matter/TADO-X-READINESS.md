@@ -5,6 +5,8 @@ infrastructure only — says nothing about heating wiring, boiler or valve compa
 Nothing was changed, restarted, installed or commissioned. No Thread credentials (PSKc, network key, active dataset,
 XPAN ID) were read or recorded; the mDNS dump redacts `xp/at/pt/id`.
 
+**Update 2026-11-24:** second BR SLZB-MR5U added; Apple TV link-local is now `fe80::189f:c96:5398:f346`. See [../thread](../thread/README.md).
+
 **Update 2026-11-10:** 6 tado° X devices are now commissioned and online in HA — see the device table in
 [README.md](README.md#commissioned-devices-server-truth-2026-11-10). Firewall Stage 1 still not deployed.
 
@@ -199,7 +201,7 @@ multi-admin share to HA, radio coverage on each floor.
    dynamic `.236`), and fix the 100 Mbps Tv unit uplink cable.
 4. **(Optional)** confirm A2843 on the Apple TV's About screen; make sure it's signed into the same Home as the iPhone
    and is the Home Hub (Home app → Home Settings → Home Hubs & Bridges → "Connected").
-5. **(Do not)** sync Thread credentials into HA, add an OTBR/SkyConnect, or reflash the SLZB-06M to Thread — none
+5. **(Superseded 2026-11-24:** an SLZB-MR5U OTBR was added and **joined the same Apple network** using HA's synced dataset, so no second network — see [../thread](../thread/README.md).**)** Original advice: (Do not) sync Thread credentials into HA, add an OTBR/SkyConnect, or reflash the SLZB-06M to Thread — none
    needed for this design and a second, separate Thread network would fragment the mesh.
 
 ## How to re-check
