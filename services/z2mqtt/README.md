@@ -76,7 +76,7 @@ Worked without re-pairing. Steps as done:
 2. Silence the old radio. An EZSP NCP **keeps running the network without a host**, so stopping z2m is not enough. SLZB-06M web UI → Settings →
    General → **Zigbee Flash Mode** (= `GET /api2?action=4&cmd=2`) puts the EFR32 in the Gecko bootloader. Verify with
    `(printf '\n'; sleep 3) | nc -w4 192.168.11.228 6638` → `Gecko Bootloader v1.A.3 … BL >`. **Not persistent:** SLZB-OS ≥3.3.1 reboots the
-   radio on every SLZB boot, so a power blip brings the old coordinator back. **Unplug the SLZB-06M** (or reflash its radio) for good.
+   radio on every SLZB boot, so a power blip brings the old coordinator back. **Unplug the SLZB-06M** (or reflash its radio) for good. **Done 2026-11-24 ~17:20: SLZB-06M unplugged, radio NOT reset** (still holds the old network = rollback path for a few days; HA's `smlight` entry for it will show unavailable).
 3. Change `serial.port` in `home-automation.nix` and deploy. z2m log: `Adapter network does not match config. Leaving network...` →
    `Forming from backup` → `New network formed!` → `zigbee-herdsman started (restored)`.
 - **Coordinator IEEE did NOT carry over:** `Coordinator address changed, updating to '0xfc1119fffeaa036b'`. The MR5U radio already has a custom

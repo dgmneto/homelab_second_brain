@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — SLZB-06M unplugged
+User unplugged the old coordinator (radio not reset; kept as rollback). Verified offline from the Mac (`nc -z 192.168.11.228 80` fails).
+
 ## 2026-11-24 — MR5U moved to PoE → frame-counter rollback, fixed
 Graceful move (z2m stopped, MR5U Thread disabled, then re-enabled → z2m "started (resumed)"). After it, both routers (`Living Room/Lights` nwk 10001,
 `Loft Bedroom/Switch` 52280) and `Entry Hall/Ligths` failed every `/get` with `Delivery failed`. Same physical spot; disabling MR5U Thread didn't help.
