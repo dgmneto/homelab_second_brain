@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — tado/Matter outage resolved (Apple TV Tailscale off + TV restart)
+Disabling Tailscale on the Apple TV did not clear the Thread routing loop; restarting the TV did. All 6 tado° X nodes resubscribed
+by 09:08:35 without another matter-server restart (verified `tools/nodes.py`, `ping -6`). Details in services/matter/LOGBOOK.md.
+
 ## 2026-11-24 — Restarted matter-server; tado still down: Tailscale on the Apple TV again
 User asked to restart matter-server. `sudo systemctl restart matter-server` on homelab-notebook (as `claude`) at 08:48 GMT; service
 `active`, 6 nodes loaded, 5 found on mDNS, but every node gets `CASESession timed out`. They had been down since **2026-11-22 19:28**

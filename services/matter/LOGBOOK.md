@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Resolved: Apple TV restart
+User restarted the Apple TV ~09:07. Nodes 3,2,10,9,8,7 logged `Subscription succeeded` 09:07:53–09:08:35 (no matter-server restart needed);
+`tools/nodes.py` all 6 `avail=True`; `ping -6` to node addrs answers. `fde9:b6c5:757::/64` route now has two nexthops,
+`fe80::189f:c96:5398:f346` and the old `fe80::109f:7643:d75c:480c` (the TV probably has a new link-local after the reboot; the old one ages out with its RA lifetime).
+Outage total 2026-11-22 19:28 → 2026-11-24 09:08.
+
 ## 2026-11-24 — Tailscale off on the Apple TV, loop persists
 ~09:01 user disabled Tailscale on the Apple TV (`apple-tv` offline, last seen 4m ago at 09:05). Still at 09:05: nodes all `avail=False`,
 `ping -6` node addrs → hop-limit exceeded from the UniFi, tracepath still loops Apple TV ↔ UniFi. Unlike 11-15 (recovered in <1 min),
