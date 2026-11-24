@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Re-bind status at 18:56 (open)
+Retry loops 17:56–18:56 re-bound Office + Little Room air sensors (7/19 total on the new IEEE). **Still bound to the old IEEE, so not reporting:**
+Kitchen/Switch, Entry Hall/Ligths, Garden/Water, Loft Bedroom/Blinds Switch, Loft bedroom button, Kitchen, Living Room, Dining Room, Guest Bathroom,
+Guest Bedroom, Loft Bathroom and Loft Bedroom air sensors. Needs: press each device's button (Entry Hall: breaker) while `device/configure` is retried.
+
 ## 2026-11-24 — Sensors silent: bindings still on old coordinator IEEE → reconfigure
 9 air sensors, button, blinds switch, Entry Hall silent since 16:54 (normally 4–14 reports/26 min). `database.db`: all binds →
 `0x8c8b48fffe9583ba` (old IEEE). `device/configure` for all 19: OK for Living Room/Lights, Loft Bedroom/Switch, Office/Lights, Little Room/Lights,
