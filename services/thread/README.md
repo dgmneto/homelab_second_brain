@@ -52,6 +52,14 @@ the mesh via the MR5U and take one extra Thread hop to the Apple TV.
   also offered as a discovered **SMLIGHT** integration; not added (would only add device sensors).
 - The Claude built-in browser pane keeps its own HA session: the user must sign in **in the pane**, not in their Chrome.
 
+## Unplugging / moving the SLZB-MR5U (done 2026-11-24, moved to PoE)
+It is now **both** the Zigbee coordinator and a Thread router/BR. Graceful order:
+`ssh homelab-notebook sudo systemctl stop zigbee2mqtt` → `curl -X PUT -H 'Content-Type: application/json' -d '"disable"' http://192.168.11.121:8080/node/state`
+(its Thread children re-attach to the Apple TV) → unplug/move → after it answers on `:8080` (~1 min, same DHCP IP) → `-d '"enable"'` (router again in ~40 s,
+**new router id**: rloc changed `0xe000` → `0xf800`) → `systemctl start zigbee2mqtt` (log `zigbee-herdsman started (resumed)`; the network lives on the radio).
+**Thread children:** 3 battery tado devices that the user reset on 2026-11-24 re-attached as children of the MR5U (`0xe001–3`). After the PoE move all 6
+were back on the Apple TV (`0x7000`). The MR5U doesn't expose child IPs/ext addresses over REST, so you can't tell which tado is under which BR from here.
+
 ## Measuring quality (before/after method)
 1. Node addresses: from the Mac, `dscacheutil -q host -a name <thread-hostname>.local` (hostnames in
    [`tools/nodes.txt`](tools/nodes.txt); re-derive with `dns-sd -L BFABFD88F60E01A6-<node hex> _matter._tcp`).

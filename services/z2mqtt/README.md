@@ -87,6 +87,8 @@ Worked without re-pairing. Steps as done:
 - `sed` with `#` as the delimiter fails on Nix comments. Use `perl -0pi -e 's|…|…|'`.
 - Last-seen per device from the box: [`tools/lastseen.py`](tools/lastseen.py) (`database.db` `lastSeen`; only flushed periodically/on
   stop, so use MQTT traffic for "right now").
+- **"Device published since restart" ≠ alive:** at startup z2m republishes every device's cached state (`cache_state_send_on_startup`), so all 20
+  devices appear in the log within seconds. Count only publishes ≥ ~1 min after `zigbee-herdsman started`, or read with `/get` (mains devices).
 - **Rollback:** stop z2m, MR5U Mode → radio 1 off/Router (or unplug), plug the SLZB-06M back (its radio still has the network), restore the
   `.bak-pre-mr5u` nix file + data dir, deploy. Do this soon: once the MR5U has run for a while, the old radio's NWK frame counter is
   behind and devices may drop its frames.
