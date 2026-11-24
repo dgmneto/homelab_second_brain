@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — MR5U moved to PoE → frame-counter rollback, fixed
+Graceful move (z2m stopped, MR5U Thread disabled, then re-enabled → z2m "started (resumed)"). After it, both routers (`Living Room/Lights` nwk 10001,
+`Loft Bedroom/Switch` 52280) and `Entry Hall/Ligths` failed every `/get` with `Delivery failed`. Same physical spot; disabling MR5U Thread didn't help.
+Forced backup showed NWK frame counter 24 191 396 < 24 191 859 from before the reboot. Ran repeated `/get`s to 6 mains devices (29 rounds, ~2 min):
+both routers answered from 17:07. Network map 17:08: 17/19 devices in neighbour tables; not yet seen: Dining Room + Guest Bedroom air sensors,
+Entry Hall/Ligths (historically needs a breaker power-cycle).
+
 ## 2026-11-24 — Coordinator migrated SLZB-06M → SLZB-MR5U radio 1 (backup restore)
 `systemctl stop zigbee2mqtt` (wrote fresh coordinator_backup.json 16:32), snapshot `/var/lib/zigbee2mqtt.bak-pre-mr5u-20261124`. SLZB-06M radio put
 in Zigbee Flash Mode (bootloader; verified `Gecko Bootloader v1.A.3` on :6638). `serial.port` → `tcp://192.168.11.121:6638`, deployed. z2m:
