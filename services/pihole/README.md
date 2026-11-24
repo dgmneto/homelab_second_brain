@@ -47,7 +47,27 @@ DNS and Pi-hole can't loop to itself or take the homelab down with it.
 while Tailscale is connected (disconnect Tailscale to recover). Adding a public resolver as a second
 global nameserver gives fallback but lets some queries skip the blocking.
 
+## Troubleshooting "Pi-hole isn't working" (start here)
+Almost always the server is fine and **clients aren't sending it queries**. Check in this order:
+1. **Is the tailnet still pointing at it?** `tailscale dns status` on any node with accept-dns on (a cloud
+   session works). Under *Resolvers* it must list `100.67.47.127`. If it says *"no resolvers configured"*,
+   the global nameserver was removed in the admin console → re-add it (section below). This was the cause on
+   2026-11-24.
+2. **Who is actually querying?** On the box, with `F=$(systemctl show -p ExecStart pihole-ftl | grep -o '/nix/store/[^ ;]*pihole-FTL' | head -1)`:
+   `sudo $F sqlite3 /var/lib/pihole/pihole-FTL.db "select client, datetime(max(timestamp),'unixepoch') from queries group by client order by 2 desc;"`
+   A client whose last query is days old has stopped using Pi-hole.
+3. **Is it blocking?** Test *on the box* (no `dig` installed: `nix shell nixpkgs#dnsutils -c dig +short @127.0.0.1 doubleclick.net` → `0.0.0.0`).
+   `sudo grep -a 'gravity blocked' /var/log/pihole/pihole.log | tail` shows live blocks (`-a`: the log has binary bytes).
+
 ## Gotchas
+- **Don't test DNS from a Claude cloud session.** UDP/53 from the cloud container to `100.67.47.127` is
+  answered by something in the sandbox, *not* Pi-hole — the query never reaches the box (absent from its log)
+  and `doubleclick.net` comes back with real Google IPs, `pi.hole` with NXDOMAIN. Run `dig` on homelab-notebook
+  or casaos instead.
+- **`pihole status` lies**: it prints "DNS service is NOT running" (plus a `FTL_PID_FILE: readonly variable`
+  error) even when `pihole-ftl` is up and answering. Use `systemctl status pihole-ftl`. `pihole -q <domain>` works.
+- `pihole-FTL` and `sqlite3` aren't on `PATH`; use the nix-store path of `pihole-FTL` (`pihole-FTL sqlite3 ...`,
+  `pihole-FTL --config dns.blocking.active`). In SQL use single quotes for strings.
 - **Re-running `pihole-ftl-setup.service` fails** (`database_error`) — it re-adds the already-present list.
   It's a one-shot at boot; gravity still gets built. Don't use it to refresh lists — use
   `sudo systemctl start pihole-gravity` (or `sudo -u pihole pihole -g`).
