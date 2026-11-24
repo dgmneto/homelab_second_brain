@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — Planned Zigbee coordinator move to SLZB-MR5U (no change yet)
+Collected versions/device list from the z2m frontend; plan in chat. Device count in the z2m README corrected (26 → 19).
+
 ## 2026-11-24 — HA OTBR integration for the SLZB-MR5U
 Added HA's OpenThread Border Router integration (`http://192.168.11.121:8080`) for visibility; HA Thread panel now lists both BRs on
 `MyHome1662126353`. Thread dataset/role unchanged (verified via OTBR REST). See [services/thread](services/thread/README.md).

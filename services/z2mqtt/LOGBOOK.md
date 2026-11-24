@@ -3,6 +3,9 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Investigation: coordinator migration to SLZB-MR5U (planning only)
+Read-only. z2m 2.14.2 / herdsman 10.10.0 / EmberZNet 8.0.2, coordinator IEEE 0x8c8b48fffe9583ba, 19 devices. Target: MR5U radio 1 EFR32MG24 ember fw 20250212. Migration plan proposed (backup → stop z2m → old adapter off → repoint serial.port → restore on start); nothing changed. SSH was blocked by 1Password, data read from the z2m frontend.
+
 ## 2026-11-10 — Rejoined TRVs blocked; Entry Hall switch lost its parent
 3 force-removed AVATTO TRVs (batteries still in) rejoined 07:10–19:23 as `0xa4c…`. Removed again with `block: true`;
 blocklist also added to the Nix z2m settings (the module regenerates configuration.yaml) and deployed, verified present after

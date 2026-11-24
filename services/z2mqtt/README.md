@@ -1,6 +1,7 @@
 # z2mqtt (zigbee2mqtt)
 
-Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. 26 devices (lights, TRV valves, air sensors, switches, thermostats, blinds).
+Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. **19 devices** (2026-11-24: 9 SNZB-02P air sensors, 3 ZBMINIL2 light switches, SWV valve, SNZB-01P button, Aqara switch, Philips blinds switch, 2 Candeo routers).
+**Versions (2026-11-24, z2m frontend → Settings → About; works without SSH):** z2m 2.14.2, herdsman 10.10.0, coordinator EmberZNet **8.0.2**, coordinator IEEE `0x8c8b48fffe9583ba`. SLZB-06M: EFR32MG21, radio fw 20250220, SLZB-OS v3.3.1.
 **2026-11-10:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) were **removed** (replaced by
 tado° X over Matter; see [../matter/README.md](../matter/README.md)). Backups: `/var/lib/zigbee2mqtt/{database.db,devices.yaml}.bak-pre-tado-20261110`.
 
