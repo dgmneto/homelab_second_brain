@@ -4,6 +4,16 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — Why WoL doesn't wake the Windows PC (investigation)
+User asked why Wake-on-LAN on the Windows PC (`divinos-pc`, MAC `30:C5:99:5E:2F:14`, wired to Office U6 IW port 2) doesn't work.
+HA side is fine. The `wake_on_lan` integration failed until 2026-11-20 (`No module named 'wakeonlan'`) and was fixed by an
+on-box-only deploy. The dashboard button sends the correct MAC to `192.168.11.255`. The NIC is in standby: the switch port links
+at 10 Mbps while the PC is off. A magic packet sent by hand from homelab-notebook at 15:07 UTC (to `.255` and `255.255.255.255`)
+did not wake it: no ping on `.202`, port stayed 10 Mbps, still offline on Tailscale after 2 min. So the PC ignores the packet,
+which points at Windows/BIOS settings. Repo fix: the box's `home-automation.nix` (WoL + ping, boot guards, pytapo 3.4.31) was
+never committed, so it is now synced into the repo. Drift note in the homelab-notebook README; WoL runbook in the homeassistant README.
+Also seen: tapo_control now wants pytapo 3.4.32 (box has 3.4.31), so it fails to set up. Not fixed.
+
 ## 2026-11-18 — Pushed casaos compose repo to GitHub from a cloud session
 User approved attaching `dgmneto/homelab` with push access. Cloned it here (GitHub `main` = `4c396c1` = casaos `origin/main`), bundled
 casaos's `origin/main..main` (10 commits, `64886b3`…`06f846e`) over ssh, fast-forwarded, checked the diff for literal secrets (none;

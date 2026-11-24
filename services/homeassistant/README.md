@@ -104,6 +104,20 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 - **Recreating this container costs ~4 min:** the LinuxServer image re-fixes Python package permissions on a new container before HA starts.
 
 ## Quirks / runbook
+- **Wake-on-LAN for the desktop PC (`divinos-pc`)** — added 2026-11-20. Office dashboard card, sub-button "PC":
+  tap → `wake_on_lan.send_magic_packet` `{mac: 30:C5:99:5E:2F:14, broadcast_address: 192.168.11.255}`; state =
+  `binary_sensor.192_168_11_202` (`ping` config entry). Both components are in `extraComponents` in
+  `hosts/homelab-notebook/nixos/home-automation.nix`. Nix HA can't pip-install, so before that deploy the integration
+  failed with `No module named 'wakeonlan'`.
+  - PC: wired, Office U6 IW **port 2**, DHCP **without a reservation** (last `.202`). If its IP changes, the ping sensor
+    goes wrong; WoL still works because it is sent to the MAC. A second "Divinos_PC" `08:8a:f1:c6:4f:e0` (Wi-Fi) also
+    exists; WoL only works over the wired NIC.
+  - **"Button does nothing": test it from this side first.** While the PC is off, the NIC's port should show as linked
+    at **10 Mbps** (standby power):
+    `services/unifi/tools/unifi.sh api/s/default/stat/device | jq '.data[]|select(.name=="Office").port_table[]|select(.port_idx==2)|{up,speed}'`.
+    Send a packet by hand: `ssh claude@homelab-notebook 'PYTHONPATH=$(ls -d /nix/store/*python3.14-wakeonlan-*/lib/python3.14/site-packages) $(ls -d /nix/store/*-python3-3.14.*/bin/python3|head -1) -c "from wakeonlan import send_magic_packet as s; s(\"30:C5:99:5E:2F:14\", ip_address=\"192.168.11.255\")"'`
+    (the box has no tcpdump/jq). On 2026-11-24 the port was up at 10 Mbps and the packet was sent, but the PC did not
+    wake, so the fault is on the PC (Windows NIC power settings / Fast Startup / BIOS PCIe wake). See LOGBOOK 2026-11-24.
 - **"Lots of entities unavailable" — list them first, by time** (no HA token needed; read-only on the recorder DB):
   `ssh claude@homelab-notebook 'cat > /tmp/q.sql; sudo nix-shell -p sqlite --run "sqlite3 -readonly /var/lib/hass/home-assistant_v2.db < /tmp/q.sql"' < services/homeassistant/tools/unavailable.sql`
   (feed SQL via a file: quoting it inline through ssh + nix-shell breaks). Entities that went unavailable at the

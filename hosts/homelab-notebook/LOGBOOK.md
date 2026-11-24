@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-24 — Synced box `home-automation.nix` into the repo (drift)
+The box's `~/nixos/home-automation.nix` (generations 16–19, 2026-11-18/20: z2m `network-online` ordering, matter chip.json
+guard, `wake_on_lan`/`ping` components, pytapo 3.4.31) had never been committed. The repo copy was replaced with the box copy.
+Nothing was deployed. Other files match apart from the known `hermes.nix` drift.
+
 ## 2026-11-16 — Rack case: both west posts float, shorter; Ethernet jack opening
 `hardware/case/build_case.py`:
 - **Floating posts.** The NW lid post now floats like the SW one. Both come from `floating_post()`: a 7 x 7 column hung off the west wall and the south wall / front panel, with a 45 deg wedge underside.

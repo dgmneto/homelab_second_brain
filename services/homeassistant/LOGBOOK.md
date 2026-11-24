@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — PC Wake-on-LAN not waking (investigation)
+Button config + `wake_on_lan` integration verified working (module present since the 2026-11-20 deploy). Manual magic packet
+from the box didn't wake the PC although its NIC is in WoL standby (port 10 Mbps), so the fault is on the PC side. Runbook added to the README. Also: tapo_control
+fails since HACS bumped to pytapo 3.4.32 (box has 3.4.31).
+
 ## 2026-11-15 — Unavailable entities triage
 Investigation. Listed unavailable entities from the recorder DB (new `tools/unavailable.sql`). Groups: all tado° X
 Matter climate entities since 2026-11-14 19:04 (Thread routing loop, see matter LOGBOOK); Sonos `media_player.living_room`

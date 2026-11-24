@@ -56,4 +56,10 @@ ssh homelab-notebook        # dgmneto, ed25519 key that exists ONLY in 1Password
   that has **never been deployed** — the box's `~/nixos/hermes.nix` is the older version, and the
   2026-10-28 Tailscale and Pi-hole deploys kept the box copy on purpose (all other files are in sync). Review before the next full deploy
   (`diff` box vs repo first).
+- **Repo ↔ box drift (2026-11-24):** `home-automation.nix` had been edited and deployed **on the box only**
+  (2026-11-18 z2m/matter boot guards, 2026-11-20 `wake_on_lan` + `ping` components, pytapo 3.4.31). The repo was
+  behind, so a deploy from here would have silently removed WoL and the guards. Synced the box copy into the repo
+  2026-11-24. **If you edit on the box, copy the file back into this repo and commit in the same task.**
+  Check for drift: `for f in *.nix flake.lock; do ssh homelab-notebook "sudo cat /home/dgmneto/nixos/$f" | diff -q - $f; done`
+  (run in `hosts/homelab-notebook/nixos/`; only `hermes.nix` is expected to differ).
 
