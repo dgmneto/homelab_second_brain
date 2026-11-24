@@ -101,10 +101,11 @@ in
             password = "!secret.yaml mqtt_password";
             retain = true;
           };
-          # Network-attached SLZB-06M coordinator. Only ONE z2m may connect to it:
+          # Network-attached coordinator: SLZB-MR5U radio 1 (EFR32MG24) since 2026-11-24,
+          # migrated from the SLZB-06M (192.168.11.228) by backup restore. Only ONE z2m may connect to it:
           # casaos' container must be `down` before this starts.
           serial = {
-            port = "tcp://192.168.11.228:6638";
+            port = "tcp://192.168.11.121:6638";
             adapter = "ember";
             baudrate = 115200;
             rtscts = false;
@@ -135,6 +136,13 @@ in
         };
       };
       networking.firewall.allowedTCPPorts = [ 8080 ];
+      # The coordinator is on the LAN. Started before the network (2026-11-17 power-cut
+      # boot), z2m hit ENETUNREACH, logged "Exiting..." and then hung with no Zigbee entities.
+      # systemd still showed it active, so Restart=on-failure never fired.
+      systemd.services.zigbee2mqtt = {
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+      };
     })
 
     (lib.mkIf cfg.matter.enable {
@@ -154,6 +162,42 @@ in
       # Discovery is mDNS: multicast answers arrive as new inbound packets, so
       # conntrack won't pass them. (Operational traffic is outbound UDP, fine.)
       networking.firewall.allowedUDPPorts = [ 5353 ];
+
+      # A power cut mid-write (2026-11-15) truncated chip.json at 4096 bytes. matter-server
+      # then "reset" it: a new root CA and fabric, 0 nodes, and every tado showed
+      # unavailable until the file was restored from the casaos backup. Guard it: keep a
+      # last-good copy and restore it instead of letting the server start a new fabric.
+      # This is a separate unit, not an ExecStartPre=+ on matter-server. The module's
+      # RootDirectory=/PrivateUsers= hide /var/lib/private even from "+" commands: the
+      # guard there saw no chip.json and exited 0 (tried 2026-11-18).
+      systemd.services.matter-server = {
+        after = [ "network-online.target" "matter-chip-json-guard.service" ];
+        wants = [ "network-online.target" ];
+        requires = [ "matter-chip-json-guard.service" ];
+      };
+      systemd.services.matter-chip-json-guard = {
+        description = "Keep a last-good matter-server chip.json; restore it if corrupt";
+        before = [ "matter-server.service" ];
+        serviceConfig.Type = "oneshot";
+        path = with pkgs; [ coreutils jq ];
+        script = ''
+          d=/var/lib/private/matter-server
+          f=$d/chip.json
+          [ -e "$f" ] || { echo "no $f yet"; exit 0; }
+          if jq -e '."sdk-config"."f/1/r"' "$f" >/dev/null 2>&1; then
+            cp -p "$f" "$d/chip.json.lastgood.tmp" && sync "$d/chip.json.lastgood.tmp" \
+              && mv "$d/chip.json.lastgood.tmp" "$d/chip.json.lastgood"
+            echo "chip.json ok; saved chip.json.lastgood"
+          elif [ -e "$d/chip.json.lastgood" ]; then
+            echo "chip.json is corrupt; restoring chip.json.lastgood" >&2
+            mv "$f" "$d/chip.json.corrupt-$(date +%s)"
+            cp -p "$d/chip.json.lastgood" "$f"
+          else
+            echo "chip.json is corrupt and there is no lastgood copy; not starting (it would create a new fabric). Restore it from casaos /footage/backups/homelab-notebook/history/*/private/matter-server/" >&2
+            exit 1
+          fi
+        '';
+      };
     })
 
     (lib.mkIf cfg.homeAssistant.enable {
@@ -194,6 +238,8 @@ in
           "onvif"
           "ffmpeg"
           "stream"
+          "wake_on_lan" # PC wake button (divinos-pc, 30:C5:99:5E:2F:14)
+          "ping" # PC on/off status sensor
         ];
         # octopus_energy moved to HACS 2026-11-10: the Nix copy was a read-only store symlink, so
         # HACS updates failed (Errno 13 on its /tmp backup). Its only requirement, pydantic, is below.
@@ -206,14 +252,14 @@ in
           aiofiles
           websocket-client
           pydantic # octopus_energy (HACS)
-          # tapo_control (HACS) 7.2.13 pins pytapo==3.4.30; nixpkgs has 3.4.19 (same deps, so only
+          # tapo_control (HACS) 7.2.14 pins pytapo==3.4.31; nixpkgs has 3.4.19 (same deps, so only
           # version + hash change). Bump here when HACS bumps the pin: manifest.json "requirements".
           (pytapo.overridePythonAttrs (_: rec {
-            version = "3.4.30";
+            version = "3.4.31";
             src = pkgs.fetchPypi {
               pname = "pytapo";
               inherit version;
-              hash = "sha256-Eo/3k5rGE80GEnVug0+VydRP0z4mfq0Ueedw5hathCE=";
+              hash = "sha256-LJtXLFrM18nO3Kvq5PGjaRWQx1jcf7rR77BuPo/j78M=";
             };
             doCheck = false;
           }))

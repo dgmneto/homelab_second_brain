@@ -1,7 +1,7 @@
 # z2mqtt (zigbee2mqtt)
 
 Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. **19 devices** (2026-11-24: 9 SNZB-02P air sensors, 3 ZBMINIL2 light switches, SWV valve, SNZB-01P button, Aqara switch, Philips blinds switch, 2 Candeo routers).
-**Versions (2026-11-24, z2m frontend → Settings → About; works without SSH):** z2m 2.14.2, herdsman 10.10.0, coordinator EmberZNet **8.0.2**, coordinator IEEE `0x8c8b48fffe9583ba`. SLZB-06M: EFR32MG21, radio fw 20250220, SLZB-OS v3.3.1.
+**Versions (2026-11-24, z2m frontend → Settings → About; works without SSH):** z2m 2.14.2, herdsman 10.10.0. Coordinator now SLZB-MR5U radio 1, IEEE **`0xfc1119fffeaa036b`** (was SLZB-06M EmberZNet 8.0.2, IEEE `0x8c8b48fffe9583ba`).
 **2026-11-10:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) were **removed** (replaced by
 tado° X over Matter; see [../matter/README.md](../matter/README.md)). Backups: `/var/lib/zigbee2mqtt/{database.db,devices.yaml}.bak-pre-tado-20261110`.
 
@@ -47,8 +47,10 @@ hand: publish an empty retained message (`-r -n`) to each `homeassistant/+/<ieee
 
 ## Networks / devices
 - Networks: `macVlanNetwork`, `internalNetwork`.
-- **Second coordinator available, unused (2026-11-24):** SLZB-MR5U `192.168.11.121` **radio 1** (EFR32MG24, Zigbee coordinator fw 20250212, socket `tcp://192.168.11.121:6638`). Its radio 2 is now the Thread OTBR ([../thread](../thread/README.md)). Nothing points z2m at it yet. Note: Thread also uses **channel 25**.
-- **No local USB/serial device.** The Zigbee coordinator is **network-attached**: `serial.port: tcp://192.168.11.228:6638`, `adapter: ember` (EZSP), baud 115200. So there is no `devices:` / `/dev/ttyUSB*` passthrough — the host `casaos` has no serial coordinator plugged in.
+- **Coordinator = SLZB-MR5U radio 1 since 2026-11-24** (`tcp://192.168.11.121:6638`, EFR32MG24, ember fw 20250212, EZSP v13). Migrated
+  from the SLZB-06M (`192.168.11.228`, EFR32MG21) by z2m backup restore. See "Coordinator migration" below. Radio 2 of the same box is the
+  Thread OTBR ([../thread](../thread/README.md)), also on **channel 25**.
+- **No local USB/serial device.** The Zigbee coordinator is **network-attached**: `serial.port: tcp://192.168.11.121:6638` (was `192.168.11.228` until 2026-11-24), `adapter: ember` (EZSP), baud 115200. So there is no `devices:` / `/dev/ttyUSB*` passthrough — the host `casaos` has no serial coordinator plugged in.
 - Zigbee network: channel 25, pan_id 62.
 
 ## Integrations
@@ -65,3 +67,26 @@ hand: publish an empty retained message (`-r -n`) to each `homeassistant/+/<ieee
 - Coordinator is over the LAN/TCP — if `192.168.11.228:6638` is unreachable, z2mqtt logs serial/connection errors and Zigbee goes dark even though the container is "Up". Check that host first, not a USB stick.
 - Data lives on `/footage`; a full `/footage` can break z2mqtt persistence/logging too.
 - Unpinned `latest` image; z2mqtt config schema occasionally changes between majors — a Watchtower bump can break the config.
+
+## Coordinator migration (SLZB-06M → SLZB-MR5U, 2026-11-24): runbook + gotchas
+Worked without re-pairing. Steps as done:
+1. `sudo systemctl stop zigbee2mqtt`. Stopping writes a fresh `coordinator_backup.json` (zigpy open-coordinator-backup; ember: keys, PAN, ext PAN,
+   channel, `hashed_tclk`; `devices` is empty for ember, which is normal). Snapshot: `/var/lib/zigbee2mqtt.bak-pre-mr5u-20261124`, nix file
+   `~/nixos/home-automation.nix.bak-pre-mr5u-20261124`.
+2. Silence the old radio. An EZSP NCP **keeps running the network without a host**, so stopping z2m is not enough. SLZB-06M web UI → Settings →
+   General → **Zigbee Flash Mode** (= `GET /api2?action=4&cmd=2`) puts the EFR32 in the Gecko bootloader. Verify with
+   `(printf '\n'; sleep 3) | nc -w4 192.168.11.228 6638` → `Gecko Bootloader v1.A.3 … BL >`. **Not persistent:** SLZB-OS ≥3.3.1 reboots the
+   radio on every SLZB boot, so a power blip brings the old coordinator back. **Unplug the SLZB-06M** (or reflash its radio) for good.
+3. Change `serial.port` in `home-automation.nix` and deploy. z2m log: `Adapter network does not match config. Leaving network...` →
+   `Forming from backup` → `New network formed!` → `zigbee-herdsman started (restored)`.
+- **Coordinator IEEE did NOT carry over:** `Coordinator address changed, updating to '0xfc1119fffeaa036b'`. The MR5U radio already has a custom
+  EUI64 burned in, and herdsman doesn't overwrite it. Same PAN/keys/channel, so devices stay joined. Reporting bindings made to the old IEEE
+  may need **Reconfigure** in z2m (wake sleepy devices first) for any device that goes quiet.
+- **`nixos-rebuild switch` restarts a manually stopped z2m** even when its config didn't change (that happened here on a failed edit: z2m
+  briefly tried to talk to the bootloader. Harmless, but stop it again before continuing).
+- `sed` with `#` as the delimiter fails on Nix comments. Use `perl -0pi -e 's|…|…|'`.
+- Last-seen per device from the box: [`tools/lastseen.py`](tools/lastseen.py) (`database.db` `lastSeen`; only flushed periodically/on
+  stop, so use MQTT traffic for "right now").
+- **Rollback:** stop z2m, MR5U Mode → radio 1 off/Router (or unplug), plug the SLZB-06M back (its radio still has the network), restore the
+  `.bak-pre-mr5u` nix file + data dir, deploy. Do this soon: once the MR5U has run for a while, the old radio's NWK frame counter is
+  behind and devices may drop its frames.

@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-24 — Deploy: z2m serial.port → SLZB-MR5U; repo synced to box
+`home-automation.nix` on the box was **ahead of the repo** (boot guards for z2m/matter-server chip.json, wake_on_lan/ping, pytapo 3.4.31
+were never committed). Edited the box copy (z2m `serial.port` → `tcp://192.168.11.121:6638`), deployed twice with the systemd-run switch
+(the first run had an unchanged file after a failed sed edit), then copied the box file into the repo. hermes.nix drift left as is (repo ahead,
+known). Backup of the pre-change file: `~/nixos/home-automation.nix.bak-pre-mr5u-20261124`.
+
 ## 2026-11-16 — Rack case: both west posts float, shorter; Ethernet jack opening
 `hardware/case/build_case.py`:
 - **Floating posts.** The NW lid post now floats like the SW one. Both come from `floating_post()`: a 7 x 7 column hung off the west wall and the south wall / front panel, with a 45 deg wedge underside.

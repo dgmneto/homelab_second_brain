@@ -71,7 +71,7 @@ Top gotchas (detail in the host READMEs):
   since 2026-10-30/31 (NixOS modules in `hosts/homelab-notebook/nixos/home-automation.nix`); see
   [services/homeassistant/MIGRATION.md](services/homeassistant/MIGRATION.md). HA's `http:` settings are in `.storage/http`, not YAML.
   **Not Docker** any more — HA/matter-server are native services. Thread has **two border routers** since 2026-11-24: the **Apple TV**
-  `192.168.11.236` (leader) and the **SLZB-MR5U** `192.168.11.121` radio 2 (OTBR, REST `:8080`); see [services/thread](services/thread/README.md).
+  `192.168.11.236` (leader) and the **SLZB-MR5U** `192.168.11.121` radio 2 (OTBR, REST `:8080`); see [services/thread](services/thread/README.md). Its radio 1 is the **Zigbee coordinator** since 2026-11-24 (`tcp://192.168.11.121:6638`; the SLZB-06M `.228` is retired).
 - **casaos** `qbittorrent` lives in `gluetunProtonVPN`'s network namespace — recreating gluetun takes it down.
   (`prowlarr` was moved **off** the VPN onto `internalNetwork` on 2026-06-22; verified running that way 2026-11-01.) watchtower updates everything weekly (Sun 10:00); autoheal is a no-op.
 - **UniFi (UDR `192.168.11.1`)**: cloud sessions have `UNIFI_API_KEY` (Site Manager key). The local API is blocked by

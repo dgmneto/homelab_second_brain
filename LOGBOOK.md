@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-24 — Zigbee coordinator moved to SLZB-MR5U (no re-pairing)
+z2m restored its backup onto MR5U radio 1. Same network, new coordinator IEEE `0xfc1119fffeaa036b`. Old SLZB-06M radio held in bootloader,
+to be unplugged. homelab-notebook `home-automation.nix` synced from box to repo (box was ahead). Details: services/z2mqtt README +
+LOGBOOK, hosts/homelab-notebook LOGBOOK.
+
 ## 2026-11-24 — Planned Zigbee coordinator move to SLZB-MR5U (no change yet)
 Collected versions/device list from the z2m frontend; plan in chat. Device count in the z2m README corrected (26 → 19).
 

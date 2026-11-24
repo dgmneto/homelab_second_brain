@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-24 — Coordinator migrated SLZB-06M → SLZB-MR5U radio 1 (backup restore)
+`systemctl stop zigbee2mqtt` (wrote fresh coordinator_backup.json 16:32), snapshot `/var/lib/zigbee2mqtt.bak-pre-mr5u-20261124`. SLZB-06M radio put
+in Zigbee Flash Mode (bootloader; verified `Gecko Bootloader v1.A.3` on :6638). `serial.port` → `tcp://192.168.11.121:6638`, deployed. z2m:
+"Forming from backup" → "New network formed!" → "started (restored)", 20 devices. **Coordinator IEEE changed** 0x8c8b48fffe9583ba →
+0xfc1119fffeaa036b (MR5U EUI64 not rewritable). Verified: both routers answer `/get`; within ~15 min 15 of 19 devices sent live reports
+(sensors, switches, blinds, button); 5 sleepy devices pending at commit time. A failed sed edit + rebuild restarted z2m against the
+bootloader for a few seconds (no harm). User told to unplug the SLZB-06M and keep it un-reset for rollback.
+
 ## 2026-11-24 — Investigation: coordinator migration to SLZB-MR5U (planning only)
 Read-only. z2m 2.14.2 / herdsman 10.10.0 / EmberZNet 8.0.2, coordinator IEEE 0x8c8b48fffe9583ba, 19 devices. Target: MR5U radio 1 EFR32MG24 ember fw 20250212. Migration plan proposed (backup → stop z2m → old adapter off → repoint serial.port → restore on start); nothing changed. SSH was blocked by 1Password, data read from the z2m frontend.
 
