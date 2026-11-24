@@ -87,6 +87,13 @@ Worked without re-pairing. Steps as done:
 - `sed` with `#` as the delimiter fails on Nix comments. Use `perl -0pi -e 's|…|…|'`.
 - Last-seen per device from the box: [`tools/lastseen.py`](tools/lastseen.py) (`database.db` `lastSeen`; only flushed periodically/on
   stop, so use MQTT traffic for "right now").
+- **Frame-counter rollback after a coordinator reboot (hit 2026-11-24, ~20 min after the restore).** The MR5U was unplugged to move to PoE; on
+  reboot the radio's NWK frame counter came back **lower** than before (backup 16:48 = 24 191 859 → 17:05 = 24 191 396). Routers (and devices
+  that didn't rejoin) silently drop its frames as replays: `/get` → `Delivery failed for '<nwk>'`, network-map LQI scans fail, while end devices
+  that **rejoined** (log `Accepting joining …`) work. Same physical spot, nothing RF-related; turning the MR5U's Thread off didn't change it.
+  Check: `mosquitto_pub … -t zigbee2mqtt/bridge/request/backup -m '{}'` makes z2m rewrite `coordinator_backup.json`; compare
+  `network_key.frame_counter` with the previous backup. Fix: generate traffic (repeated `/get`s) until the counter passes the old value; it also
+  heals by itself with normal traffic. Avoid rebooting the coordinator in the first hours after a restore.
 - **"Device published since restart" ≠ alive:** at startup z2m republishes every device's cached state (`cache_state_send_on_startup`), so all 20
   devices appear in the log within seconds. Count only publishes ≥ ~1 min after `zigbee-herdsman started`, or read with `/get` (mains devices).
 - **Rollback:** stop z2m, MR5U Mode → radio 1 off/Router (or unplug), plug the SLZB-06M back (its radio still has the network), restore the
