@@ -4,7 +4,7 @@
 // Home Assistant or the Shelly app. The idle timer restarts every time the plug is switched on.
 // Deployed via services/shelly/README.md ("Deploy the script"); keep this file = the device copy.
 
-let THRESHOLD_W = 5;   // charger draw at/below this counts as "idle/finished"
+let THRESHOLD_W = 10;  // charger draw at/below this counts as "idle/finished"
 let IDLE_S = 300;      // 5 minutes
 let POLL_S = 10;
 

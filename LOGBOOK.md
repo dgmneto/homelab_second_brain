@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-26 — Bike charger: 10 W idle threshold, 700 W power limit, button moved to Hall card
+Follow-up to the entry below, from the charger rating (42 V 3 A out, 2.5 A @ 240 V in). Details in services/shelly + homeassistant logbooks.
+
 ## 2026-11-26 — Bike charger Shelly plug: HA integration, dashboard button, idle cut-off
 New Shelly Plus Plug UK (`192.168.11.252`, found via UniFi clients) powering the e-bike charger. On-device script
 `bike-charger-idle-off` switches it off after 5 min at ≤5 W; nothing turns it back on. Added `shelly` to HA extraComponents

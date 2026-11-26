@@ -3,6 +3,10 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Bike Charger button moved into the Hall card
+User asked for it in the Hall card. With HA stopped (backup `lovelace.lovelace.bak-pre-hall-sub-20261126`): removed the standalone
+card, added a `switch.bike_charger` sub-button (tap → more-info) to the Hall bubble-card. HA active. Not checked in a browser.
+
 ## 2026-11-26 — Shelly integration + Bike Charger dashboard button
 `shelly` added to extraComponents (deployed). With HA stopped: appended the shelly config entry to `.storage/core.config_entries`
 (backup `.bak-pre-shelly-20261126`); then appended a Bubble-Card button (entity `switch.bike_charger`, tap → more-info,

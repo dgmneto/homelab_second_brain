@@ -2,6 +2,10 @@
 
 Reverse-chronological. Newest entry on top. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Bike Charger: threshold 10 W, power_limit 700 W
+User gave the charger rating (42 V 3.0 A out, 2.5 A @ 240 V in). Script `THRESHOLD_W` 5 → 10 (Stop/PutCode/Start; Eval confirms 10),
+`Switch.SetConfig power_limit: 700` (was 3000). Verified via Script.GetStatus/Switch.GetConfig.
+
 ## 2026-11-26 — Bike Charger plug set up (script + HA)
 Found `shellypluspluguk-c0cdd64f00a4` at 192.168.11.252 via `unifi.sh api/s/default/stat/sta` (fw 1.4.4, auth off, no scripts).
 RPC from homelab-notebook: set device + switch:0 name "Bike Charger"; `Script.Create` → id 1, `PutCode`
