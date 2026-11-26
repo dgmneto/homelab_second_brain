@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-26 — Zigbee switches failing: stale old-coordinator binds; tapo + smlight fixes
+Every Zigbee device still had binds to the pre-migration coordinator IEEE, which caused broadcast/unicast failures. A z2m external extension now removes
+them (mains devices done; sleepy ones clean up on wake). Kitchen/Switch (one-way behind the Candeo router) and Entry Hall (orphaned) need a breaker
+power-cycle. Also: tapo_control's pytapo bumped to 3.4.32 (deployed), HA's smlight entry for the retired SLZB-06M removed. Details: z2mqtt / homeassistant logbooks.
+
 ## 2026-11-26 — Bike charger arrival notification (iPhone)
 Status sensor + actionable iOS push on arriving home, updated in place until dismissed. See services/shelly. Side findings:
 tapo_control needs pytapo 3.4.32; smlight entry for the retired .228 still configured.

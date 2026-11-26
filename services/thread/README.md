@@ -88,5 +88,11 @@ router) and from devices re-attaching to the MR5U if it is closer to them. Apple
 them and the child tables.
 
 **Follow-ups:** re-measure after ~1 week (2026-12-01): the 7-day log counts, which children moved to the MR5U.
+> **Gotcha:** `curl http://192.168.11.121:8080/node/dataset/active` returns the Thread **network key and PSKc in clear**. Don't run it
+> unfiltered into logs/transcripts; pipe through `jq '{Channel,PanId,ExtPanId}'`.
+>
+> Zigbee coordinator (radio 1) and OTBR (radio 2) are in the **same box on the same channel 25** since 2026-11-24. On 2026-11-26 the NCP
+> counters showed CCA failures ≈ 0, so co-channel interference was not the cause of that day's Zigbee failures. Still worth separating.
+
 Consider moving Thread or Zigbee off **channel 25**: both meshes share it today. That's a Zigbee/Apple change, not
 done here.

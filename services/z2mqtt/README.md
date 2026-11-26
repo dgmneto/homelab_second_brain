@@ -86,6 +86,29 @@ Worked without re-pairing. Steps as done:
   4–14 per 26 min normally). **Fix = reconfigure every device** (`zigbee2mqtt/bridge/request/device/configure` `{"id":"<name>"}`) right after a
   migration, before anything else happens. Routers and rx-on switches re-bind at once. Sleepy devices fail with `Delivery failed`
   until woken (press their button; retry configure in a loop). **Next migration: reconfigure all devices immediately after the restore.**
+- **…and then remove the OLD binds: configure adds the new bind but never removes the old one** (found 2026-11-26: all 19
+  devices still had binds to `0x8c8b48fffe9583ba`, even the re-bound ones). Devices keep trying to resolve that
+  dead IEEE, which showed up as `Delivery of BROADCAST failed for '65533'` (up to ~300/h, from 11-25 23:00) and
+  APS unicast failures (NCP COUNTERS idx 11 `APS_DATA_TX_UNICAST_FAILED` 775 vs idx 9 success 34 per period, while MAC tx was
+  fine and idx 32 `PHY_CCA_FAIL` ≈ 0, so not RF/channel). Commands to Kitchen/Switch, Entry Hall and Loft Bedroom/Switch timed out.
+  `bridge/request/device/unbind` can't target an IEEE that isn't a device, so the fix is the external extension
+  [`tools/cleanup-old-coordinator-binds.js`](tools/cleanup-old-coordinator-binds.js) (installed 2026-11-26 via
+  `bridge/request/extension/save`; lives in `/var/lib/zigbee2mqtt/external_extensions/`, survives restarts). It sends a ZDO Unbind for every old-IEEE
+  bind (routers at once, sleepy devices when they next talk), drops it from `database.db`, and clears `meta.configured` on devices with
+  no new bind so z2m's Configure re-binds them on their next message. Progress: `journalctl -u zigbee2mqtt | grep old-binds`.
+  **Remove it once it logs `[old-binds] all clean`:** `bridge/request/extension/remove {"name":"cleanup-old-coordinator-binds.js"}`.
+  List stale binds offline: see the 2026-11-26 LOGBOOK entry (python over `database.db`, `endpoints.*.binds[].deviceIeeeAddress`).
+- **Decode `[NCP COUNTERS]`:** the index order is `EmberCounterType` in herdsman `dist/adapter/ember/enums.js` (0 MAC_RX_BROADCAST … 11
+  APS_DATA_TX_UNICAST_FAILED, 12 ROUTE_DISCOVERY_INITIATED, 21 NWK_FRAME_COUNTER_FAILURE, 32 PHY_CCA_FAIL_COUNT, 33 BROADCAST_TABLE_FULL).
+- **MQTT from the box (verified 2026-11-26):** `nix shell nixpkgs#mosquitto -c mosquitto_pub -h 127.0.0.1 -u zigbee2mqtt -P "$PW" …` with
+  `PW=$(sudo grep mqtt_password /var/lib/zigbee2mqtt/secret.yaml | sed -E "s/^[^:]*: *//; s/^['\"]//; s/['\"]$//")`. Device state topics are **not
+  retained** (a `mosquitto_sub -C 1` on `zigbee2mqtt/<dev>` waits for the next report). Network map: `bridge/request/networkmap`
+  `{"type":"raw","routes":false}` → `bridge/response/networkmap` (~2.5 min; `links[]` = target's neighbour table, relationship 0 parent / 1 child / 2 sibling).
+- **Kitchen/Switch (Aqara `lumi.switch.acn058`, no-neutral end device) one-way since 11-25:** reports arrive, but every downlink fails
+  `Delivery failed for '11909'`. Its parent is now the Candeo router `Living Room/Lights` (LQI 151); before the migration it presumably sat
+  on the coordinator. Aqara end devices are known to misbehave behind third-party routers. Fix = power-cycle it at the breaker so it
+  rejoins (ideally onto the coordinator). `Entry Hall/Ligths` has **no parent in the network map at all** (orphaned again; breaker power-cycle).
+
 - **`nixos-rebuild switch` restarts a manually stopped z2m** even when its config didn't change (that happened here on a failed edit: z2m
   briefly tried to talk to the bootloader. Harmless, but stop it again before continuing).
 - `sed` with `#` as the delimiter fails on Nix comments. Use `perl -0pi -e 's|…|…|'`.

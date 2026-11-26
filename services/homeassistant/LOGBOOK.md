@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — tapo_control pytapo 3.4.32; smlight (SLZB-06M) entry removed
+HACS had updated tapo_control to 7.2.15 (pins pytapo==3.4.32): DependencyError at boot. Bumped the Nix override (version + hash from PyPI's sdist
+sha256), deployed 13:09. Verified: no pytapo/DependencyError after restart, 128/154 pet-camera states non-unavailable in the 2 min after boot.
+Removed the `smlight` config entry for the retired SLZB-06M (192.168.11.228) + its device + 22 entities offline (HA stopped; backups
+`core.{config_entries,device_registry,entity_registry}.bak-pre-smlight-rm-20261126`); not referenced by dashboards/YAML. No smlight errors after start.
+Note: the device registry now uses `config_entry_id` (singular) + `primary_config_entry`, not a `config_entries` list.
+
 ## 2026-11-26 — Bike charger status sensor + arrival notification
 Appended `input_boolean:` + `template:` blocks to configuration.yaml and one automation to automations.yaml (backups
 `*.bak-pre-bike-notify-20261126`; source `services/shelly/ha/`). `check_config` can't run on the box (wants to pip-install colorlog),

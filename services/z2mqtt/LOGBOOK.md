@@ -3,6 +3,16 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Switches not responding: stale old-coordinator binds removed (in progress)
+User: kitchen, hall and loft bedroom switches misbehave. Found: 13× Kitchen/Switch + 12× Entry Hall set failures today (`Delivery failed`), 1 Loft
+Bedroom/Switch brightness failure; `BROADCAST failed '65533'` ramping from 11-25 23:00 (~280/h overnight); NCP counters: APS unicast 34 ok / 775 failed,
+CCA fails ≈ 0, MR5U uptime 44 h (no reboot → not a frame-counter rollback). `database.db`: **every** device still bound to the old IEEE
+(configure never unbinds). Backed up `database.db.bak-pre-unbind-20261126`, installed external extension `cleanup-old-coordinator-binds.js`
+(see README). Removed at once: Living Room/Lights, Office/Lights, Little Room/Lights, Guest Room/Lights, Loft Bedroom/Switch (all 4 clusters).
+After that both routers answer `/get`. Broadcast failures had already fallen to ~0 from 12:40. Still stale (14, sleepy or unreachable): Kitchen/Switch,
+Entry Hall/Ligths, Loft bedroom button, Garden/Water, Loft Bedroom/Blinds Switch, 9 air sensors; they clean up as they wake. Network map: Kitchen/Switch
+child of Living Room/Lights, downlink fails (one-way); Entry Hall has no parent. Both need a breaker power-cycle on site.
+
 ## 2026-11-24 — Re-bind status at 18:56 (open)
 Retry loops 17:56–18:56 re-bound Office + Little Room air sensors (7/19 total on the new IEEE). **Still bound to the old IEEE, so not reporting:**
 Kitchen/Switch, Entry Hall/Ligths, Garden/Water, Loft Bedroom/Blinds Switch, Loft bedroom button, Kitchen, Living Room, Dining Room, Guest Bathroom,
