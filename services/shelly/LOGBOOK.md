@@ -2,6 +2,10 @@
 
 Reverse-chronological. Newest entry on top. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Notification: removed tap-to-open URL
+User tapped the test notification (manual run 13:00) and was taken to the device page; wanted the buttons instead. Removed `url: entityId:…`
+from the automation (box backup `automations.yaml.bak-pre-bike-nourl-20261126`), HA restarted, active. iOS shows action buttons on long-press only.
+
 ## 2026-11-26 — Arrival notification for the bike charger
 Added `sensor.bike_charger_status`, `input_boolean.bike_charger_notification` and automation "Bike Charger/Status notification"
 (files in `ha/`, design in README). Verified the sensor via RPC on/off (idle → off); push not tested from the phone.

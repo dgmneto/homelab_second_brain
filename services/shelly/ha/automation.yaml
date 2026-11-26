@@ -89,7 +89,6 @@
                 message: "{{ message }}"
                 data:
                   tag: bike-charger
-                  url: "entityId:switch.bike_charger"
                   push:
                     interruption-level: "{{ level }}"
                   actions: >-

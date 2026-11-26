@@ -4,6 +4,9 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-26 — Bike charger notification: no tap URL
+Removed the tap-opens-device URL from the iOS push; buttons are reached by long-press (iOS limitation). See services/shelly.
+
 ## 2026-11-26 — Zigbee switches failing: stale old-coordinator binds; tapo + smlight fixes
 Every Zigbee device still had binds to the pre-migration coordinator IEEE, which caused broadcast/unicast failures. A z2m external extension now removes
 them (mains devices done; sleepy ones clean up on wake). Kitchen/Switch (one-way behind the Candeo router) and Entry Hall (orphaned) need a breaker

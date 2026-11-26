@@ -53,8 +53,9 @@ HA YAML, source of truth in [ha/](ha/): `configuration.snippet.yaml` (appended t
   remembers that; it resets on a real off→on (not on unavailable→on after a restart).
 - **Automation "Bike Charger/Status notification"**: `person.divino_menezes` not_home→home sends a push to
   `notify.mobile_app_iphone` (the iPhone18,3; the old "iPhone 13 Pro (2)" also still reports). It carries `tag: bike-charger`,
-  so each send replaces the previous one. Tapping the notification opens the `switch.bike_charger` more-info (`url: entityId:…`). Buttons:
-  Turn on/Turn off (depending on state) + Dismiss.
+  so each send replaces the previous one. Buttons: Turn on/Turn off (depending on state) + Dismiss.
+  **On iOS the buttons only show when the notification is long-pressed** (lock screen: swipe left → View); a plain tap just opens the app.
+  No tap `url` on purpose: the user wants the controls in the notification, not a jump to the device page (removed 2026-11-26).
 - While `input_boolean.bike_charger_notification` is on, every status change (and switch on→off) re-sends it: `passive`
   (silent) except `completed` and arrival (`active`). Tapping an iOS action removes the notification, and the re-send after
   the state change brings it back, so it only goes away when you dismiss it. **Dismiss** (or leaving home) turns the flag off.
