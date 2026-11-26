@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Shelly integration + Bike Charger dashboard button
+`shelly` added to extraComponents (deployed). With HA stopped: appended the shelly config entry to `.storage/core.config_entries`
+(backup `.bak-pre-shelly-20261126`); then appended a Bubble-Card button (entity `switch.bike_charger`, tap → more-info,
+power sub-button) to Home → Ground Floor in `.storage/lovelace.lovelace` (backup `.bak-pre-bike-charger-20261126`). 18 entities
+created; HA active, no shelly/lovelace errors. Not checked in a browser. (A first add attempt failed on a script bug while HA was
+stopped; HA was restarted untouched and the add retried.)
+
 ## 2026-11-15 — Unavailable entities triage
 Investigation. Listed unavailable entities from the recorder DB (new `tools/unavailable.sql`). Groups: all tado° X
 Matter climate entities since 2026-11-14 19:04 (Thread routing loop, see matter LOGBOOK); Sonos `media_player.living_room`

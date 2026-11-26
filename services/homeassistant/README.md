@@ -79,6 +79,9 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   in the Tapo app is needed for streams either way. Outbound IPv6 fails fast: see `notes/lan-ipv6.md`.
 >   `smlight` logs one "Connection failed" per boot (startup only).
 >
+> - **Shelly devices** (Bike Charger plug, since 2026-11-26): built-in `shelly` integration; the idle cut-off runs on the plug, not
+>   in HA. See [../shelly/README.md](../shelly/README.md).
+>
 > Everything below describes the **old casaos container** (removed 2026-10-31; its config dir is kept for rollback/archive).
 
 ## Image

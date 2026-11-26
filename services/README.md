@@ -21,6 +21,7 @@ This is the knowledge layer.
 | [gluetunProtonVPN](gluetunProtonVPN/README.md) | casaos | docker |
 | [hermes](hermes/README.md) | **homelab-notebook** | NixOS module (casaos containers stopped, rollback only) |
 | [homeassistant](homeassistant/README.md) | **homelab-notebook** | NixOS module (since 2026-10-31) |
+| [shelly](shelly/README.md) | LAN devices → HA on **homelab-notebook** | Wi-Fi smart plugs (on-device scripts) |
 | [jellyfin](jellyfin/README.md) | casaos | docker |
 | [matter](matter/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30) |
 | [mosquitto](mosquitto/README.md) | **homelab-notebook** | NixOS module (since 2026-10-30) |

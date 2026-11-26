@@ -240,6 +240,7 @@ in
           "stream"
           "wake_on_lan" # PC wake button (divinos-pc, 30:C5:99:5E:2F:14)
           "ping" # PC on/off status sensor
+          "shelly" # Bike Charger plug (Shelly Plus Plug UK, 192.168.11.252)
         ];
         # octopus_energy moved to HACS 2026-11-10: the Nix copy was a read-only store symlink, so
         # HACS updates failed (Errno 13 on its /tmp backup). Its only requirement, pydantic, is below.
