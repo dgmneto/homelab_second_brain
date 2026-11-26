@@ -42,6 +42,28 @@ Code over ~1.5 kB must be sent in chunks (`append: true` for later chunks).
 Inspect live state: `curl -s -X POST -d '{"id":1,"code":"lowSince"}' http://192.168.11.252/rpc/Script.Eval`
 (returns the uptime in seconds when the current low-power streak began, or `null`).
 
+## Bike Charger: arrival notification (iPhone)
+
+HA YAML, source of truth in [ha/](ha/): `configuration.snippet.yaml` (appended to `/var/lib/hass/configuration.yaml`) and
+`automation.yaml` (entry `id: bike_charger_notification` in `automations.yaml`). Installed 2026-11-26; HA restart needed for changes
+(no API token for a reload).
+
+- **`sensor.bike_charger_status`** (trigger-based template, from the switch and power sensor + HA start): `off` | `idle` (on, ≤10 W, nothing
+  charged yet) | `charging` (>10 W) | `completed` (drew >10 W since the last off→on, now low or off). Attribute `charged`
+  remembers that; it resets on a real off→on (not on unavailable→on after a restart).
+- **Automation "Bike Charger/Status notification"**: `person.divino_menezes` not_home→home sends a push to
+  `notify.mobile_app_iphone` (the iPhone18,3; the old "iPhone 13 Pro (2)" also still reports). It carries `tag: bike-charger`,
+  so each send replaces the previous one. Tapping the notification opens the `switch.bike_charger` more-info (`url: entityId:…`). Buttons:
+  Turn on/Turn off (depending on state) + Dismiss.
+- While `input_boolean.bike_charger_notification` is on, every status change (and switch on→off) re-sends it: `passive`
+  (silent) except `completed` and arrival (`active`). Tapping an iOS action removes the notification, and the re-send after
+  the state change brings it back, so it only goes away when you dismiss it. **Dismiss** (or leaving home) turns the flag off.
+  iOS gives HA no event for a swipe-to-clear, so after a plain swipe the next status change re-posts it once.
+- Watts in the message are a snapshot at the last status change (not live; iOS can't update without re-posting).
+- Manual test: Settings → Automations → "Bike Charger/Status notification" → Run = send now (the template branch for no trigger).
+- Verified 2026-11-26: plug on/off via RPC → status `idle` → `off` with the flag off (no push sent). The push itself and the action buttons
+  were **not tested from the phone** by the agent.
+
 ## Home Assistant
 
 - Integration `shelly`, config entry title "Bike Charger", unique_id `C0CDD64F00A4`, data `{host, port: 80, sleep_period: 0, model, gen: 2}`.

@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-26 — Bike charger arrival notification (iPhone)
+Status sensor + actionable iOS push on arriving home, updated in place until dismissed. See services/shelly. Side findings:
+tapo_control needs pytapo 3.4.32; smlight entry for the retired .228 still configured.
+
 ## 2026-11-26 — Bike charger: 10 W idle threshold, 700 W power limit, button moved to Hall card
 Follow-up to the entry below, from the charger rating (42 V 3 A out, 2.5 A @ 240 V in). Details in services/shelly + homeassistant logbooks.
 

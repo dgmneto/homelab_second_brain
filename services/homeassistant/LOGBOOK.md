@@ -3,6 +3,13 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Bike charger status sensor + arrival notification
+Appended `input_boolean:` + `template:` blocks to configuration.yaml and one automation to automations.yaml (backups
+`*.bak-pre-bike-notify-20261126`; source `services/shelly/ha/`). `check_config` can't run on the box (wants to pip-install colorlog),
+so validated by restart + log. Two restarts, both clean for the new config. Unrelated errors seen at boot: **tapo_control now wants pytapo
+3.4.32** (Nix has 3.4.31, so the camera is down again; bump the override) and smlight still polls the retired SLZB-06M `192.168.11.228`
+(delete that config entry).
+
 ## 2026-11-26 — Bike Charger button moved into the Hall card
 User asked for it in the Hall card. With HA stopped (backup `lovelace.lovelace.bak-pre-hall-sub-20261126`): removed the standalone
 card, added a `switch.bike_charger` sub-button (tap → more-info) to the Hall bubble-card. HA active. Not checked in a browser.

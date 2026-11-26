@@ -2,6 +2,10 @@
 
 Reverse-chronological. Newest entry on top. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — Arrival notification for the bike charger
+Added `sensor.bike_charger_status`, `input_boolean.bike_charger_notification` and automation "Bike Charger/Status notification"
+(files in `ha/`, design in README). Verified the sensor via RPC on/off (idle → off); push not tested from the phone.
+
 ## 2026-11-26 — Bike Charger: threshold 10 W, power_limit 700 W
 User gave the charger rating (42 V 3.0 A out, 2.5 A @ 240 V in). Script `THRESHOLD_W` 5 → 10 (Stop/PutCode/Start; Eval confirms 10),
 `Switch.SetConfig power_limit: 700` (was 3000). Verified via Script.GetStatus/Switch.GetConfig.
