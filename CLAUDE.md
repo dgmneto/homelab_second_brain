@@ -171,5 +171,7 @@ Logbook rules:
 3. **Commit and push ASAP.** Every notes/logbook update must be `git commit`ted and `git push`ed to
    `origin main` (`git@github.com:dgmneto/homelab_second_brain.git`) as soon as the task is done —
    do not leave the working tree dirty between tasks. The repo is the durable record; an unpushed
-   change is a lost change. (GitHub auth uses the 1Password SSH agent — if it is locked, signing
+   change is a lost change. **Cloud sessions are told to push to a `claude/<name>` branch: push there AND to `main`**
+   (`git push origin HEAD:main`, after `git fetch origin main && git rebase origin/main`). On 2026-11-26 a session pushed only to its branch, so the
+   next session couldn't see its z2m work and wrongly called it "unlogged".) (GitHub auth uses the 1Password SSH agent — if it is locked, signing
    fails; unlock it and retry. The on-disk `id_rsa` is the *homelab server* key, not GitHub's.)
