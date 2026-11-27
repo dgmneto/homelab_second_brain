@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-27 — Entry Hall/Ligths still dead after the IEEE restore (investigation)
+08:05: nothing received from `0x44e2f8fffe22af6c` since 11-24 16:47: no reports, no `Accepting joining`. Every `set` fails `Delivery failed for '50001'`.
+Before the migration it rejoined by itself every 1–2 days (`Accepting joining` 11-10…11-23, LQI 92–152). It has been unstable since the Hall/Thermostat router was removed 11-10.
+Since 11-24 it has made no join attempts at all, so it isn't hearing any router or the coordinator. That's not fixable from software: power-cycle it at the breaker. If still
+no join, factory-reset it (long-press 5 s) with permit_join on. If it keeps dropping, it needs a mains router (smart plug) near the hall.
+
 ## 2026-11-27 — Restored old coordinator IEEE on the MR5U → silent sensors and dead commands fixed
 Symptoms: Kitchen, Living Room, Dining Room, Guest Bathroom, Loft Bathroom and Loft Bedroom SNZB-02P silent since 11-24 16:2x (Kitchen since
 11-25 23:17). Kitchen/Switch and Entry Hall commands failed with `Delivery failed`. Broadcast-failure storm in the log. The 11-26 session's `cleanup-old-coordinator-binds.js` extension (its notes were only on branch `claude/sharp-gates-6u1p42`, merged to main 11-27)
