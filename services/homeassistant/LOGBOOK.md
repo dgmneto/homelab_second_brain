@@ -3,6 +3,31 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **homeassistant** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-26 — tapo_control pytapo 3.4.32; smlight (SLZB-06M) entry removed
+HACS had updated tapo_control to 7.2.15 (pins pytapo==3.4.32): DependencyError at boot. Bumped the Nix override (version + hash from PyPI's sdist
+sha256), deployed 13:09. Verified: no pytapo/DependencyError after restart, 128/154 pet-camera states non-unavailable in the 2 min after boot.
+Removed the `smlight` config entry for the retired SLZB-06M (192.168.11.228) + its device + 22 entities offline (HA stopped; backups
+`core.{config_entries,device_registry,entity_registry}.bak-pre-smlight-rm-20261126`); not referenced by dashboards/YAML. No smlight errors after start.
+Note: the device registry now uses `config_entry_id` (singular) + `primary_config_entry`, not a `config_entries` list.
+
+## 2026-11-26 — Bike charger status sensor + arrival notification
+Appended `input_boolean:` + `template:` blocks to configuration.yaml and one automation to automations.yaml (backups
+`*.bak-pre-bike-notify-20261126`; source `services/shelly/ha/`). `check_config` can't run on the box (wants to pip-install colorlog),
+so validated by restart + log. Two restarts, both clean for the new config. Unrelated errors seen at boot: **tapo_control now wants pytapo
+3.4.32** (Nix has 3.4.31, so the camera is down again; bump the override) and smlight still polls the retired SLZB-06M `192.168.11.228`
+(delete that config entry).
+
+## 2026-11-26 — Bike Charger button moved into the Hall card
+User asked for it in the Hall card. With HA stopped (backup `lovelace.lovelace.bak-pre-hall-sub-20261126`): removed the standalone
+card, added a `switch.bike_charger` sub-button (tap → more-info) to the Hall bubble-card. HA active. Not checked in a browser.
+
+## 2026-11-26 — Shelly integration + Bike Charger dashboard button
+`shelly` added to extraComponents (deployed). With HA stopped: appended the shelly config entry to `.storage/core.config_entries`
+(backup `.bak-pre-shelly-20261126`); then appended a Bubble-Card button (entity `switch.bike_charger`, tap → more-info,
+power sub-button) to Home → Ground Floor in `.storage/lovelace.lovelace` (backup `.bak-pre-bike-charger-20261126`). 18 entities
+created; HA active, no shelly/lovelace errors. Not checked in a browser. (A first add attempt failed on a script bug while HA was
+stopped; HA was restarted untouched and the add retried.)
+
 ## 2026-11-15 — Unavailable entities triage
 Investigation. Listed unavailable entities from the recorder DB (new `tools/unavailable.sql`). Groups: all tado° X
 Matter climate entities since 2026-11-14 19:04 (Thread routing loop, see matter LOGBOOK); Sonos `media_player.living_room`

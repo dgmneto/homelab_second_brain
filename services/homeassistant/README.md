@@ -70,7 +70,7 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   **`tapo_control` (HACS 7.2.13), working again 2026-11-10:** Nix now supplies what it needs. That's `onvif`/`ffmpeg`/`stream` in
 >   `extraComponents` (the missing `onvif` library caused the "Invalid config: onvif, tapo_control" notice at every
 >   boot), plus `python-kasa` and an override of **pytapo to 3.4.30** (nixpkgs has 3.4.19) in `extraPackages`.
->   **When HACS updates tapo_control, compare manifest.json `requirements`' pytapo pin with the override in
+>   **(2026-11-26: tapo_control 7.2.15 → pytapo 3.4.32, deployed.)** **When HACS updates tapo_control, compare manifest.json `requirements`' pytapo pin with the override in
 >   home-automation.nix**: bump the version and hash (`sha256-` + base64 of PyPI's sdist sha256) if the pin changed.
 >   Verified after deploy: no setup errors; 68/77 enabled entities have state (9 unavailable, e.g. `button.…_sync_time`).
 >   (Was: code missing; serves one Tapo C225 "Living Room Pet Camera" at 192.168.11.222, 109
@@ -78,6 +78,11 @@ Home Assistant — central home-automation hub. Integrates Zigbee devices (via M
 >   fragile. Built-in `tplink` integration is the alternative. RTSP (554) is closed on the camera, so a "camera account"
 >   in the Tapo app is needed for streams either way. Outbound IPv6 fails fast: see `notes/lan-ipv6.md`.
 >   `smlight` logs one "Connection failed" per boot (startup only).
+>
+> - **`smlight` config entry removed 2026-11-26** (it was the retired SLZB-06M `.228`; 22 entities + device deleted offline, backups
+>   `core.*.bak-pre-smlight-rm-20261126`). The SLZB-MR5U `.121` is not in HA; add it via Settings → Integrations if you want its sensors.
+> - **Shelly devices** (Bike Charger plug, since 2026-11-26): built-in `shelly` integration; the idle cut-off runs on the plug, not
+>   in HA. See [../shelly/README.md](../shelly/README.md).
 >
 > Everything below describes the **old casaos container** (removed 2026-10-31; its config dir is kept for rollback/archive).
 

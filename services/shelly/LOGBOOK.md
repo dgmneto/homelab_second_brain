@@ -1,0 +1,22 @@
+# Logbook — shelly
+
+Reverse-chronological. Newest entry on top. See `../../LOGBOOK.md` for the project-wide log.
+
+## 2026-11-26 — Notification: removed tap-to-open URL
+User tapped the test notification (manual run 13:00) and was taken to the device page; wanted the buttons instead. Removed `url: entityId:…`
+from the automation (box backup `automations.yaml.bak-pre-bike-nourl-20261126`), HA restarted, active. iOS shows action buttons on long-press only.
+
+## 2026-11-26 — Arrival notification for the bike charger
+Added `sensor.bike_charger_status`, `input_boolean.bike_charger_notification` and automation "Bike Charger/Status notification"
+(files in `ha/`, design in README). Verified the sensor via RPC on/off (idle → off); push not tested from the phone.
+
+## 2026-11-26 — Bike Charger: threshold 10 W, power_limit 700 W
+User gave the charger rating (42 V 3.0 A out, 2.5 A @ 240 V in). Script `THRESHOLD_W` 5 → 10 (Stop/PutCode/Start; Eval confirms 10),
+`Switch.SetConfig power_limit: 700` (was 3000). Verified via Script.GetStatus/Switch.GetConfig.
+
+## 2026-11-26 — Bike Charger plug set up (script + HA)
+Found `shellypluspluguk-c0cdd64f00a4` at 192.168.11.252 via `unifi.sh api/s/default/stat/sta` (fw 1.4.4, auth off, no scripts).
+RPC from homelab-notebook: set device + switch:0 name "Bike Charger"; `Script.Create` → id 1, `PutCode`
+(bike-charger-idle-off.js), `SetConfig enable:true`, `Start`. Live test with the charger idle at 0–0.7 W: off at uptime 990 s
+(streak began at 680 s). The first streak (started ~450 s) reset once at ~670 s for an unknown reason, possibly a brief
+>5 W blip; if the cut-off seems late, log `apower` + `lowSince` as in the README. Plug left **off**. Firmware 2.0.3 not applied.

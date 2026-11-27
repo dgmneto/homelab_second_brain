@@ -3,6 +3,14 @@
 Reverse-chronological. Newest entry on top. Host-level changes (NixOS deploys, hardware, users).
 Service detail goes in `../../services/<svc>/LOGBOOK.md`; project-wide log in `../../LOGBOOK.md`.
 
+## 2026-11-26 — Deploy: pytapo 3.4.31 → 3.4.32
+Box vs repo diff: only that change (+ known hermes.nix drift). Box backup `home-automation.nix.bak-pre-pytapo32-20261126`. systemd-run switch OK
+(50 s); HA restarted 13:09:57, z2m not restarted.
+
+## 2026-11-26 — Deploy: HA extraComponents += shelly
+Box vs repo diff before deploy: only the known hermes.nix drift + .bak files. Copied home-automation.nix (box backup
+`home-automation.nix.bak-pre-shelly-20261126`), systemd-run switch succeeded in 30 s (HA env already had aioshelly; HA not restarted by the switch).
+
 ## 2026-11-24 — Deploy: z2m serial.port → SLZB-MR5U; repo synced to box
 `home-automation.nix` on the box was **ahead of the repo** (boot guards for z2m/matter-server chip.json, wake_on_lan/ping, pytapo 3.4.31
 were never committed). Edited the box copy (z2m `serial.port` → `tcp://192.168.11.121:6638`), deployed twice with the systemd-run switch

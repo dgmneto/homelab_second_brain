@@ -8,6 +8,26 @@ the matching `services/<svc>/LOGBOOK.md`.
 6 air sensors had been silent for 2+ days, and the Kitchen switch / Entry Hall didn't respond. Cause: everything was still bound to the old coordinator IEEE. Wrote the NVM3
 restored-EUI64 token on the MR5U so it answers as `0x8c8b48fffe9583ba`, and restarted z2m. The sensors are back and commands work. Entry Hall needs a breaker cycle.
 The unplugged SLZB-06M is now an IEEE clone: erase it before reuse. Details: services/z2mqtt README ("Coordinator IEEE restore") + LOGBOOK.
+## 2026-11-26 — Bike charger notification: no tap URL
+Removed the tap-opens-device URL from the iOS push; buttons are reached by long-press (iOS limitation). See services/shelly.
+
+## 2026-11-26 — Zigbee switches failing: stale old-coordinator binds; tapo + smlight fixes
+Every Zigbee device still had binds to the pre-migration coordinator IEEE, which caused broadcast/unicast failures. A z2m external extension now removes
+them (mains devices done; sleepy ones clean up on wake). Kitchen/Switch (one-way behind the Candeo router) and Entry Hall (orphaned) need a breaker
+power-cycle. Also: tapo_control's pytapo bumped to 3.4.32 (deployed), HA's smlight entry for the retired SLZB-06M removed. Details: z2mqtt / homeassistant logbooks.
+
+## 2026-11-26 — Bike charger arrival notification (iPhone)
+Status sensor + actionable iOS push on arriving home, updated in place until dismissed. See services/shelly. Side findings:
+tapo_control needs pytapo 3.4.32; smlight entry for the retired .228 still configured.
+
+## 2026-11-26 — Bike charger: 10 W idle threshold, 700 W power limit, button moved to Hall card
+Follow-up to the entry below, from the charger rating (42 V 3 A out, 2.5 A @ 240 V in). Details in services/shelly + homeassistant logbooks.
+
+## 2026-11-26 — Bike charger Shelly plug: HA integration, dashboard button, idle cut-off
+New Shelly Plus Plug UK (`192.168.11.252`, found via UniFi clients) powering the e-bike charger. On-device script
+`bike-charger-idle-off` switches it off after 5 min at ≤5 W; nothing turns it back on. Added `shelly` to HA extraComponents
+(deployed), added the config entry offline, added a Ground Floor dashboard button that opens the more-info dialog.
+Verified: plug turned itself off at 12:40:37 after 5 min idle (0–0.7 W); HA recorded `switch.bike_charger` → off. Details: services/shelly.
 
 ## 2026-11-24 — Zigbee coordinator moved to SLZB-MR5U (no re-pairing)
 z2m restored its backup onto MR5U radio 1. Same network, new coordinator IEEE `0xfc1119fffeaa036b`. Old SLZB-06M radio held in bootloader,

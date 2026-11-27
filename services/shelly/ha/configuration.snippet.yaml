@@ -1,0 +1,42 @@
+# Appended to /var/lib/hass/configuration.yaml (homelab-notebook). Source of truth: this file.
+input_boolean:
+  bike_charger_notification:
+    name: Bike Charger notification active
+    icon: mdi:bell-ring
+
+template:
+  - triggers:
+      - trigger: state
+        entity_id:
+          - switch.bike_charger
+          - sensor.bike_charger_power
+      - trigger: homeassistant
+        event: start
+    sensor:
+      - name: Bike Charger Status
+        unique_id: bike_charger_status
+        icon: mdi:bicycle-electric
+        # off | idle (on, not charging yet) | charging | completed (charged >10 W since last switch-on, now low/off)
+        state: >
+          {% set sw = states('switch.bike_charger') %}
+          {% set p = states('sensor.bike_charger_power') | float(0) %}
+          {% set turned_on = trigger.entity_id | default('') == 'switch.bike_charger'
+               and trigger.from_state is not none and trigger.from_state.state == 'off'
+               and trigger.to_state.state == 'on' %}
+          {% set charged = (false if turned_on else (this.attributes.get('charged', false) | bool))
+               or (sw == 'on' and p > 10) %}
+          {% if sw not in ['on', 'off'] %}unavailable
+          {% elif sw == 'on' and p > 10 %}charging
+          {% elif charged %}completed
+          {% elif sw == 'on' %}idle
+          {% else %}off{% endif %}
+        attributes:
+          charged: >
+            {% set sw = states('switch.bike_charger') %}
+            {% set p = states('sensor.bike_charger_power') | float(0) %}
+            {% set turned_on = trigger.entity_id | default('') == 'switch.bike_charger'
+                 and trigger.from_state is not none and trigger.from_state.state == 'off'
+                 and trigger.to_state.state == 'on' %}
+            {{ (false if turned_on else (this.attributes.get('charged', false) | bool))
+               or (sw == 'on' and p > 10) }}
+          power: "{{ states('sensor.bike_charger_power') | float(0) | round(0) }}"

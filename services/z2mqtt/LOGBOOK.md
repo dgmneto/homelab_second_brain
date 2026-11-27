@@ -5,8 +5,8 @@ why, server commands run, verified outcome. See `../../LOGBOOK.md` for the proje
 
 ## 2026-11-27 — Restored old coordinator IEEE on the MR5U → silent sensors and dead commands fixed
 Symptoms: Kitchen, Living Room, Dining Room, Guest Bathroom, Loft Bathroom and Loft Bedroom SNZB-02P silent since 11-24 16:2x (Kitchen since
-11-25 23:17). Kitchen/Switch and Entry Hall commands failed with `Delivery failed`. Broadcast-failure storm in the log. Found an **unlogged 11-26 session's**
-`cleanup-old-coordinator-binds.js` extension + `database.db.bak-pre-unbind-20261126`. It could only fix coordinator children, so 11 devices were still stale.
+11-25 23:17). Kitchen/Switch and Entry Hall commands failed with `Delivery failed`. Broadcast-failure storm in the log. The 11-26 session's `cleanup-old-coordinator-binds.js` extension (its notes were only on branch `claude/sharp-gates-6u1p42`, merged to main 11-27)
+had fixed only devices parented by the coordinator, so 11 devices were still stale.
 Cause: binds + stored TC address = old IEEE `0x8c8b48fffe9583ba`, so devices broadcast NWK_addr_req forever. Fix: snapshot
 `/var/lib/zigbee2mqtt.bak-pre-eui64-20261127`. Wrote NVM3 `STACK_RESTORED_EUI64` = old IEEE (`tools/set-eui64.js`, token was blank, status 0),
 removed the extensions, restarted z2m 00:27:56 → `Coordinator address changed, updating to '0x8c8b48fffe9583ba'`, resumed. Verified: by 00:34,
@@ -15,6 +15,15 @@ had been re-bound to `0xfc11…` (5 mains OK, 3 sleepy errors) and loaded the cl
 **Open:** Little Room/Air Sensor + Loft Bedroom/Switch stale binds (extension retries; Candeo answers NOT_PERMITTED). Remove the extension when it logs
 `all clean`. Entry Hall/Ligths has been unreachable since 11-24 16:47 and **needs a breaker power-cycle**. Blinds Switch is sleepy (press to verify).
 **SLZB-06M must now be erased before any reuse (same IEEE).**
+## 2026-11-26 — Switches not responding: stale old-coordinator binds removed (in progress)
+User: kitchen, hall and loft bedroom switches misbehave. Found: 13× Kitchen/Switch + 12× Entry Hall set failures today (`Delivery failed`), 1 Loft
+Bedroom/Switch brightness failure; `BROADCAST failed '65533'` ramping from 11-25 23:00 (~280/h overnight); NCP counters: APS unicast 34 ok / 775 failed,
+CCA fails ≈ 0, MR5U uptime 44 h (no reboot → not a frame-counter rollback). `database.db`: **every** device still bound to the old IEEE
+(configure never unbinds). Backed up `database.db.bak-pre-unbind-20261126`, installed external extension `cleanup-old-coordinator-binds.js`
+(see README). Removed at once: Living Room/Lights, Office/Lights, Little Room/Lights, Guest Room/Lights, Loft Bedroom/Switch (all 4 clusters).
+After that both routers answer `/get`. Broadcast failures had already fallen to ~0 from 12:40. Still stale (14, sleepy or unreachable): Kitchen/Switch,
+Entry Hall/Ligths, Loft bedroom button, Garden/Water, Loft Bedroom/Blinds Switch, 9 air sensors; they clean up as they wake. Network map: Kitchen/Switch
+child of Living Room/Lights, downlink fails (one-way); Entry Hall has no parent. Both need a breaker power-cycle on site.
 
 ## 2026-11-24 — Re-bind status at 18:56 (open)
 Retry loops 17:56–18:56 re-bound Office + Little Room air sensors (7/19 total on the new IEEE). **Still bound to the old IEEE, so not reporting:**

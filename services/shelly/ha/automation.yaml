@@ -1,0 +1,97 @@
+# One entry in /var/lib/hass/automations.yaml (homelab-notebook). Source of truth: this file.
+- id: 'bike_charger_notification'
+  alias: Bike Charger/Status notification
+  description: >-
+    On arrival home, push the bike charger status to Divino's iPhone with an on/off button; update it in place
+    (tag bike-charger) on status changes until "Dismiss" is tapped or he leaves. Manual "Run" = send now.
+    Source: homelab_second_brain services/shelly/ha/automation.yaml
+  mode: queued
+  triggers:
+    - trigger: state
+      entity_id: person.divino_menezes
+      from: not_home
+      to: home
+      id: arrive
+    - trigger: state
+      entity_id: person.divino_menezes
+      from: home
+      id: leave
+    - trigger: state
+      entity_id: sensor.bike_charger_status
+      not_to: [unavailable, unknown]
+      id: status
+    - trigger: state
+      entity_id: switch.bike_charger
+      from: 'on'
+      to: 'off'
+      id: status
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: BIKE_CHARGER_ON
+      id: turn_on
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: BIKE_CHARGER_OFF
+      id: turn_off
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: BIKE_CHARGER_DISMISS
+      id: dismiss
+  actions:
+    - choose:
+        - conditions: [{condition: trigger, id: turn_on}]
+          sequence:
+            - action: switch.turn_on
+              target: {entity_id: switch.bike_charger}
+        - conditions: [{condition: trigger, id: turn_off}]
+          sequence:
+            - action: switch.turn_off
+              target: {entity_id: switch.bike_charger}
+        - conditions: [{condition: trigger, id: [dismiss, leave]}]
+          sequence:
+            - action: input_boolean.turn_off
+              target: {entity_id: input_boolean.bike_charger_notification}
+        - conditions:
+            - condition: or
+              conditions:
+                - condition: trigger
+                  id: arrive
+                - condition: and
+                  conditions:
+                    - condition: trigger
+                      id: status
+                    - condition: state
+                      entity_id: input_boolean.bike_charger_notification
+                      state: 'on'
+                - condition: template   # manual "Run" from the UI (no trigger)
+                  value_template: "{{ trigger is not defined or trigger.id is not defined }}"
+          sequence:
+            - action: input_boolean.turn_on
+              target: {entity_id: input_boolean.bike_charger_notification}
+            - variables:
+                status: "{{ states('sensor.bike_charger_status') }}"
+                is_on: "{{ is_state('switch.bike_charger', 'on') }}"
+                watts: "{{ states('sensor.bike_charger_power') | float(0) | round(0) | int }}"
+                message: >-
+                  {% if status == 'charging' %}⚡ Charging · {{ watts }} W
+                  {% elif status == 'completed' %}✅ Charge completed{{ ' · still on (' ~ watts ~ ' W), auto-off soon' if is_on else ' · switched off' }}
+                  {% elif status == 'idle' %}On · not charging ({{ watts }} W), auto-off after 5 min
+                  {% elif status == 'off' %}Off
+                  {% else %}{{ status }}{% endif %}
+                level: >-
+                  {{ 'active' if (trigger is not defined or trigger.id | default('') == 'arrive' or status == 'completed') else 'passive' }}
+            - action: notify.mobile_app_iphone
+              data:
+                title: Bike charger
+                message: "{{ message }}"
+                data:
+                  tag: bike-charger
+                  push:
+                    interruption-level: "{{ level }}"
+                  actions: >-
+                    {{ ([{'action': 'BIKE_CHARGER_OFF', 'title': 'Turn off', 'destructive': true}] if is_on
+                        else [{'action': 'BIKE_CHARGER_ON', 'title': 'Turn on'}])
+                       + [{'action': 'BIKE_CHARGER_DISMISS', 'title': 'Dismiss'}] }}

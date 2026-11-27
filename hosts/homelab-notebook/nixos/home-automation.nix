@@ -240,6 +240,7 @@ in
           "stream"
           "wake_on_lan" # PC wake button (divinos-pc, 30:C5:99:5E:2F:14)
           "ping" # PC on/off status sensor
+          "shelly" # Bike Charger plug (Shelly Plus Plug UK, 192.168.11.252)
         ];
         # octopus_energy moved to HACS 2026-11-10: the Nix copy was a read-only store symlink, so
         # HACS updates failed (Errno 13 on its /tmp backup). Its only requirement, pydantic, is below.
@@ -252,14 +253,14 @@ in
           aiofiles
           websocket-client
           pydantic # octopus_energy (HACS)
-          # tapo_control (HACS) 7.2.14 pins pytapo==3.4.31; nixpkgs has 3.4.19 (same deps, so only
+          # tapo_control (HACS) 7.2.15 pins pytapo==3.4.32; nixpkgs has 3.4.19 (same deps, so only
           # version + hash change). Bump here when HACS bumps the pin: manifest.json "requirements".
           (pytapo.overridePythonAttrs (_: rec {
-            version = "3.4.31";
+            version = "3.4.32";
             src = pkgs.fetchPypi {
               pname = "pytapo";
               inherit version;
-              hash = "sha256-LJtXLFrM18nO3Kvq5PGjaRWQx1jcf7rR77BuPo/j78M=";
+              hash = "sha256-dx2U94fiJFAXSZul5kUimBnQyi2Atc5njLfZ64pfxH4=";
             };
             doCheck = false;
           }))
