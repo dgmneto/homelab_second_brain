@@ -3,6 +3,19 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **z2mqtt** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-27 — Restored old coordinator IEEE on the MR5U → silent sensors and dead commands fixed
+Symptoms: Kitchen, Living Room, Dining Room, Guest Bathroom, Loft Bathroom and Loft Bedroom SNZB-02P silent since 11-24 16:2x (Kitchen since
+11-25 23:17). Kitchen/Switch and Entry Hall commands failed with `Delivery failed`. Broadcast-failure storm in the log. Found an **unlogged 11-26 session's**
+`cleanup-old-coordinator-binds.js` extension + `database.db.bak-pre-unbind-20261126`. It could only fix coordinator children, so 11 devices were still stale.
+Cause: binds + stored TC address = old IEEE `0x8c8b48fffe9583ba`, so devices broadcast NWK_addr_req forever. Fix: snapshot
+`/var/lib/zigbee2mqtt.bak-pre-eui64-20261127`. Wrote NVM3 `STACK_RESTORED_EUI64` = old IEEE (`tools/set-eui64.js`, token was blank, status 0),
+removed the extensions, restarted z2m 00:27:56 → `Coordinator address changed, updating to '0x8c8b48fffe9583ba'`, resumed. Verified: by 00:34,
+17/19 devices were heard after the restart, all 6 silent sensors included. Kitchen/Switch and Garden/Water answer `/get`. Then `device/configure` on the 8 devices that
+had been re-bound to `0xfc11…` (5 mains OK, 3 sleepy errors) and loaded the cleanup extension with OLD/NEW swapped: 6/8 `0xfc11` binds removed.
+**Open:** Little Room/Air Sensor + Loft Bedroom/Switch stale binds (extension retries; Candeo answers NOT_PERMITTED). Remove the extension when it logs
+`all clean`. Entry Hall/Ligths has been unreachable since 11-24 16:47 and **needs a breaker power-cycle**. Blinds Switch is sleepy (press to verify).
+**SLZB-06M must now be erased before any reuse (same IEEE).**
+
 ## 2026-11-24 — Re-bind status at 18:56 (open)
 Retry loops 17:56–18:56 re-bound Office + Little Room air sensors (7/19 total on the new IEEE). **Still bound to the old IEEE, so not reporting:**
 Kitchen/Switch, Entry Hall/Ligths, Garden/Water, Loft Bedroom/Blinds Switch, Loft bedroom button, Kitchen, Living Room, Dining Room, Guest Bathroom,

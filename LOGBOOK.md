@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-27 — Zigbee: restored old coordinator IEEE on SLZB-MR5U (silent sensors + dead switches fixed)
+6 air sensors had been silent for 2+ days, and the Kitchen switch / Entry Hall didn't respond. Cause: everything was still bound to the old coordinator IEEE. Wrote the NVM3
+restored-EUI64 token on the MR5U so it answers as `0x8c8b48fffe9583ba`, and restarted z2m. The sensors are back and commands work. Entry Hall needs a breaker cycle.
+The unplugged SLZB-06M is now an IEEE clone: erase it before reuse. Details: services/z2mqtt README ("Coordinator IEEE restore") + LOGBOOK.
+
 ## 2026-11-24 — Zigbee coordinator moved to SLZB-MR5U (no re-pairing)
 z2m restored its backup onto MR5U radio 1. Same network, new coordinator IEEE `0xfc1119fffeaa036b`. Old SLZB-06M radio held in bootloader,
 to be unplugged. homelab-notebook `home-automation.nix` synced from box to repo (box was ahead). Details: services/z2mqtt README +

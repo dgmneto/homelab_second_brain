@@ -1,7 +1,10 @@
 # z2mqtt (zigbee2mqtt)
 
 Zigbee2MQTT — bridges Zigbee devices to MQTT so Home Assistant can consume them. **19 devices** (2026-11-24: 9 SNZB-02P air sensors, 3 ZBMINIL2 light switches, SWV valve, SNZB-01P button, Aqara switch, Philips blinds switch, 2 Candeo routers).
-**Versions (2026-11-24, z2m frontend → Settings → About; works without SSH):** z2m 2.14.2, herdsman 10.10.0. Coordinator now SLZB-MR5U radio 1, IEEE **`0xfc1119fffeaa036b`** (was SLZB-06M EmberZNet 8.0.2, IEEE `0x8c8b48fffe9583ba`).
+**Versions (2026-11-24, z2m frontend → Settings → About; works without SSH):** z2m 2.14.2, herdsman 10.10.0. Coordinator = SLZB-MR5U radio 1 (EmberZNet 7.4.2, EZSP 13).
+**Coordinator IEEE is `0x8c8b48fffe9583ba` again since 2026-11-27.** That is the old SLZB-06M's IEEE, restored on the MR5U through the NVM3
+`STACK_RESTORED_EUI64` token. The MR5U's own burned-in EUI64 is `0xfc1119fffeaa036b`, used 11-24→11-27. See "Coordinator IEEE restore" below.
+**⚠ The unplugged SLZB-06M still holds this network and the same IEEE. Never plug it back in without erasing its radio first.**
 **2026-11-10:** the 4 AVATTO TRVs, `Hall/Thermostat` (Shelly relay) and `Dining Room/Thermostat` (Bosch) were **removed** (replaced by
 tado° X over Matter; see [../matter/README.md](../matter/README.md)). Backups: `/var/lib/zigbee2mqtt/{database.db,devices.yaml}.bak-pre-tado-20261110`.
 
@@ -79,7 +82,7 @@ Worked without re-pairing. Steps as done:
    radio on every SLZB boot, so a power blip brings the old coordinator back. **Unplug the SLZB-06M** (or reflash its radio) for good. **Done 2026-11-24 ~17:20: SLZB-06M unplugged, radio NOT reset** (still holds the old network = rollback path for a few days; HA's `smlight` entry for it will show unavailable).
 3. Change `serial.port` in `home-automation.nix` and deploy. z2m log: `Adapter network does not match config. Leaving network...` →
    `Forming from backup` → `New network formed!` → `zigbee-herdsman started (restored)`.
-- **Coordinator IEEE did NOT carry over:** `Coordinator address changed, updating to '0xfc1119fffeaa036b'`. The MR5U radio already has a custom
+- **Coordinator IEEE did NOT carry over** (superseded 2026-11-27: **restore the old IEEE instead**, see the next section; the reconfigure approach below deadlocked): `Coordinator address changed, updating to '0xfc1119fffeaa036b'`. The MR5U radio already has a custom
   EUI64 burned in, and herdsman doesn't overwrite it. Same PAN/keys/channel, so devices stay joined, **but every reporting binding still targets
   the old IEEE `0x8c8b48fffe9583ba`** (`database.db` → `endpoints.*.binds[].deviceIeeeAddress`). It kept working for ~20 min while devices had the
   old IEEE→0x0000 mapping cached. After the PoE-reboot outage they lost it, and **all battery sensors went silent** (0 reports in 50 min vs
@@ -103,3 +106,32 @@ Worked without re-pairing. Steps as done:
 - **Rollback:** stop z2m, MR5U Mode → radio 1 off/Router (or unplug), plug the SLZB-06M back (its radio still has the network), restore the
   `.bak-pre-mr5u` nix file + data dir, deploy. Do this soon: once the MR5U has run for a while, the old radio's NWK frame counter is
   behind and devices may drop its frames.
+  **Obsolete since 2026-11-27:** the MR5U now carries the old IEEE, so the SLZB-06M is a clone. Erase its radio before any reuse.
+
+## Coordinator IEEE restore (2026-11-27): the real fix for a migration to an ember adapter with a different EUI64
+**Symptom (11-24 → 11-27):** 6 SNZB-02P sensors sent nothing for 2+ days. Commands to devices parented by a router failed (`Delivery failed`):
+`Kitchen/Switch` (Aqara) wouldn't switch, and `/get` timed out. The log showed a constant stream of `zh:ember: Delivery of BROADCAST failed for '65533'`.
+**Cause:** every pre-migration binding and each device's stored TC address pointed at `0x8c8b48fffe9583ba`. Devices kept broadcasting
+`NWK_addr_req` for that IEEE (in debug: `ezspMessageSentHandler type=BROADCAST … clusterId 0 … messageTag=255` = relayed broadcasts from the
+devices), and nobody answered. That filled the broadcast tables and starved the two Candeo routers. Re-binding per device
+(`device/configure`, or the `cleanup-old-coordinator-binds.js` extension from 11-26) **deadlocked**: the silent sensors never send, so
+they never "wake", and ZDO bind/unbind to router children failed anyway. Only devices whose parent was the coordinator got fixed.
+**Fix (verified):** give the MR5U the old IEEE through the NVM3 token `STACK_RESTORED_EUI64` (key `0x1e12a`, little-endian bytes). It's writable on
+EFR32MG2x/EZSP ≥13 even though the MFG `CUSTOM_EUI_64` is already burned:
+1. Snapshot: `bridge/request/backup` + `sudo cp -a /var/lib/zigbee2mqtt /var/lib/zigbee2mqtt.bak-pre-eui64-20261127`.
+2. Load [`tools/eui64-probe.js`](tools/eui64-probe.js) (read-only; logs current EUI64 + token, blank = `ffffffffffffffff`), then
+   [`tools/set-eui64.js`](tools/set-eui64.js) via `bridge/request/extension/save` (`{"name":…,"code":…}`, see [`tools/zq.sh`](tools/zq.sh)).
+   Both run on extension load, inside the adapter queue (`zigbee.zhController.adapter.ezsp`).
+3. **Remove both extensions and any bind-cleanup extension whose OLD/NEW are about to flip**, then `systemctl restart zigbee2mqtt`. The ASH
+   reset reboots the NCP. Log: `Coordinator address changed, updating to '0x8c8b48fffe9583ba'` → `started (resumed)`.
+4. Within 1–4 min all silent sensors reported again, and Kitchen/Switch + Garden/Water answered `/get`.
+5. Devices that had been re-bound to `0xfc11…` in the meantime (both routers, 3 ZBMINIL2s, Office/Little Room/Guest Bedroom sensors) need
+   `device/configure` and removal of the `0xfc11…` binds. [`tools/cleanup-old-coordinator-binds.js`](tools/cleanup-old-coordinator-binds.js)
+   (OLD/NEW swapped) is loaded for that. Remove it once it logs `[old-binds] all clean`.
+**Revert:** same extension with `DATA = "ffffffffffffffff"` + restart → MR5U falls back to its own `0xfc1119fffeaa036b`.
+**Next migration:** do this right after the restore, before anything else, if the new adapter's IEEE differs.
+**Helpers** (box has no python3/jq on PATH; use `/nix/store/*-python3-3.12*/bin/python3`): [`tools/zq.sh`](tools/zq.sh) publishes as the z2m
+MQTT user (`sudo sh zq.sh <topic-suffix> '<json>'`; reads the password from `secret.yaml`, never prints it). [`tools/nm.py`](tools/nm.py) = parent/child links from
+the latest network map in the journal. [`tools/fails.py`](tools/fails.py) = failed set/get per hour and device. Temporary debug logging:
+`bridge/request/options {"options":{"advanced":{"log_level":"debug"}}}` (set back to `info` afterwards; not persisted across the Nix-regenerated config).
+**Not related:** `Loft Bedroom/Switch` (Candeo dimmer) publishes about 0.2 msg/s (electrical-measurement reports). It's noisy but harmless.
