@@ -3,6 +3,18 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-28 15:25 — Apple Home + tado app can't reach the tado devices, HA fine (investigation)
+`tailscale status`: `apple-tv` still **online** (VPN connected; the iPhone is not on the tailnet). Path into Thread via the Apple TV now works (6/6 pings with a temporary /128 route via
+`fe80::189f:c96:5398:f346`), so the inbound loop from 01:42 is gone. The hub's own controller traffic can't be observed from here.
+Thread is healthy: one partition (leader Apple TV, id 28), 2 routers. Network data has only the Apple OMR `fde9:b6c5:757::/64`; the MR5U's `_meshcop` `omr` TXT
+`fd19:d69c:fe9c:1::/64` is an unused local candidate, not published. Children: Apple TV 4, MR5U 2. The MR5U holds ALOCs fc38 (primary BBR) + fc10 (service).
+All 24 `_matter._tcp` records resolve to fde9 addresses on the LAN.
+**Fabric tables (read_attribute 0/62/1 with `fabric_filtered: false`; the cached attribute is fabric-filtered):** vendor 4996 = Apple Keychain, 4942 = tado,
+4937 = Apple Home (label "3E"), 65521 = HA ("Casa"). All 6 have the Apple Home + HA fabrics. **Nodes 8 (SmallRoomTRV) and 10 (LoftTRV) have no tado fabric**, so the
+tado app can't see those two at all until they're re-shared to tado (multi-admin pairing code from Apple Home or HA).
+Conclusion: the Thread side is fine. Most likely the Apple TV hub is still impaired by its active Tailscale VPN (same as 11-14). Asked the user to disconnect it and reboot the Apple TV.
+Next isolation step if that fails: `PUT /node/state "disable"` on the MR5U for a test.
+
 ## 2026-11-28 — 4/6 tado unavailable again: Tailscale on the Apple TV (stopgap route via MR5U)
 User re-enabled Tailscale on the Apple TV (`apple-tv` online in the tailnet). matter-server: nodes 2, 3, 9, 10 avail=False, retrying setup.
 `ping -6` showed `Time exceeded` from `2a02:8012:882b::1`, and tracepath looped Apple TV ↔ UniFi (same as 11-14). It was partial because the ECMP OMR route sends half the traffic via the MR5U.

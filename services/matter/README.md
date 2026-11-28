@@ -33,6 +33,8 @@ HA's fabric; 5/6: timeouts). Per device HA gets: `climate` (heat-only Thermostat
 humidity, a **binary** battery sensor (BatChargeLevel only, no %), 1–2 identify buttons; reboot count/uptime/boot reason
 are disabled by the integration.
 **Gotchas:**
+- **Which controllers is a device paired with?** [`tools/fabrics.py`](tools/fabrics.py) (`read_attribute 0/62/1`, `fabric_filtered: false`). Vendors: 4996 Apple Keychain, 4937 Apple Home,
+  4942 tado app, 65521 HA. 2026-11-28: SmallRoomTRV + LoftTRV lack the tado fabric. If only HA works, check `tailscale status | grep apple-tv` first.
 - **"All tado unavailable" cause #2: routing loop from Tailscale on the Apple TV (incident 2026-11-14 19:00).**
   Same symptoms (every node `CASESession timed out` / `Subscription Liveness timeout` within ~2 min), but
   `ping -6 -c2 <node fde9:… addr>` returns `Time exceeded: Hop limit` from `2a02:8012:882b::1`, and
