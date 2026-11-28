@@ -3,6 +3,16 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-28 15:35 — tado app shows no devices (Apple Home OK): Apple TV BR dead, NAT64 only on the Apple TV
+Decoded Thread network data (`/diagnostics` → `NetworkData`, no keys in it): `::/0` has-route from both 0x7000 (Apple TV) and 0xf800 (MR5U).
+**NAT64 prefix `fde9:b6c5:757:ffff::/96` only from the Apple TV** (flags 0xf0). OMR `fde9:b6c5:757::/64` from the Apple TV. SRP anycast+unicast from the Apple TV.
+BBR primary = MR5U. Test: removed the metric-50 MR5U pin, `PUT /node/state "disable"` on the MR5U, pinned the route via the Apple TV → **6/6 nodes 100 % loss after 150 s**.
+So the Apple TV doesn't forward LAN→Thread at all while Tailscale (still online on the tailnet) runs on it. The MR5U had been carrying all of HA's traffic.
+Re-enabled the MR5U (router in 60 s) and re-pinned via the MR5U → 6/6 0 % loss, all avail=True in HA. Explains the symptoms: Apple Home uses the Apple TV's own radio (works); the
+tado app goes through tado's cloud ← NAT64 on the Apple TV (broken). **Correction to the 15:25 entry:** the "/128 via the Apple TV, 6/6 ping OK" test was invalid. The Apple TV
+bounced those packets back over the LAN to the MR5U (it also learns the MR5U's RIO). Only a test with the MR5U's Thread disabled proves the Apple TV path.
+Open: the user must disconnect/delete Tailscale on the Apple TV and restart it. Then remove the metric-50 route.
+
 ## 2026-11-28 15:25 — Apple Home + tado app can't reach the tado devices, HA fine (investigation)
 `tailscale status`: `apple-tv` still **online** (VPN connected; the iPhone is not on the tailnet). Path into Thread via the Apple TV now works (6/6 pings with a temporary /128 route via
 `fe80::189f:c96:5398:f346`), so the inbound loop from 01:42 is gone. The hub's own controller traffic can't be observed from here.

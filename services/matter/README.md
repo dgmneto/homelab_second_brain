@@ -49,6 +49,10 @@ are disabled by the integration.
   gone at reboot) + `sudo systemctl restart matter-server`. Remove it (`sudo ip -6 route del fde9:b6c5:757::/64 metric 50`) once Tailscale is off the Apple TV.
   The stopgap fixes **HA only**: Apple Home and the **tado app** reach the devices through the Apple TV, so they show "no devices" until its VPN is off.
   Quick check: `tailscale status | grep apple-tv`. Any state other than `offline` means its VPN is up.
+  **The tado app needs the Apple TV specifically:** the only NAT64 prefix in the Thread network data is the Apple TV's (the MR5U doesn't provide NAT64), and the tado app
+  reaches devices through tado's cloud via NAT64. So "HA + Apple Home OK, tado app shows no devices" = the Apple TV BR's forwarding is broken. **Testing the Apple TV path:**
+  disable the MR5U's Thread first (`PUT /node/state "disable"`) and pin the route via `fe80::189f:c96:5398:f346`. With the MR5U up, the Apple TV can bounce
+  packets to the MR5U over the LAN, so a ping "via the Apple TV" falsely succeeds (bit us 2026-11-28).
 - **"All tado unavailable at once" runbook (cause #1: UniFi RA) (incident 2026-11-11 06:27–06:29).** All 6 nodes dropped within 2 min and
   stayed down with `CASESession timed out`. Check in this order (all read-only, from a cloud session):
   1. `tools/nodes.py` → every `avail=False` means a shared path, not one device.

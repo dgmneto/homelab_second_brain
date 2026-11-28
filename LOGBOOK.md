@@ -4,6 +4,10 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-28 — tado app shows no devices: the Apple TV BR isn't forwarding (Tailscale still on it)
+Test with the MR5U's Thread off: 0/6 tado reachable through the Apple TV. The MR5U carries HA's traffic; Apple Home uses the Apple TV's own radio. The tado app needs the Apple TV's NAT64
+(the only one in the mesh) → broken. MR5U re-enabled, HA 6/6. The user must remove Tailscale from the Apple TV and restart it. Details: services/matter LOGBOOK + README.
+
 ## 2026-11-28 — tado/Thread outage: Tailscale on the Apple TV again
 4/6 tado unavailable in HA, and the tado app showed no devices. Cause: Tailscale VPN active on the Apple TV, so the Apple TV BR loops traffic (known since 11-14).
 Stopgap: homelab-notebook route pinned via the SLZB-MR5U + matter-server restart → 6/6 back in HA. The user must turn Tailscale off on the Apple TV, then delete
