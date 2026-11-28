@@ -3,6 +3,11 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches the **Thread** network / border routers.
 See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-28 — Apple TV BR stopped forwarding (Tailscale on tvOS); traffic pinned to MR5U
+The Apple TV was still the Thread leader, and the MR5U a router (`/node` 2 routers, partition unchanged). The Apple TV advertised the OMR route but looped inbound packets back to
+UniFi. Temporary metric-50 route on homelab-notebook via the MR5U (`fe80::90da:72ff:fefa:b910`). Details: matter LOGBOOK. Shows the second BR's value: HA
+recovered without the Apple TV.
+
 ## 2026-11-24 — HA OTBR integration added for the SLZB-MR5U
 At the user's request: HA UI, add `otbr` with URL `http://192.168.11.121:8080` → "Created configuration". OTBR unchanged after
 (`MyHome1662126353`, rloc 0xe000, router, same partition). HA Thread panel: preferred `MyHome1662126353`, 2 BRs (Living Room + SLZB-MR5U).

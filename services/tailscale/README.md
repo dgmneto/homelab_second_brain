@@ -8,7 +8,7 @@ gluetun breakage, and it stays out of watchtower's weekly `:latest` pulls.
 Installed 2026-10-28, version 1.104.4 from `https://pkgs.tailscale.com/stable/debian` (bookworm).
 Updates come via `apt` (not watchtower).
 
-> **Do not enable Tailscale on the Apple TV** (`apple-tv` node, 100.81.174.65): it is the only Thread border router and the tvOS VPN breaks Thread forwarding → every Matter device unavailable (2026-11-14). See [matter README](../matter/README.md).
+> **Do not enable Tailscale on the Apple TV** (`apple-tv` node, 100.81.174.65): it is the Thread leader/main border router (the MR5U is the 2nd since 11-24), and the tvOS VPN breaks Thread forwarding → every Matter device unavailable (2026-11-14). Happened again 2026-11-28 (partial this time, thanks to the MR5U; stopgap route in the matter README). The tado app and Apple Home break regardless. See [matter README](../matter/README.md).
 
 ## Node
 

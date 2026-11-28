@@ -41,6 +41,12 @@ are disabled by the integration.
   breaks the border router's forwarding. Turning it off restored all 6 nodes in <1 min. **Never run Tailscale on the Apple TV**
   (`apple-tv` tailnet node). Otherwise: restart the Apple TV, then `sudo systemctl restart matter-server` if nodes don't
   resubscribe. No firewall involvement (the ICMP answer comes from the router, so pings never reach the mesh).
+  **Repeat 2026-11-28 (Tailscale back on the Apple TV), now with 2 BRs:** a partial outage, because homelab-notebook load-balances (ECMP) the OMR route
+  over the Apple TV and the MR5U. Nodes hashed to the Apple TV looped (4/6 unavailable in HA), the rest worked. **Stopgap that restored all 6 in HA
+  in about 2 min:** `sudo ip -6 route add fde9:b6c5:757::/64 via fe80::90da:72ff:fefa:b910 dev enp2s0 metric 50` (pin to the MR5U; not persistent,
+  gone at reboot) + `sudo systemctl restart matter-server`. Remove it (`sudo ip -6 route del fde9:b6c5:757::/64 metric 50`) once Tailscale is off the Apple TV.
+  The stopgap fixes **HA only**: Apple Home and the **tado app** reach the devices through the Apple TV, so they show "no devices" until its VPN is off.
+  Quick check: `tailscale status | grep apple-tv`. Any state other than `offline` means its VPN is up.
 - **"All tado unavailable at once" runbook (cause #1: UniFi RA) (incident 2026-11-11 06:27–06:29).** All 6 nodes dropped within 2 min and
   stayed down with `CASESession timed out`. Check in this order (all read-only, from a cloud session):
   1. `tools/nodes.py` → every `avail=False` means a shared path, not one device.

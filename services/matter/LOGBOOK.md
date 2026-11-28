@@ -3,6 +3,12 @@
 Reverse-chronological. Newest entry on top. One entry per task that touches **matter** — what changed,
 why, server commands run, verified outcome. See `../../LOGBOOK.md` for the project-wide log.
 
+## 2026-11-28 — 4/6 tado unavailable again: Tailscale on the Apple TV (stopgap route via MR5U)
+User re-enabled Tailscale on the Apple TV (`apple-tv` online in the tailnet). matter-server: nodes 2, 3, 9, 10 avail=False, retrying setup.
+`ping -6` showed `Time exceeded` from `2a02:8012:882b::1`, and tracepath looped Apple TV ↔ UniFi (same as 11-14). It was partial because the ECMP OMR route sends half the traffic via the MR5U.
+Added `ip -6 route add fde9:b6c5:757::/64 via fe80::90da:72ff:fefa:b910 dev enp2s0 metric 50` → 6/6 at 0 % ping loss. Restarted matter-server → all 6 avail=True
+after ~100 s. Open: the user must turn Tailscale off on the Apple TV (tado app/Apple Home still broken), then delete the metric-50 route.
+
 ## 2026-11-24 — Second Thread BR (SLZB-MR5U) joined; before/after pings
 No matter-server change. SLZB-MR5U OTBR joined Apple's Thread network as router/BR; homelab-notebook now routes `fde9:b6c5:757::/64`
 via both BRs (ECMP). Baseline 7-day counts: 35 unavailable, 263 liveness timeouts, 2200 CASE timeouts. See [../thread](../thread/README.md).

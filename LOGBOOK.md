@@ -4,6 +4,11 @@ Reverse-chronological. Newest entry on top. One entry per task that touches the 
 changed, why, commands run on the server, and the verified outcome. Per-service detail also goes in
 the matching `services/<svc>/LOGBOOK.md`.
 
+## 2026-11-28 — tado/Thread outage: Tailscale on the Apple TV again
+4/6 tado unavailable in HA, and the tado app showed no devices. Cause: Tailscale VPN active on the Apple TV, so the Apple TV BR loops traffic (known since 11-14).
+Stopgap: homelab-notebook route pinned via the SLZB-MR5U + matter-server restart → 6/6 back in HA. The user must turn Tailscale off on the Apple TV, then delete
+the temporary route. Details: services/matter + thread LOGBOOKs.
+
 ## 2026-11-27 — Zigbee: restored old coordinator IEEE on SLZB-MR5U (silent sensors + dead switches fixed)
 6 air sensors had been silent for 2+ days, and the Kitchen switch / Entry Hall didn't respond. Cause: everything was still bound to the old coordinator IEEE. Wrote the NVM3
 restored-EUI64 token on the MR5U so it answers as `0x8c8b48fffe9583ba`, and restarted z2m. The sensors are back and commands work. Entry Hall needs a breaker cycle.
